@@ -83,6 +83,7 @@ impl<T> Collection for Matrix<T> {
 #[cfg(test)]
 mod tests {
     extern crate test;
+
     use self::test::Bencher;
     use super::Matrix;
 
