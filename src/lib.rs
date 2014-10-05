@@ -9,17 +9,29 @@ use std::mem;
 
 #[unsafe_no_drop_flag]
 pub struct Matrix<T> {
-    len: uint,
+    rows: uint,
+    cols: uint,
     ptr: *mut T,
 }
 
 impl<T> Matrix<T> {
     #[inline]
-    pub fn new(len: uint) -> Matrix<T> {
+    pub fn new(rows: uint, cols: uint) -> Matrix<T> {
         let ptr = unsafe {
-            heap::allocate(len * mem::size_of::<T>(), mem::min_align_of::<T>())
+            heap::allocate(rows * cols * mem::size_of::<T>(),
+                mem::min_align_of::<T>())
         };
-        Matrix { len: len, ptr: ptr as *mut T }
+        Matrix { rows: rows, cols: cols, ptr: ptr as *mut T }
+    }
+
+    #[inline]
+    pub fn rows(&self) -> uint {
+        self.rows
+    }
+
+    #[inline]
+    pub fn cols(&self) -> uint {
+        self.cols
     }
 
     #[inline]
@@ -37,7 +49,7 @@ impl<T> Matrix<T> {
         unsafe {
             mem::transmute(raw::Slice {
                 data: self.as_mut_ptr() as *const T,
-                len: self.len,
+                len: self.len(),
             })
         }
     }
@@ -49,7 +61,8 @@ impl<T> Drop for Matrix<T> {
     fn drop(&mut self) {
         unsafe {
             heap::deallocate(self.ptr as *mut u8,
-                self.len * mem::size_of::<T>(), mem::min_align_of::<T>())
+                self.len() * mem::size_of::<T>(),
+                mem::min_align_of::<T>())
         }
     }
 }
@@ -67,7 +80,7 @@ impl<T> Slice<T> for Matrix<T> {
         unsafe {
             mem::transmute(raw::Slice {
                 data: self.as_ptr(),
-                len: self.len,
+                len: self.len(),
             })
         }
     }
@@ -76,7 +89,7 @@ impl<T> Slice<T> for Matrix<T> {
 impl<T> Collection for Matrix<T> {
     #[inline]
     fn len(&self) -> uint {
-        self.len
+        self.rows * self.cols
     }
 }
 
@@ -89,14 +102,14 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let matrix: Matrix<f64> = Matrix::new(100);
-        assert!(matrix.len() == 100);
+        let matrix: Matrix<f64> = Matrix::new(100, 100);
+        assert!(matrix.len() == 10_000);
     }
 
     #[bench]
     fn bench_new(b: &mut Bencher) {
         b.iter(|| {
-            let matrix: Matrix<f64> = Matrix::new(10_000);
+            let matrix: Matrix<f64> = Matrix::new(100, 100);
             assert!(matrix.len() == 10_000);
         })
     }
