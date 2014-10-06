@@ -6,3 +6,7 @@ authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 [dependencies.blas]
 name = "blas"
 git = "https://github.com/rs-math/blas"
+
+[dependencies.lapack]
+name = "lapack"
+git = "https://github.com/rs-math/lapack"
