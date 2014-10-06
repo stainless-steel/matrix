@@ -5,4 +5,4 @@ authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 
 [dependencies.blas]
 name = "blas"
-git = "https://github.com/steel-math/blas"
+git = "https://github.com/rs-math/blas"
