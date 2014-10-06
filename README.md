@@ -1,5 +1,7 @@
 # Matrix
 
+The library provides algorithms for manipulating real matrices.
+
 ## Contributing
 
 1. Fork the project.

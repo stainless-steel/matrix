@@ -1,6 +1,10 @@
+//! The library provides algorithms for manipulating real matrices.
+
 extern crate blas;
 extern crate lapack;
 
+/// Multiplies an m-by-p matrix `a` by a p-by-n matrix `b` and stores the
+/// result in an m-by-n matrix `c`.
 #[inline]
 pub fn multiply(a: *const f64, b: *const f64, c: *mut f64, m: uint, p: uint, n: uint) {
     if n == 1 {
@@ -11,6 +15,9 @@ pub fn multiply(a: *const f64, b: *const f64, c: *mut f64, m: uint, p: uint, n: 
     }
 }
 
+/// Multiplies an m-by-p matrix `a` by a p-by-n matrix `b`, sums the resulting
+/// m-by-n matrix with an m-by-n matrix `c`, and stores the final result in an
+/// m-by-n matrix `d`.
 #[inline]
 pub fn multiply_add(a: *const f64, b: *const f64, c: *const f64, d: *mut f64,
     m: uint, p: uint, n: uint) {
@@ -29,9 +36,9 @@ pub fn multiply_add(a: *const f64, b: *const f64, c: *const f64, d: *mut f64,
     }
 }
 
-/// Performs the eigendecomposition of a symmetric m-by-m matrix and stores
-/// the resulting eigenvectors and eigenvalues in an m-by-m matrix and
-/// m-by-1 matrix, respectively.
+/// Performs the eigendecomposition of a symmetric m-by-m matrix `a` and stores
+/// the resulting eigenvectors and eigenvalues in an m-by-m matrix `vecs` and
+/// m-by-1 matrix `vals`, respectively.
 ///
 /// https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix#Real_symmetric_matrices
 pub fn sym_eig(a: *const f64, vecs: *mut f64, vals: *mut f64, m: uint)
