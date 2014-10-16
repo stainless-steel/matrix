@@ -3,10 +3,14 @@
 extern crate blas;
 extern crate lapack;
 
-/// Multiplies an m-by-p matrix `a` by a p-by-n matrix `b` and stores the
-/// result in an m-by-n matrix `c`.
+/// Multiplies two matrices.
+///
+/// An `m`-by-`p` matrix `a` is multiplied by a `p`-by-`n` matrix `b`; the
+/// result is stored in an `m`-by-`n` matrix `c`.
 #[inline]
-pub fn multiply(a: *const f64, b: *const f64, c: *mut f64, m: uint, p: uint, n: uint) {
+pub fn multiply(a: *const f64, b: *const f64, c: *mut f64, m: uint, p: uint,
+                n: uint) {
+
     if n == 1 {
         blas::dgemv(b'N', m, p, 1.0, a, m, b, 1, 0.0, c, 1);
     } else {
@@ -14,12 +18,14 @@ pub fn multiply(a: *const f64, b: *const f64, c: *mut f64, m: uint, p: uint, n: 
     }
 }
 
-/// Multiplies an m-by-p matrix `a` by a p-by-n matrix `b`, sums the resulting
-/// m-by-n matrix with an m-by-n matrix `c`, and stores the final result in an
-/// m-by-n matrix `d`.
+/// Multiplies two matrices and adds another matrix.
+///
+/// An `m`-by-`p` matrix `a` is multiplied by a `p`-by-`n` matrix `b`; the
+/// result is summed up with an `m`-by-`n` matrix `c` and stored in an
+/// `m`-by-`n` matrix `d`.
 #[inline]
 pub fn multiply_add(a: *const f64, b: *const f64, c: *const f64, d: *mut f64,
-    m: uint, p: uint, n: uint) {
+                    m: uint, p: uint, n: uint) {
 
     if c != (d as *const f64) {
         unsafe {
@@ -34,13 +40,13 @@ pub fn multiply_add(a: *const f64, b: *const f64, c: *const f64, d: *mut f64,
     }
 }
 
-/// Performs the eigendecomposition of a symmetric m-by-m matrix `a` and stores
-/// the resulting eigenvectors and eigenvalues in an m-by-m matrix `vecs` and
-/// m-by-1 matrix `vals`, respectively.
+/// Performs the eigendecomposition of a symmetric matrix.
 ///
-/// https://en.wikipedia.org/wiki/Eigendecomposition_of_a_matrix#Real_symmetric_matrices
+/// A symmetric `m`-by-`m` matrix `a` is decomposed; the resulting eigenvectors
+/// and eigenvalus are stored in an `m`-by-`m` matrix `vecs` and an `m`-element
+/// vector `vals`, respectively.
 pub fn sym_eig(a: *const f64, vecs: *mut f64, vals: *mut f64, m: uint)
-    -> Result<(), int> {
+               -> Result<(), int> {
 
     if a != (vecs as *const f64) {
         // NOTE: Only the upper triangular matrix is actually needed; however,
@@ -54,10 +60,8 @@ pub fn sym_eig(a: *const f64, vecs: *mut f64, vals: *mut f64, m: uint)
     let mut temp = Vec::from_elem(4 * m, 0.0);
     let mut flag = 0;
 
-    lapack::dsyev(b'V', b'U', m, vecs, m, vals, temp.as_mut_ptr(), 4 * m, &mut flag);
+    lapack::dsyev(b'V', b'U', m, vecs, m, vals, temp.as_mut_ptr(), 4 * m,
+                  &mut flag);
 
-    match flag {
-        0 => Ok(()),
-        _ => Err(flag),
-    }
+    if flag == 0 { Ok(()) } else { Err(flag) }
 }
