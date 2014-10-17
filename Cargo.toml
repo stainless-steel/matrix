@@ -3,6 +3,10 @@ name = "matrix"
 version = "0.0.1"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 
+[lib]
+name = "matrix"
+doctest = false
+
 [dependencies.blas]
 name = "blas"
 git = "https://github.com/rs-math/blas"
