@@ -12,3 +12,6 @@ git = "https://github.com/rs-math/blas"
 
 [dependencies.lapack]
 git = "https://github.com/rs-math/lapack"
+
+[dev-dependencies.assert]
+git = "https://github.com/rs-math/assert"

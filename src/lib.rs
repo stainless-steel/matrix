@@ -1,6 +1,6 @@
 //! Algorithms for manipulating real matrices.
 
-#![feature(macro_rules)]
+#![feature(phase)]
 
 extern crate blas;
 extern crate lapack;
@@ -66,23 +66,7 @@ pub fn sym_eig(a: *const f64, vecs: *mut f64, vals: *mut f64, m: uint) -> Result
 
 #[cfg(test)]
 mod test {
-    macro_rules! assert_equal(
-        ($given:expr, $expected:expr) => ({
-            assert_eq!($given.len(), $expected.len());
-            for i in range(0u, $given.len()) {
-                assert_eq!($given[i], $expected[i]);
-            }
-        });
-    )
-
-    macro_rules! assert_almost_equal(
-        ($given:expr, $expected:expr) => ({
-            assert_eq!($given.len(), $expected.len());
-            for i in range(0u, $given.len()) {
-                assert!(::std::num::abs($given[i] - $expected[i]) < 1e-8);
-            }
-        });
-    )
+    #[phase(plugin)] extern crate assert;
 
     #[test]
     fn multiply() {
@@ -148,8 +132,8 @@ mod test {
         let expected_vals = vec![-0.671640666831794, -0.230366398529950, 0.397221322493687,
                                   0.999582068576074,  3.026535012212483];
 
-        assert_almost_equal!(vecs, expected_vecs);
-        assert_almost_equal!(vals, expected_vals);
+        assert_close!(vecs, expected_vecs);
+        assert_close!(vals, expected_vals);
     }
 }
 
