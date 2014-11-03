@@ -14,4 +14,4 @@ git = "https://github.com/rs-math/blas"
 git = "https://github.com/rs-math/lapack"
 
 [dev-dependencies.assert]
-git = "https://github.com/rs-math/assert"
+git = "https://github.com/stainless-steel/assert"
