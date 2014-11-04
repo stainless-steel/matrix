@@ -8,5 +8,5 @@ The library provides algorithms for manipulating real matrices.
 2. Implement your feature.
 3. Create a pull request.
 
-[travis-svg]: https://travis-ci.org/rs-math/matrix.svg?branch=master
-[travis-url]: https://travis-ci.org/rs-math/matrix
+[travis-svg]: https://travis-ci.org/stainless-steel/matrix.svg?branch=master
+[travis-url]: https://travis-ci.org/stainless-steel/matrix

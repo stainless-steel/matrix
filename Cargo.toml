@@ -8,10 +8,10 @@ name = "matrix"
 doctest = false
 
 [dependencies.blas]
-git = "https://github.com/rs-math/blas"
+git = "https://github.com/stainless-steel/blas"
 
 [dependencies.lapack]
-git = "https://github.com/rs-math/lapack"
+git = "https://github.com/stainless-steel/lapack"
 
 [dev-dependencies.assert]
 git = "https://github.com/stainless-steel/assert"
