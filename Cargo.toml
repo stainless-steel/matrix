@@ -3,10 +3,6 @@ name = "matrix"
 version = "0.0.1"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 
-[lib]
-name = "matrix"
-doctest = false
-
 [dependencies.blas]
 git = "https://github.com/stainless-steel/blas"
 

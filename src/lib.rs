@@ -3,10 +3,11 @@
 #![feature(phase)]
 
 extern crate blas;
+extern crate lapack;
 
 pub mod decomp;
 
-/// Multiplies two matrices.
+/// Multiply two matrices.
 ///
 /// An `m`-by-`p` matrix `a` is multiplied by a `p`-by-`n` matrix `b`; the
 /// result is stored in an `m`-by-`n` matrix `c`.
@@ -19,7 +20,7 @@ pub fn multiply(a: &[f64], b: &[f64], c: &mut [f64], m: uint, p: uint, n: uint) 
     }
 }
 
-/// Multiplies two matrices and adds another matrix.
+/// Multiply two matrices and adds another matrix.
 ///
 /// An `m`-by-`p` matrix `a` is multiplied by a `p`-by-`n` matrix `b`; the
 /// result is summed up with an `m`-by-`n` matrix `c` and stored in an
@@ -28,7 +29,8 @@ pub fn multiply(a: &[f64], b: &[f64], c: &mut [f64], m: uint, p: uint, n: uint) 
 pub fn multiply_add(a: &[f64], b: &[f64], c: &[f64], d: &mut [f64], m: uint, p: uint, n: uint) {
     if c.as_ptr() != d.as_ptr() {
         unsafe {
-            std::ptr::copy_nonoverlapping_memory(d.as_mut_ptr(), c.as_ptr(), m * n);
+            use std::ptr::copy_nonoverlapping_memory as copy;
+            copy(d.as_mut_ptr(), c.as_ptr(), m * n);
         }
     }
 
@@ -51,7 +53,7 @@ mod test {
         let b = vec![1.0, 2.0, 3.0, 4.0];
         let mut c = vec![0.0, 0.0];
 
-        super::multiply(a.as_slice(), b.as_slice(), c.as_mut_slice(), m, p, n);
+        ::multiply(a.as_slice(), b.as_slice(), c.as_mut_slice(), m, p, n);
 
         let expected_c = vec![50.0, 60.0];
         assert_equal!(c, expected_c);
@@ -66,7 +68,7 @@ mod test {
         let c = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
         let mut d = vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
 
-        super::multiply_add(a.as_slice(), b.as_slice(), c.as_slice(), d.as_mut_slice(), m, p, n);
+        ::multiply_add(a.as_slice(), b.as_slice(), c.as_slice(), d.as_mut_slice(), m, p, n);
 
         let expected_c = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
         assert_equal!(c, expected_c);
@@ -89,7 +91,7 @@ mod bench {
         let mut c = Vec::from_elem(m * m, 1.0);
 
         bench.iter(|| {
-            super::multiply(a.as_slice(), b.as_slice(), c.as_mut_slice(), m, m, m)
+            ::multiply(a.as_slice(), b.as_slice(), c.as_mut_slice(), m, m, m)
         });
     }
 
@@ -102,7 +104,7 @@ mod bench {
         let mut c = Vec::from_elem(m * 1, 1.0);
 
         bench.iter(|| {
-            super::multiply(a.as_slice(), b.as_slice(), c.as_mut_slice(), m, m, 1)
+            ::multiply(a.as_slice(), b.as_slice(), c.as_mut_slice(), m, m, 1)
         });
     }
 }

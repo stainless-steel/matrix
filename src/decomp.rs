@@ -1,6 +1,4 @@
-extern crate lapack;
-
-/// Performs the eigendecomposition of a symmetric matrix.
+/// Perform the eigendecomposition of a symmetric matrix.
 ///
 /// A symmetric `m`-by-`m` matrix `a` is decomposed; the resulting eigenvectors
 /// and eigenvalus are stored in an `m`-by-`m` matrix `vecs` and an `m`-element
@@ -10,7 +8,8 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result
         // NOTE: Only the upper triangular matrix is actually needed; however,
         // copying only that part might not be optimal for performance. Check!
         unsafe {
-            ::std::ptr::copy_nonoverlapping_memory(vecs.as_mut_ptr(), a.as_ptr(), m * m);
+            use std::ptr::copy_nonoverlapping_memory as copy;
+            copy(vecs.as_mut_ptr(), a.as_ptr(), m * m);
         }
     }
 
@@ -19,15 +18,13 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result
     let mut temp = Vec::from_elem(4 * m, 0.0);
     let mut flag = 0;
 
-    self::lapack::dsyev(b'V', b'U', m, vecs, m, vals, temp.as_mut_slice(), 4 * m, &mut flag);
+    ::lapack::dsyev(b'V', b'U', m, vecs, m, vals, temp.as_mut_slice(), 4 * m, &mut flag);
 
     if flag == 0 { Ok(()) } else { Err(flag) }
 }
 
 #[cfg(test)]
 mod test {
-    #[phase(plugin)] extern crate assert;
-
     #[test]
     fn sym_eig() {
         let m = 5;
@@ -47,7 +44,7 @@ mod test {
         let mut vecs = Vec::from_elem(m * m, 0.0);
         let mut vals = Vec::from_elem(m, 0.0);
 
-        assert_ok!(super::sym_eig(a.as_slice(), vecs.as_mut_slice(), vals.as_mut_slice(), m));
+        assert_ok!(::decomp::sym_eig(a.as_slice(), vecs.as_mut_slice(), vals.as_mut_slice(), m));
 
         let expected_vecs = vec![
              0.200767588469279, -0.613521879994358,  0.529492579537623,
