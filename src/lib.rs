@@ -20,7 +20,7 @@ pub fn multiply(a: &[f64], b: &[f64], c: &mut [f64], m: uint, p: uint, n: uint) 
     }
 }
 
-/// Multiply two matrices and adds another matrix.
+/// Multiply two matrices and add another matrix.
 ///
 /// An `m`-by-`p` matrix `a` is multiplied by a `p`-by-`n` matrix `b`; the
 /// result is summed up with an `m`-by-`n` matrix `c` and stored in an
