@@ -1,12 +1,20 @@
+/// An error.
+pub enum Error {
+    /// One or more arguments have illegal values.
+    InvalidArguments,
+    /// The algorithm failed to converge.
+    FailedToConverge,
+}
+
 /// Perform the eigendecomposition of a symmetric matrix.
 ///
 /// A symmetric `m`-by-`m` matrix `a` is decomposed; the resulting eigenvectors
 /// and eigenvalus are stored in an `m`-by-`m` matrix `vecs` and an `m`-element
 /// vector `vals`, respectively.
-pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result<(), int> {
+pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result<(), Error> {
     if a.as_ptr() != vecs.as_ptr() {
-        // NOTE: Only the upper triangular matrix is actually needed; however,
-        // copying only that part might not be optimal for performance. Check!
+        // Only the upper triangular matrix is actually needed; however, copying
+        // only that part might not be optimal for performance. Check!
         unsafe {
             use std::ptr::copy_nonoverlapping_memory as copy;
             copy(vecs.as_mut_ptr(), a.as_ptr(), m * m);
@@ -20,7 +28,13 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result
 
     ::lapack::dsyev(b'V', b'U', m, vecs, m, vals, temp.as_mut_slice(), 4 * m, &mut flag);
 
-    if flag == 0 { Ok(()) } else { Err(flag) }
+    if flag < 0 {
+        Err(InvalidArguments)
+    } else if flag > 0 {
+        Err(FailedToConverge)
+    } else {
+        Ok(())
+    }
 }
 
 #[cfg(test)]
