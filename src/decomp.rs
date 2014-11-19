@@ -29,9 +29,9 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result
     ::lapack::dsyev(b'V', b'U', m, vecs, m, vals, temp.as_mut_slice(), 4 * m, &mut flag);
 
     if flag < 0 {
-        Err(InvalidArguments)
+        Err(Error::InvalidArguments)
     } else if flag > 0 {
-        Err(FailedToConverge)
+        Err(Error::FailedToConverge)
     } else {
         Ok(())
     }
