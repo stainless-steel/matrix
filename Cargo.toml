@@ -14,5 +14,5 @@ git = "https://github.com/stainless-steel/blas"
 [dependencies.lapack]
 git = "https://github.com/stainless-steel/lapack"
 
-[dev-dependencies.assert]
-git = "https://github.com/stainless-steel/assert"
+[dev-dependencies]
+assert = "0.0.1"
