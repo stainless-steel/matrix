@@ -1,6 +1,6 @@
 [package]
 name = "matrix"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/stainless-steel/matrix"
@@ -8,11 +8,9 @@ homepage = "https://github.com/stainless-steel/matrix"
 documentation = "https://stainless-steel.github.io/matrix"
 description = "The library provides algorithms for manipulating real matrices."
 
-[dependencies.blas]
-git = "https://github.com/stainless-steel/blas"
-
-[dependencies.lapack]
-git = "https://github.com/stainless-steel/lapack"
+[dependencies]
+blas = "0.0.2"
+lapack = "0.0.2"
 
 [dev-dependencies]
 assert = "0.0.1"
