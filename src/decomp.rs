@@ -1,4 +1,5 @@
 /// An error.
+#[deriving(Copy)]
 pub enum Error {
     /// One or more arguments have illegal values.
     InvalidArguments,
