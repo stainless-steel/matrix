@@ -1,5 +1,5 @@
 /// An error.
-#[deriving(Copy)]
+#[derive(Copy)]
 pub enum Error {
     /// One or more arguments have illegal values.
     InvalidArguments,
@@ -13,6 +13,8 @@ pub enum Error {
 /// and eigenvalus are stored in an `m`-by-`m` matrix `vecs` and an `m`-element
 /// vector `vals`, respectively.
 pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result<(), Error> {
+    use std::iter::repeat;
+
     if a.as_ptr() != vecs.as_ptr() {
         // Only the upper triangular matrix is actually needed; however, copying
         // only that part might not be optimal for performance. Check!
@@ -24,7 +26,7 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result
 
     // The size of the temporary array should be >= max(1, 3 * m - 1).
     // http://www.netlib.org/lapack/explore-html/dd/d4c/dsyev_8f.html
-    let mut temp = Vec::from_elem(4 * m, 0.0);
+    let mut temp = repeat(0.0).take(4 * m).collect::<Vec<_>>();
     let mut flag = 0;
 
     ::lapack::dsyev(b'V', b'U', m, vecs, m, vals, temp.as_mut_slice(), 4 * m, &mut flag);
@@ -42,6 +44,8 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result
 mod test {
     #[test]
     fn sym_eig() {
+        use std::iter::repeat;
+
         let m = 5;
 
         let a = vec![
@@ -56,8 +60,8 @@ mod test {
             0.678735154857773,
         ];
 
-        let mut vecs = Vec::from_elem(m * m, 0.0);
-        let mut vals = Vec::from_elem(m, 0.0);
+        let mut vecs = repeat(0.0).take(m * m).collect::<Vec<_>>();
+        let mut vals = repeat(0.0).take(m).collect::<Vec<_>>();
 
         assert_ok!(::decomp::sym_eig(a.as_slice(), vecs.as_mut_slice(), vals.as_mut_slice(), m));
 

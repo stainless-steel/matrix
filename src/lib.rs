@@ -82,13 +82,15 @@ mod test {
 mod bench {
     extern crate test;
 
+    use std::iter::repeat;
+
     #[bench]
     fn multiply_matrix_matrix(bench: &mut test::Bencher) {
         let m = 100;
 
-        let a = Vec::from_elem(m * m, 1.0);
-        let b = Vec::from_elem(m * m, 1.0);
-        let mut c = Vec::from_elem(m * m, 1.0);
+        let a = repeat(1.0).take(m * m).collect::<Vec<_>>();
+        let b = repeat(1.0).take(m * m).collect::<Vec<_>>();
+        let mut c = repeat(1.0).take(m * m).collect::<Vec<_>>();
 
         bench.iter(|| {
             ::multiply(a.as_slice(), b.as_slice(), c.as_mut_slice(), m, m, m)
@@ -99,9 +101,9 @@ mod bench {
     fn multiply_matrix_vector(bench: &mut test::Bencher) {
         let m = 100;
 
-        let a = Vec::from_elem(m * m, 1.0);
-        let b = Vec::from_elem(m * 1, 1.0);
-        let mut c = Vec::from_elem(m * 1, 1.0);
+        let a = repeat(1.0).take(m * m).collect::<Vec<_>>();
+        let b = repeat(1.0).take(m * 1).collect::<Vec<_>>();
+        let mut c = repeat(1.0).take(m * 1).collect::<Vec<_>>();
 
         bench.iter(|| {
             ::multiply(a.as_slice(), b.as_slice(), c.as_mut_slice(), m, m, 1)
