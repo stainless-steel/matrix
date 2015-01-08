@@ -1,6 +1,11 @@
 //! Algorithms for manipulating real matrices.
 
-#![feature(phase)]
+#[cfg(test)]
+#[macro_use]
+extern crate assert;
+
+#[cfg(test)]
+extern crate test;
 
 extern crate blas;
 extern crate lapack;
@@ -42,9 +47,7 @@ pub fn multiply_add(a: &[f64], b: &[f64], c: &[f64], d: &mut [f64], m: uint, p: 
 }
 
 #[cfg(test)]
-mod test {
-    #[phase(plugin)] extern crate assert;
-
+mod tests {
     #[test]
     fn multiply() {
         let (m, p, n) = (2, 4, 1);
@@ -79,10 +82,9 @@ mod test {
 }
 
 #[cfg(test)]
-mod bench {
-    extern crate test;
-
+mod benches {
     use std::iter::repeat;
+    use test;
 
     #[bench]
     fn multiply_matrix_matrix(bench: &mut test::Bencher) {

@@ -41,7 +41,7 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     #[test]
     fn sym_eig() {
         use std::iter::repeat;
