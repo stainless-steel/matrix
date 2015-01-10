@@ -12,7 +12,8 @@ pub enum Error {
 /// A symmetric `m`-by-`m` matrix `a` is decomposed; the resulting eigenvectors
 /// and eigenvalus are stored in an `m`-by-`m` matrix `vecs` and an `m`-element
 /// vector `vals`, respectively.
-pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result<(), Error> {
+#[allow(unstable)]
+pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: usize) -> Result<(), Error> {
     use std::iter::repeat;
 
     if a.as_ptr() != vecs.as_ptr() {
@@ -29,7 +30,7 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: uint) -> Result
     let mut temp = repeat(0.0).take(4 * m).collect::<Vec<_>>();
     let mut flag = 0;
 
-    ::lapack::dsyev(b'V', b'U', m, vecs, m, vals, temp.as_mut_slice(), 4 * m, &mut flag);
+    ::lapack::dsyev(b'V', b'U', m, vecs, m, vals, &mut temp[], 4 * m, &mut flag);
 
     if flag < 0 {
         Err(Error::InvalidArguments)
@@ -63,7 +64,7 @@ mod tests {
         let mut vecs = repeat(0.0).take(m * m).collect::<Vec<_>>();
         let mut vals = repeat(0.0).take(m).collect::<Vec<_>>();
 
-        assert_ok!(::decomp::sym_eig(a.as_slice(), vecs.as_mut_slice(), vals.as_mut_slice(), m));
+        assert_ok!(::decomp::sym_eig(&a[], &mut vecs[], &mut vals[], m));
 
         let expected_vecs = vec![
              0.200767588469279, -0.613521879994358,  0.529492579537623,
