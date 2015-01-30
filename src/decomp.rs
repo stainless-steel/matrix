@@ -1,3 +1,5 @@
+#![feature(core)]
+
 /// An error.
 #[derive(Copy)]
 pub enum Error {
@@ -12,7 +14,6 @@ pub enum Error {
 /// A symmetric `m`-by-`m` matrix `a` is decomposed; the resulting eigenvectors
 /// and eigenvalus are stored in an `m`-by-`m` matrix `vecs` and an `m`-element
 /// vector `vals`, respectively.
-#[allow(unstable)]
 pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: usize) -> Result<(), Error> {
     use std::iter::repeat;
 
