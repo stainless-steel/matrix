@@ -1,5 +1,7 @@
 //! Algorithms for manipulating real matrices.
 
+#![feature(core)]
+
 #[cfg(test)]
 #[macro_use]
 extern crate assert;

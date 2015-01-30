@@ -1,5 +1,3 @@
-#![feature(core)]
-
 /// An error.
 #[derive(Copy)]
 pub enum Error {
