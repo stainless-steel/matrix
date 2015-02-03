@@ -1,6 +1,7 @@
 //! Algorithms for manipulating real matrices.
 
 #![feature(core)]
+#![cfg_attr(test, feature(test))]
 
 #[cfg(test)]
 #[macro_use]
