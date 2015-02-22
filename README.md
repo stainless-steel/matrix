@@ -1,6 +1,6 @@
 # Matrix [![Build Status][travis-svg]][travis-url]
 
-The library provides algorithms for manipulating real matrices.
+The package provides algorithms for manipulating real matrices.
 
 ## [Documentation][docs]
 

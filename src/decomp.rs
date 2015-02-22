@@ -29,7 +29,7 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: usize) -> Resul
     let mut temp = repeat(0.0).take(4 * m).collect::<Vec<_>>();
     let mut flag = 0;
 
-    ::lapack::dsyev(b'V', b'U', m, vecs, m, vals, &mut temp[], 4 * m, &mut flag);
+    ::lapack::dsyev(b'V', b'U', m, vecs, m, vals, &mut temp, 4 * m, &mut flag);
 
     if flag < 0 {
         Err(Error::InvalidArguments)
@@ -63,7 +63,7 @@ mod tests {
         let mut vecs = repeat(0.0).take(m * m).collect::<Vec<_>>();
         let mut vals = repeat(0.0).take(m).collect::<Vec<_>>();
 
-        assert_ok!(::decomp::sym_eig(&a[], &mut vecs[], &mut vals[], m));
+        assert_ok!(::decomp::sym_eig(&a, &mut vecs, &mut vals, m));
 
         let expected_vecs = vec![
              0.200767588469279, -0.613521879994358,  0.529492579537623,
