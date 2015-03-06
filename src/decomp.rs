@@ -19,7 +19,7 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: usize) -> Resul
         // Only the upper triangular matrix is actually needed; however, copying
         // only that part might not be optimal for performance. Check!
         unsafe {
-            use std::ptr::copy_nonoverlapping_memory as copy;
+            use std::ptr::copy_nonoverlapping as copy;
             copy(vecs.as_mut_ptr(), a.as_ptr(), m * m);
         }
     }

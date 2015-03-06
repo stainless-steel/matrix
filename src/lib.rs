@@ -1,6 +1,5 @@
 //! Algorithms for manipulating real matrices.
 
-#![feature(core)]
 #![cfg_attr(test, feature(test))]
 
 #[cfg(test)]
@@ -37,7 +36,7 @@ pub fn multiply(a: &[f64], b: &[f64], c: &mut [f64], m: usize, p: usize, n: usiz
 pub fn multiply_add(a: &[f64], b: &[f64], c: &[f64], d: &mut [f64], m: usize, p: usize, n: usize) {
     if c.as_ptr() != d.as_ptr() {
         unsafe {
-            use std::ptr::copy_nonoverlapping_memory as copy;
+            use std::ptr::copy_nonoverlapping as copy;
             copy(d.as_mut_ptr(), c.as_ptr(), m * n);
         }
     }
