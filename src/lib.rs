@@ -37,7 +37,7 @@ pub fn multiply_add(a: &[f64], b: &[f64], c: &[f64], d: &mut [f64], m: usize, p:
     if c.as_ptr() != d.as_ptr() {
         unsafe {
             use std::ptr::copy_nonoverlapping as copy;
-            copy(d.as_mut_ptr(), c.as_ptr(), m * n);
+            copy(c.as_ptr(), d.as_mut_ptr(), m * n);
         }
     }
 
