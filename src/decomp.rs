@@ -1,5 +1,5 @@
 /// An error.
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub enum Error {
     /// One or more arguments have illegal values.
     InvalidArguments,
@@ -14,6 +14,7 @@ pub enum Error {
 /// vector `vals`, respectively.
 pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: usize) -> Result<(), Error> {
     use std::iter::repeat;
+    use lapack::metal::{dsyev, Jobz, Uplo};
 
     if a.as_ptr() != vecs.as_ptr() {
         // Only the upper triangular matrix is actually needed; however, copying
@@ -29,7 +30,7 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: usize) -> Resul
     let mut temp = repeat(0.0).take(4 * m).collect::<Vec<_>>();
     let mut flag = 0;
 
-    ::lapack::dsyev(b'V', b'U', m, vecs, m, vals, &mut temp, 4 * m, &mut flag);
+    dsyev(Jobz::V, Uplo::U, m, vecs, m, vals, &mut temp, 4 * m, &mut flag);
 
     if flag < 0 {
         Err(Error::InvalidArguments)
@@ -42,6 +43,8 @@ pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: usize) -> Resul
 
 #[cfg(test)]
 mod tests {
+    use assert;
+
     #[test]
     fn sym_eig() {
         use std::iter::repeat;
@@ -63,7 +66,7 @@ mod tests {
         let mut vecs = repeat(0.0).take(m * m).collect::<Vec<_>>();
         let mut vals = repeat(0.0).take(m).collect::<Vec<_>>();
 
-        assert_ok!(::decomp::sym_eig(&a, &mut vecs, &mut vals, m));
+        assert::success(::decomp::sym_eig(&a, &mut vecs, &mut vals, m));
 
         let expected_vecs = vec![
              0.200767588469279, -0.613521879994358,  0.529492579537623,
@@ -76,12 +79,12 @@ mod tests {
              0.302202482503382,  0.589211894835079,  0.517708631263932,
              0.488854547655902,
         ];
-        assert_close!(vecs, expected_vecs);
+        assert::within(&vecs, &expected_vecs, 1e-14);
 
         let expected_vals = vec![
             -0.671640666831794, -0.230366398529950, 0.397221322493687,
              0.999582068576074,  3.026535012212483,
         ];
-        assert_close!(vals, expected_vals);
+        assert::within(&vals, &expected_vals, 1e-14);
     }
 }

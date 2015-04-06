@@ -3,7 +3,6 @@
 #![cfg_attr(test, feature(test))]
 
 #[cfg(test)]
-#[macro_use]
 extern crate assert;
 
 #[cfg(test)]
@@ -20,10 +19,12 @@ pub mod decomp;
 /// result is stored in an `m`-by-`n` matrix `c`.
 #[inline]
 pub fn multiply(a: &[f64], b: &[f64], c: &mut [f64], m: usize, p: usize, n: usize) {
+    use blas::metal::{dgemv, dgemm, Trans};
+
     if n == 1 {
-        blas::dgemv(b'N', m, p, 1.0, a, m, b, 1, 0.0, c, 1);
+        dgemv(Trans::N, m, p, 1.0, a, m, b, 1, 0.0, c, 1);
     } else {
-        blas::dgemm(b'N', b'N', m, n, p, 1.0, a, m, b, p, 0.0, c, m);
+        dgemm(Trans::N, Trans::N, m, n, p, 1.0, a, m, b, p, 0.0, c, m);
     }
 }
 
@@ -34,6 +35,8 @@ pub fn multiply(a: &[f64], b: &[f64], c: &mut [f64], m: usize, p: usize, n: usiz
 /// `m`-by-`n` matrix `d`.
 #[inline]
 pub fn multiply_add(a: &[f64], b: &[f64], c: &[f64], d: &mut [f64], m: usize, p: usize, n: usize) {
+    use blas::metal::{dgemv, dgemm, Trans};
+
     if c.as_ptr() != d.as_ptr() {
         unsafe {
             use std::ptr::copy_nonoverlapping as copy;
@@ -42,14 +45,16 @@ pub fn multiply_add(a: &[f64], b: &[f64], c: &[f64], d: &mut [f64], m: usize, p:
     }
 
     if n == 1 {
-        blas::dgemv(b'N', m, p, 1.0, a, m, b, 1, 1.0, d, 1);
+        dgemv(Trans::N, m, p, 1.0, a, m, b, 1, 1.0, d, 1);
     } else {
-        blas::dgemm(b'N', b'N', m, n, p, 1.0, a, m, b, p, 1.0, d, m);
+        dgemm(Trans::N, Trans::N, m, n, p, 1.0, a, m, b, p, 1.0, d, m);
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use assert;
+
     #[test]
     fn multiply() {
         let (m, p, n) = (2, 4, 1);
@@ -61,7 +66,7 @@ mod tests {
         ::multiply(&a, &b, &mut c, m, p, n);
 
         let expected_c = vec![50.0, 60.0];
-        assert_equal!(c, expected_c);
+        assert::equal(&c, &expected_c);
     }
 
     #[test]
@@ -76,10 +81,10 @@ mod tests {
         ::multiply_add(&a, &b, &c, &mut d, m, p, n);
 
         let expected_c = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
-        assert_equal!(c, expected_c);
+        assert::equal(&c, &expected_c);
 
         let expected_d = vec![23.0, 30.0, 52.0, 68.0, 81.0, 106.0, 110.0, 144.0];
-        assert_equal!(d, expected_d);
+        assert::equal(&d, &expected_d);
     }
 }
 
