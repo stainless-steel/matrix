@@ -1,13 +1,5 @@
 //! Algorithms for manipulating real matrices.
 
-#![cfg_attr(test, feature(test))]
-
-#[cfg(test)]
-extern crate assert;
-
-#[cfg(test)]
-extern crate test;
-
 extern crate blas;
 extern crate lapack;
 
@@ -48,74 +40,5 @@ pub fn multiply_add(a: &[f64], b: &[f64], c: &[f64], d: &mut [f64], m: usize, p:
         dgemv(Trans::N, m, p, 1.0, a, m, b, 1, 1.0, d, 1);
     } else {
         dgemm(Trans::N, Trans::N, m, n, p, 1.0, a, m, b, p, 1.0, d, m);
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use assert;
-
-    #[test]
-    fn multiply() {
-        let (m, p, n) = (2, 4, 1);
-
-        let a = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
-        let b = vec![1.0, 2.0, 3.0, 4.0];
-        let mut c = vec![0.0, 0.0];
-
-        ::multiply(&a, &b, &mut c, m, p, n);
-
-        let expected_c = vec![50.0, 60.0];
-        assert::equal(&c, &expected_c);
-    }
-
-    #[test]
-    fn multiply_add() {
-        let (m, p, n) = (2, 3, 4);
-
-        let a = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
-        let b = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0];
-        let c = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
-        let mut d = vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-
-        ::multiply_add(&a, &b, &c, &mut d, m, p, n);
-
-        let expected_c = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
-        assert::equal(&c, &expected_c);
-
-        let expected_d = vec![23.0, 30.0, 52.0, 68.0, 81.0, 106.0, 110.0, 144.0];
-        assert::equal(&d, &expected_d);
-    }
-}
-
-#[cfg(test)]
-mod benches {
-    use std::iter::repeat;
-    use test;
-
-    #[bench]
-    fn multiply_matrix_matrix(bench: &mut test::Bencher) {
-        let m = 100;
-
-        let a = repeat(1.0).take(m * m).collect::<Vec<_>>();
-        let b = repeat(1.0).take(m * m).collect::<Vec<_>>();
-        let mut c = repeat(1.0).take(m * m).collect::<Vec<_>>();
-
-        bench.iter(|| {
-            ::multiply(&a, &b, &mut c, m, m, m)
-        });
-    }
-
-    #[bench]
-    fn multiply_matrix_vector(bench: &mut test::Bencher) {
-        let m = 100;
-
-        let a = repeat(1.0).take(m * m).collect::<Vec<_>>();
-        let b = repeat(1.0).take(m * 1).collect::<Vec<_>>();
-        let mut c = repeat(1.0).take(m * 1).collect::<Vec<_>>();
-
-        bench.iter(|| {
-            ::multiply(&a, &b, &mut c, m, m, 1)
-        });
     }
 }
