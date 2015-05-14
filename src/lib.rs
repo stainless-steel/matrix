@@ -7,8 +7,8 @@ pub mod decomp;
 
 /// Multiply two matrices.
 ///
-/// An `m`-by-`p` matrix `a` is multiplied by a `p`-by-`n` matrix `b`; the
-/// result is stored in an `m`-by-`n` matrix `c`.
+/// An `m`-by-`p` matrix `a` is multiplied by a `p`-by-`n` matrix `b`; the result is stored in an
+/// `m`-by-`n` matrix `c`.
 #[inline]
 pub fn multiply(a: &[f64], b: &[f64], c: &mut [f64], m: usize, p: usize, n: usize) {
     use blas::metal::{dgemv, dgemm, Trans};
@@ -22,9 +22,8 @@ pub fn multiply(a: &[f64], b: &[f64], c: &mut [f64], m: usize, p: usize, n: usiz
 
 /// Multiply two matrices and add another matrix.
 ///
-/// An `m`-by-`p` matrix `a` is multiplied by a `p`-by-`n` matrix `b`; the
-/// result is summed up with an `m`-by-`n` matrix `c` and stored in an
-/// `m`-by-`n` matrix `d`.
+/// An `m`-by-`p` matrix `a` is multiplied by a `p`-by-`n` matrix `b`; the result is summed up with
+/// an `m`-by-`n` matrix `c` and stored in an `m`-by-`n` matrix `d`.
 #[inline]
 pub fn multiply_add(a: &[f64], b: &[f64], c: &[f64], d: &mut [f64], m: usize, p: usize, n: usize) {
     use blas::metal::{dgemv, dgemm, Trans};

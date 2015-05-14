@@ -9,16 +9,15 @@ pub enum Error {
 
 /// Perform the eigendecomposition of a symmetric matrix.
 ///
-/// A symmetric `m`-by-`m` matrix `a` is decomposed; the resulting eigenvectors
-/// and eigenvalus are stored in an `m`-by-`m` matrix `vecs` and an `m`-element
-/// vector `vals`, respectively.
+/// A symmetric `m`-by-`m` matrix `a` is decomposed; the resulting eigenvectors and eigenvalus are
+/// stored in an `m`-by-`m` matrix `vecs` and an `m`-element vector `vals`, respectively.
 pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: usize) -> Result<(), Error> {
     use std::iter::repeat;
     use lapack::metal::{dsyev, Jobz, Uplo};
 
     if a.as_ptr() != vecs.as_ptr() {
-        // Only the upper triangular matrix is actually needed; however, copying
-        // only that part might not be optimal for performance. Check!
+        // Only the upper triangular matrix is actually needed; however, copying only that part
+        // might not be optimal for performance. Check!
         unsafe {
             use std::ptr::copy_nonoverlapping as copy;
             copy(a.as_ptr(), vecs.as_mut_ptr(), m * m);
