@@ -9,8 +9,8 @@ documentation = "https://stainless-steel.github.io/matrix"
 description = "The package provides algorithms for manipulating real matrices."
 
 [dependencies]
-blas = "*"
-lapack = "*"
+blas = "0.3"
+lapack = "0.3"
 
 [dev-dependencies]
 assert = "*"

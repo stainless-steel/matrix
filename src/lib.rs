@@ -11,7 +11,7 @@ pub mod decomp;
 /// `m`-by-`n` matrix `c`.
 #[inline]
 pub fn multiply(a: &[f64], b: &[f64], c: &mut [f64], m: usize, p: usize, n: usize) {
-    use blas::metal::{dgemv, dgemm, Trans};
+    use blas::{dgemv, dgemm, Trans};
 
     if n == 1 {
         dgemv(Trans::N, m, p, 1.0, a, m, b, 1, 0.0, c, 1);
@@ -26,7 +26,7 @@ pub fn multiply(a: &[f64], b: &[f64], c: &mut [f64], m: usize, p: usize, n: usiz
 /// an `m`-by-`n` matrix `c` and stored in an `m`-by-`n` matrix `d`.
 #[inline]
 pub fn multiply_add(a: &[f64], b: &[f64], c: &[f64], d: &mut [f64], m: usize, p: usize, n: usize) {
-    use blas::metal::{dgemv, dgemm, Trans};
+    use blas::{dgemv, dgemm, Trans};
 
     if c.as_ptr() != d.as_ptr() {
         unsafe {

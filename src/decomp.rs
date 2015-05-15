@@ -13,7 +13,7 @@ pub enum Error {
 /// stored in an `m`-by-`m` matrix `vecs` and an `m`-element vector `vals`, respectively.
 pub fn sym_eig(a: &[f64], vecs: &mut [f64], vals: &mut [f64], m: usize) -> Result<(), Error> {
     use std::iter::repeat;
-    use lapack::metal::{dsyev, Jobz, Uplo};
+    use lapack::{dsyev, Jobz, Uplo};
 
     if a.as_ptr() != vecs.as_ptr() {
         // Only the upper triangular matrix is actually needed; however, copying only that part
