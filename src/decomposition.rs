@@ -23,9 +23,9 @@ pub fn symmetric_eigen(A: &[f64], U: &mut [f64], L: &mut [f64], m: usize) -> Res
         );
     );
 
-    if A.len() != m * m || U.len() != m * m || L.len() != m {
-        return Err(Error::InvalidArguments)
-    }
+    debug_assert_eq!(A.len(), m * m);
+    debug_assert_eq!(U.len(), m * m);
+    debug_assert_eq!(L.len(), m);
 
     if A.as_ptr() != U.as_ptr() {
         unsafe {

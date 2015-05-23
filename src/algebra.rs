@@ -11,6 +11,10 @@
 pub fn multiply(A: &[f64], B: &[f64], C: &mut [f64], m: usize, p: usize, n: usize) {
     use blas::{dgemv, dgemm, Trans};
 
+    debug_assert_eq!(A.len(), m * p);
+    debug_assert_eq!(B.len(), p * n);
+    debug_assert_eq!(C.len(), m * n);
+
     if n == 1 {
         dgemv(Trans::N, m, p, 1.0, A, m, B, 1, 0.0, C, 1);
     } else {
@@ -32,6 +36,11 @@ pub fn multiply(A: &[f64], B: &[f64], C: &mut [f64], m: usize, p: usize, n: usiz
 pub fn multiply_add(A: &[f64], B: &[f64], C: &[f64], D: &mut [f64], m: usize, p: usize, n: usize) {
     use blas::{dgemv, dgemm, Trans};
     use std::ptr;
+
+    debug_assert_eq!(A.len(), m * p);
+    debug_assert_eq!(B.len(), p * n);
+    debug_assert_eq!(C.len(), m * n);
+    debug_assert_eq!(D.len(), m * n);
 
     if C.as_ptr() != D.as_ptr() {
         unsafe {
