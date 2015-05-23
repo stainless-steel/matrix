@@ -1,6 +1,6 @@
 [package]
 name = "matrix"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/stainless-steel/matrix"
@@ -12,8 +12,8 @@ description = "The package provides algorithms for manipulating real matrices."
 name = "lib"
 
 [dependencies]
-blas = "0.3"
-lapack = "0.3"
+blas = "*"
+lapack = "*"
 
 [dev-dependencies]
 assert = "*"
