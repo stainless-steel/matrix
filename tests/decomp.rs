@@ -3,11 +3,9 @@ extern crate matrix;
 
 #[test]
 fn sym_eig() {
-    use std::iter::repeat;
+    let size = 5;
 
-    let m = 5;
-
-    let a = vec![
+    let matrix = vec![
         0.814723686393179, 0.097540404999410, 0.157613081677548,
         0.141886338627215, 0.655740699156587, 0.097540404999410,
         0.278498218867048, 0.970592781760616, 0.421761282626275,
@@ -19,12 +17,12 @@ fn sym_eig() {
         0.678735154857773,
     ];
 
-    let mut vecs = repeat(0.0).take(m * m).collect::<Vec<_>>();
-    let mut vals = repeat(0.0).take(m).collect::<Vec<_>>();
+    let mut vectors = vec![0.0; size * size];
+    let mut values = vec![0.0; size];
 
-    assert::success(matrix::decomp::sym_eig(&a, &mut vecs, &mut vals, m));
+    assert::success(matrix::decomp::symmetric_eigen(&matrix, &mut vectors, &mut values, size));
 
-    let expected_vecs = vec![
+    let expected_vectors = vec![
          0.200767588469279, -0.613521879994358,  0.529492579537623,
          0.161735212201923, -0.526082320114459, -0.241005628008408,
         -0.272281143378657,  0.443280672960843, -0.675165120368165,
@@ -35,11 +33,11 @@ fn sym_eig() {
          0.302202482503382,  0.589211894835079,  0.517708631263932,
          0.488854547655902,
     ];
-    assert::within(&vecs, &expected_vecs, 1e-14);
+    assert::within(&vectors, &expected_vectors, 1e-14);
 
-    let expected_vals = vec![
+    let expected_values = vec![
         -0.671640666831794, -0.230366398529950, 0.397221322493687,
          0.999582068576074,  3.026535012212483,
     ];
-    assert::within(&vals, &expected_vals, 1e-14);
+    assert::within(&values, &expected_values, 1e-14);
 }
