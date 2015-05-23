@@ -49,7 +49,8 @@ pub fn symmetric_eigen(A: &[f64], U: &mut [f64], L: &mut [f64], m: usize) -> Res
     success!(flag);
 
     let size = work[0] as usize;
-    let mut work = vec![0.0; size];
+    let mut work = Vec::with_capacity(size);
+    unsafe { work.set_len(size) };
     dsyev(Jobz::V, Uplo::U, m, U, m, L, &mut work, size, &mut flag);
     success!(flag);
 
