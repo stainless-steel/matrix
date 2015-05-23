@@ -1,7 +1,4 @@
-#![allow(non_snake_case)]
-
-extern crate assert;
-extern crate matrix;
+use {assert, matrix};
 
 #[test]
 fn symmetric_eigen() {
