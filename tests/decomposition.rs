@@ -4,7 +4,7 @@ extern crate assert;
 extern crate matrix;
 
 #[test]
-fn sym_eig() {
+fn symmetric_eigen() {
     let m = 5;
 
     let A = vec![
@@ -20,7 +20,7 @@ fn sym_eig() {
     let mut U = vec![0.0; m * m];
     let mut L = vec![0.0; m];
 
-    assert::success(matrix::decomp::symmetric_eigen(&A, &mut U, &mut L, m));
+    assert::success(matrix::symmetric_eigen(&A, &mut U, &mut L, m));
 
     assert::within(&U, &vec![
          0.200767588469279, -0.613521879994358,  0.529492579537623,  0.161735212201923,

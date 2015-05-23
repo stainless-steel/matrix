@@ -1,13 +1,5 @@
 use std::ptr;
-
-/// An error.
-#[derive(Clone, Copy)]
-pub enum Error {
-    /// One or more arguments have illegal values.
-    InvalidArguments,
-    /// The algorithm failed to converge.
-    FailedToConverge,
-}
+use {Error, Result};
 
 /// Perform the eigendecomposition of a symmetric matrix.
 ///
@@ -18,7 +10,7 @@ pub enum Error {
 /// ```
 ///
 /// The slices `A`, `U`, and `L` should have `m × m`, `m × m`, and `m` elements, respectively.
-pub fn symmetric_eigen(A: &[f64], U: &mut [f64], L: &mut [f64], m: usize) -> Result<(), Error> {
+pub fn symmetric_eigen(A: &[f64], U: &mut [f64], L: &mut [f64], m: usize) -> Result<()> {
     use lapack::{dsyev, Jobz, Uplo};
 
     macro_rules! success(

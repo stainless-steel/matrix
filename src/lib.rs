@@ -5,9 +5,21 @@
 extern crate blas;
 extern crate lapack;
 
-pub mod decomp;
+mod decomposition;
 
-use std::ptr;
+pub use decomposition::symmetric_eigen;
+
+/// An error.
+#[derive(Clone, Copy)]
+pub enum Error {
+    /// One or more arguments have illegal values.
+    InvalidArguments,
+    /// The algorithm failed to converge.
+    FailedToConverge,
+}
+
+/// A result.
+pub type Result<T> = std::result::Result<T, Error>;
 
 /// Multiply two matrices.
 ///
@@ -45,7 +57,7 @@ pub fn multiply_add(A: &[f64], B: &[f64], C: &[f64], D: &mut [f64], m: usize, p:
 
     if C.as_ptr() != D.as_ptr() {
         unsafe {
-            ptr::copy_nonoverlapping(C.as_ptr(), D.as_mut_ptr(), m * n);
+            std::ptr::copy_nonoverlapping(C.as_ptr(), D.as_mut_ptr(), m * n);
         }
     }
 
