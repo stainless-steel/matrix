@@ -19,8 +19,6 @@ pub struct Matrix {
     pub rows: usize,
     /// The number of columns.
     pub columns: usize,
-    /// The number of nonzero elements.
-    pub nonzeros: usize,
     /// The actual data.
     pub data: Data,
 }
@@ -29,14 +27,16 @@ pub struct Matrix {
 #[derive(Debug)]
 pub enum Data {
     /// Data stored using the compressed-row format.
-    CompressedRow(CompressedDimension),
+    Row(Dimension),
     /// Data stored using the compressed-column format.
-    CompressedColumn(CompressedDimension),
+    Column(Dimension),
 }
 
 /// Data stored in the compressed-column or compressed-row format.
 #[derive(Debug)]
-pub struct CompressedDimension {
+pub struct Dimension {
+    /// The number of nonzero elements.
+    pub nonzeros: usize,
     /// The values of the nonzero elements.
     pub values: Vec<f64>,
     /// The indices of columns (rows) the nonzero elements.
@@ -49,10 +49,6 @@ pub struct CompressedDimension {
 }
 
 impl Matrix {
-    #[inline]
-    pub fn nonzeros(&self) -> usize {
-        self.nonzeros
-    }
 }
 
 impl generic::Matrix for Matrix {
@@ -76,7 +72,7 @@ impl Into<Data> for Matrix {
 
 impl From<Matrix> for dense::Matrix {
     fn from(sparse: Matrix) -> dense::Matrix {
-        let (rows, columns, nonzeros) = (sparse.rows, sparse.columns, sparse.nonzeros);
+        let (rows, columns) = (sparse.rows, sparse.columns);
 
         let mut dense = dense::Matrix {
             rows: rows,
@@ -84,30 +80,26 @@ impl From<Matrix> for dense::Matrix {
             data: vec![0.0; rows * columns],
         };
 
-        if nonzeros == 0 {
-            return dense;
-        }
-
         match sparse.data {
-            Data::CompressedRow(ref data) => {
-                debug_assert_eq!(data.values.len(), nonzeros);
-                debug_assert_eq!(data.indices.len(), nonzeros);
-                debug_assert_eq!(data.offsets.len(), rows + 1);
+            Data::Row(Dimension { nonzeros, ref values, ref indices, ref offsets }) => {
+                debug_assert_eq!(values.len(), nonzeros);
+                debug_assert_eq!(indices.len(), nonzeros);
+                debug_assert_eq!(offsets.len(), rows + 1);
                 for i in 0..rows {
-                    for k in data.offsets[i]..data.offsets[i + 1] {
-                        let j = data.indices[k];
-                        dense.data[j * rows + i] = data.values[k];
+                    for k in offsets[i]..offsets[i + 1] {
+                        let j = indices[k];
+                        dense.data[j * rows + i] = values[k];
                     }
                 }
             },
-            Data::CompressedColumn(ref data) => {
-                debug_assert_eq!(data.values.len(), nonzeros);
-                debug_assert_eq!(data.indices.len(), nonzeros);
-                debug_assert_eq!(data.offsets.len(), columns + 1);
+            Data::Column(Dimension { nonzeros, ref values, ref indices, ref offsets }) => {
+                debug_assert_eq!(values.len(), nonzeros);
+                debug_assert_eq!(indices.len(), nonzeros);
+                debug_assert_eq!(offsets.len(), columns + 1);
                 for j in 0..columns {
-                    for k in data.offsets[j]..data.offsets[j + 1] {
-                        let i = data.indices[k];
-                        dense.data[j * rows + i] = data.values[k];
+                    for k in offsets[j]..offsets[j + 1] {
+                        let i = indices[k];
+                        dense.data[j * rows + i] = values[k];
                     }
                 }
             },
@@ -121,17 +113,17 @@ impl From<Matrix> for dense::Matrix {
 mod tests {
     use assert;
 
-    use super::{Matrix, Data, CompressedDimension};
+    use super::{Matrix, Data, Dimension};
 
     #[test]
-    fn into() {
+    fn column_into() {
         use dense;
 
         let matrix = Matrix {
             rows: 5,
             columns: 3,
-            nonzeros: 3,
-            data: Data::CompressedColumn(CompressedDimension {
+            data: Data::Column(Dimension {
+                nonzeros: 3,
                 values: vec![1.0, 2.0, 3.0],
                 indices: vec![0, 1, 2],
                 offsets: vec![0, 1, 2, 3],
