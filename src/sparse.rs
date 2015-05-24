@@ -59,8 +59,7 @@ pub struct Diagonal {
     pub subdiagonals: usize,
     /// The number of superdiagonals.
     pub superdiagonals: usize,
-    /// The values of the diagonals. The head elements of subdiagonals and tail elements of
-    /// superdiagonals are not used but should be present.
+    /// The values of the diagonals.
     pub values: Vec<f64>,
 }
 
