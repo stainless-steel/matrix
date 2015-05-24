@@ -9,7 +9,7 @@ use {Error, Result};
 /// A = U * diag(L) * U^T.
 /// ```
 ///
-/// The slices `A`, `U`, and `L` should have `m × m`, `m × m`, and `m` elements, respectively.
+/// `A`, `U`, and `L` should have `m × m`, `m × m`, and `m` elements, respectively.
 pub fn symmetric_eigen(A: &[f64], U: &mut [f64], L: &mut [f64], m: usize) -> Result<()> {
     use lapack::{dsyev, Jobz, Uplo};
 

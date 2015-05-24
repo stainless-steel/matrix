@@ -15,7 +15,7 @@ pub mod sparse;
 mod algebra;
 mod decomposition;
 
-pub use algebra::{combine, dot, multiply, scale};
+pub use algebra::{dot, scale, sum, times};
 pub use decomposition::symmetric_eigen;
 
 /// An error.
