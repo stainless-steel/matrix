@@ -7,9 +7,11 @@ extern crate lapack;
 
 mod algebra;
 mod decomposition;
+mod storage;
 
 pub use algebra::{multiply, multiply_add};
 pub use decomposition::symmetric_eigen;
+pub use storage::{Sparse, CompressedData};
 
 /// An error.
 #[derive(Clone, Copy)]
