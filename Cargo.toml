@@ -8,9 +8,6 @@ homepage = "https://github.com/stainless-steel/matrix"
 documentation = "https://stainless-steel.github.io/matrix"
 description = "The package provides algorithms for manipulating real matrices."
 
-[[test]]
-name = "lib"
-
 [dependencies]
 blas = "*"
 lapack = "*"
