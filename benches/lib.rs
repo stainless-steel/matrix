@@ -13,7 +13,7 @@ fn multiply_matrix_matrix(bench: &mut test::Bencher) {
     let mut C = vec![1.0; m * m];
 
     bench.iter(|| {
-        matrix::multiply(&A, &B, &mut C, m, m, m)
+        matrix::multiply(1.0, &A, &B, 1.0, &mut C, m, m, m)
     });
 }
 
@@ -22,10 +22,10 @@ fn multiply_matrix_vector(bench: &mut test::Bencher) {
     let m = 100;
 
     let A = vec![1.0; m * m];
-    let B = vec![1.0; m * 1];
-    let mut C = vec![1.0; m * 1];
+    let B = vec![1.0; m];
+    let mut C = vec![1.0; m];
 
     bench.iter(|| {
-        matrix::multiply(&A, &B, &mut C, m, m, 1)
+        matrix::multiply(1.0, &A, &B, 1.0, &mut C, m, m, 1)
     });
 }
