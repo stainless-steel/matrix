@@ -1,4 +1,4 @@
-/// Multiply two matrices and add another one.
+/// Multiply two matrices.
 ///
 /// The formula is as follows:
 ///
