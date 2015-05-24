@@ -90,6 +90,9 @@ impl From<Matrix> for dense::Matrix {
 
         match sparse.data {
             Data::CompressedRow(ref data) => {
+                debug_assert_eq!(data.values.len(), nonzeros);
+                debug_assert_eq!(data.indices.len(), nonzeros);
+                debug_assert_eq!(data.offsets.len(), rows + 1);
                 for i in 0..rows {
                     for k in data.offsets[i]..data.offsets[i + 1] {
                         let j = data.indices[k];
@@ -98,6 +101,9 @@ impl From<Matrix> for dense::Matrix {
                 }
             },
             Data::CompressedColumn(ref data) => {
+                debug_assert_eq!(data.values.len(), nonzeros);
+                debug_assert_eq!(data.indices.len(), nonzeros);
+                debug_assert_eq!(data.offsets.len(), columns + 1);
                 for j in 0..columns {
                     for k in data.offsets[j]..data.offsets[j + 1] {
                         let i = data.indices[k];
@@ -123,12 +129,12 @@ mod tests {
 
         let matrix = Matrix {
             rows: 5,
-            columns: 5,
-            nonzeros: 5,
+            columns: 3,
+            nonzeros: 3,
             data: Data::CompressedColumn(CompressedDimension {
-                values: vec![1.0, 2.0, 3.0, 4.0, 5.0],
-                indices: vec![0, 1, 2, 3, 4],
-                offsets: vec![0, 1, 2, 3, 4, 5],
+                values: vec![1.0, 2.0, 3.0],
+                indices: vec![0, 1, 2],
+                offsets: vec![0, 1, 2, 3],
             }),
         };
 
@@ -138,8 +144,6 @@ mod tests {
             1.0, 0.0, 0.0, 0.0, 0.0,
             0.0, 2.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 3.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 4.0, 0.0,
-            0.0, 0.0, 0.0, 0.0, 5.0,
         ]);
     }
 }
