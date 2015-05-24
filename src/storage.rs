@@ -30,7 +30,7 @@ pub enum SparseData {
 pub struct CompressedData {
     /// The values of the nonzero elements.
     pub values: Vec<f64>,
-    /// The indices of columns or rows the nonzero elements.
+    /// The indices of columns (rows) the nonzero elements.
     pub indices: Vec<usize>,
     /// The offsets of columns (rows) such that the values and indices of the `i`th column (row)
     /// are stored starting from `values[j]` and `indices[j]`, respectively, where `j =
