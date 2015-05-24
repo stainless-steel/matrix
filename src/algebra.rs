@@ -1,6 +1,6 @@
 use blas;
 
-/// Multiply a matrix by a matrix.
+/// Compute a wighted sum of a matrix product and a matrix.
 ///
 /// The formula is as follows:
 ///
@@ -8,10 +8,10 @@ use blas;
 /// C = α * A * B + β * C.
 /// ```
 ///
-/// The slices `A`, `B`, and `C` should have `m × p`, `p × n`, and `m × n` elements, respectively.
+/// `A`, `B`, and `C` should have `m × p`, `p × n`, and `m × n` elements, respectively.
 #[inline]
-pub fn multiply(alpha: f64, A: &[f64], B: &[f64], beta: f64, C: &mut [f64], m: usize, p: usize,
-                n: usize) {
+pub fn combine(alpha: f64, A: &[f64], B: &[f64], beta: f64, C: &mut [f64], m: usize, p: usize,
+               n: usize) {
 
     debug_assert_eq!(A.len(), m * p);
     debug_assert_eq!(B.len(), p * n);
@@ -24,13 +24,31 @@ pub fn multiply(alpha: f64, A: &[f64], B: &[f64], beta: f64, C: &mut [f64], m: u
     }
 }
 
-/// Multiply a vector by a scalar.
+/// Compute the scalar product of two vectors.
 ///
-/// The slice `X` should have `m` elements.
+/// `X` and `Y` should contain `n` elements.
 #[inline]
-pub fn scale(alpha: f64, X: &mut [f64], m: usize) {
-    debug_assert_eq!(X.len(), m);
-    blas::dscal(m, alpha, X, 1);
+pub fn dot(X: &[f64], Y: &[f64], n: usize) -> f64 {
+    debug_assert_eq!(X.len(), n);
+    debug_assert_eq!(Y.len(), n);
+    blas::ddot(n, X, 1, Y, 1)
+}
+
+/// Compute the matrix product of two matrices.
+///
+/// `A`, `B`, and `C` should have `m × p`, `p × n`, and `m × n` elements, respectively.
+#[inline]
+pub fn multiply(A: &[f64], B: &[f64], C: &mut [f64], m: usize, p: usize, n: usize) {
+    combine(1.0, A, B, 0.0, C, m, p, n);
+}
+
+/// Scale a vector by a scalar.
+///
+/// `X` should have `n` elements.
+#[inline]
+pub fn scale(alpha: f64, X: &mut [f64], n: usize) {
+    debug_assert_eq!(X.len(), n);
+    blas::dscal(n, alpha, X, 1);
 }
 
 #[cfg(test)]
@@ -38,23 +56,28 @@ mod tests {
     use assert;
 
     #[test]
-    fn multiply() {
+    fn combine() {
         let (m, p, n) = (2, 3, 4);
         let A = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
         let B = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0];
         let mut C = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
 
-        super::multiply(1.0, &A, &B, 1.0, &mut C, m, p, n);
+        super::combine(1.0, &A, &B, 1.0, &mut C, m, p, n);
 
         assert::equal(&C, &vec![23.0, 30.0, 52.0, 68.0, 81.0, 106.0, 110.0, 144.0]);
     }
 
     #[test]
+    fn dot() {
+        assert::equal(super::dot(&[10.0, -4.0], &[5.0, 2.0], 2), 42.0);
+    }
+
+    #[test]
     fn scale() {
-        let m = 4;
+        let n = 4;
         let mut X = vec![1.0, 2.0, 3.0, 4.0];
 
-        super::scale(2.0, &mut X, m);
+        super::scale(2.0, &mut X, n);
 
         assert::equal(&X, &vec![2.0, 4.0, 6.0, 8.0]);
     }
