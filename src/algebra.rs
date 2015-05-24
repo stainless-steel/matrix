@@ -1,6 +1,6 @@
 use blas;
 
-/// Multiply two matrices.
+/// Multiply a matrix by a matrix.
 ///
 /// The formula is as follows:
 ///
@@ -24,7 +24,7 @@ pub fn multiply(alpha: f64, A: &[f64], B: &[f64], beta: f64, C: &mut [f64], m: u
     }
 }
 
-/// Multiply a vectory by a scalar.
+/// Multiply a vector by a scalar.
 ///
 /// The slice `X` should have `m` elements.
 pub fn scale(alpha: f64, X: &mut [f64], m: usize) {
