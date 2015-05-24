@@ -1,3 +1,5 @@
+//! Dense matrices.
+
 use std::convert::Into;
 use std::ops::{Deref, DerefMut};
 
@@ -14,6 +16,7 @@ pub struct Matrix {
     pub data: Data,
 }
 
+/// Data of a dense matrix.
 pub type Data = Vec<f64>;
 
 impl Matrix {

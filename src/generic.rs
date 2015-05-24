@@ -1,3 +1,5 @@
+//! Generic matrices.
+
 use std::convert::Into;
 
 use dense;

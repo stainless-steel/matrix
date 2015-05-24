@@ -1,3 +1,13 @@
+//! Sparse matrices.
+//!
+//! Two formats of sparse storage are currently supported:
+//!
+//! * the [compressed-row][1] format and
+//! * the [compressed-column][2] format.
+//!
+//! [1]: http://netlib.org/linalg/html_templates/node91.html
+//! [2]: http://netlib.org/linalg/html_templates/node92.html
+
 use std::convert::Into;
 
 use {generic, dense};
@@ -18,14 +28,9 @@ pub struct Matrix {
 /// Data of a sparse matrix.
 #[derive(Debug)]
 pub enum Data {
-    /// Data stored using the [compressed-row format][1].
-    ///
-    /// [1]: http://netlib.org/linalg/html_templates/node91.html
+    /// Data stored using the compressed-row format.
     CompressedRow(CompressedDimension),
-
-    /// Data stored using the [compressed-column format][1].
-    ///
-    /// [1]: http://netlib.org/linalg/html_templates/node92.html
+    /// Data stored using the compressed-column format.
     CompressedColumn(CompressedDimension),
 }
 

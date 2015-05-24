@@ -8,21 +8,12 @@ extern crate assert;
 extern crate blas;
 extern crate lapack;
 
-mod generic;
-mod dense;
-mod sparse;
+pub mod dense;
+pub mod generic;
+pub mod sparse;
 
 mod algebra;
 mod decomposition;
-
-pub use generic::Matrix as GenericMatrix;
-
-pub use dense::Matrix as DenseMatrix;
-pub use dense::Data as DenseData;
-
-pub use sparse::Matrix as SparseMatrix;
-pub use sparse::Data as SparseData;
-pub use sparse::CompressedDimension;
 
 pub use algebra::{multiply, multiply_add};
 pub use decomposition::symmetric_eigen;
