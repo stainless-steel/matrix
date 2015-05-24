@@ -113,7 +113,7 @@ mod tests {
     use super::{Matrix, Data, CompressedDimension};
 
     #[test]
-    fn into_dense() {
+    fn into() {
         use dense;
 
         let matrix = Matrix {
