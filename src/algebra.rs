@@ -27,6 +27,7 @@ pub fn multiply(alpha: f64, A: &[f64], B: &[f64], beta: f64, C: &mut [f64], m: u
 /// Multiply a vector by a scalar.
 ///
 /// The slice `X` should have `m` elements.
+#[inline]
 pub fn scale(alpha: f64, X: &mut [f64], m: usize) {
     debug_assert_eq!(X.len(), m);
     blas::dscal(m, alpha, X, 1);
