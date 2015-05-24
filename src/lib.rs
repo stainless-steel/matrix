@@ -11,7 +11,7 @@ mod storage;
 
 pub use algebra::{multiply, multiply_add};
 pub use decomposition::symmetric_eigen;
-pub use storage::{Sparse, CompressedData};
+pub use storage::{SparseMatrix, SparseData, CompressedData};
 
 /// An error.
 #[derive(Clone, Copy)]
