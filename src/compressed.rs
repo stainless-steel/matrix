@@ -10,11 +10,11 @@
 
 use num::{Num, Zero};
 
-use dense;
+use Dense;
 
 /// A compressed matrix.
 #[derive(Debug)]
-pub struct Matrix<T> {
+pub struct Compressed<T> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -22,7 +22,7 @@ pub struct Matrix<T> {
     /// The number of nonzero elements.
     pub nonzeros: usize,
     /// The storage format.
-    pub format: Format,
+    pub format: CompressedFormat,
     /// The values of the nonzero elements.
     pub data: Vec<T>,
     /// The indices of columns (rows) the nonzero elements.
@@ -36,28 +36,28 @@ pub struct Matrix<T> {
 
 /// The storage format of a compressed matrix.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Format {
+pub enum CompressedFormat {
     /// The compressed-row format.
     Row,
     /// The compressed-column format.
     Column,
 }
 
-impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
-    fn from(matrix: Matrix<T>) -> dense::Matrix<T> {
-        let Matrix { rows, columns, nonzeros, format, ref data, ref indices, ref offsets } = matrix;
+impl<T> From<Compressed<T>> for Dense<T> where T: Copy + Num {
+    fn from(compressed: Compressed<T>) -> Dense<T> {
+        let Compressed { rows, columns, nonzeros, format, ref data, ref indices, ref offsets } = compressed;
 
         debug_assert_eq!(data.len(), nonzeros);
         debug_assert_eq!(indices.len(), nonzeros);
 
-        let mut dense = dense::Matrix {
+        let mut dense = Dense {
             rows: rows,
             columns: columns,
             data: vec![Zero::zero(); rows * columns],
         };
 
         match format {
-            Format::Row => {
+            CompressedFormat::Row => {
                 debug_assert_eq!(offsets.len(), rows + 1);
                 for i in 0..rows {
                     for k in offsets[i]..offsets[i + 1] {
@@ -66,7 +66,7 @@ impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
                     }
                 }
             },
-            Format::Column => {
+            CompressedFormat::Column => {
                 debug_assert_eq!(offsets.len(), columns + 1);
                 for j in 0..columns {
                     for k in offsets[j]..offsets[j + 1] {
@@ -83,23 +83,23 @@ impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
 
 #[cfg(test)]
 mod tests {
-    use {assert, dense};
+    use {assert, Compressed, CompressedFormat, Dense};
 
     #[test]
     fn into_dense() {
-        let matrix = super::Matrix {
+        let compressed = Compressed {
             rows: 5,
             columns: 3,
             nonzeros: 3,
-            format: super::Format::Column,
+            format: CompressedFormat::Column,
             data: vec![1.0, 2.0, 3.0],
             indices: vec![0, 1, 2],
             offsets: vec![0, 1, 2, 3],
         };
 
-        let matrix: dense::Matrix<f64> = matrix.into();
+        let dense: Dense<f64> = compressed.into();
 
-        assert::equal(&matrix[..], &vec![
+        assert::equal(&dense[..], &vec![
             1.0, 0.0, 0.0, 0.0, 0.0,
             0.0, 2.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 3.0, 0.0, 0.0,

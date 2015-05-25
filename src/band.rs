@@ -7,11 +7,11 @@
 
 use num::{Num, Zero};
 
-use dense;
+use Dense;
 
 /// A band matrix.
 #[derive(Debug)]
-pub struct Matrix<T> {
+pub struct Band<T> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -25,14 +25,14 @@ pub struct Matrix<T> {
     pub data: Vec<T>,
 }
 
-impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
-    fn from(matrix: Matrix<T>) -> dense::Matrix<T> {
-        let Matrix { rows, columns, superdiagonals, subdiagonals, ref data } = matrix;
+impl<T> From<Band<T>> for Dense<T> where T: Copy + Num {
+    fn from(band: Band<T>) -> Dense<T> {
+        let Band { rows, columns, superdiagonals, subdiagonals, ref data } = band;
 
         let diagonals = superdiagonals + 1 + subdiagonals;
         debug_assert_eq!(data.len(), diagonals * columns);
 
-        let mut dense = dense::Matrix {
+        let mut dense = Dense {
             rows: rows,
             columns: columns,
             data: vec![Zero::zero(); rows * columns],
@@ -63,11 +63,11 @@ impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
 
 #[cfg(test)]
 mod tests {
-    use {assert, dense};
+    use {assert, Band, Dense};
 
     #[test]
     fn into_tall_dense() {
-        let matrix = super::Matrix {
+        let band = Band {
             rows: 7,
             columns: 4,
             superdiagonals: 2,
@@ -80,9 +80,9 @@ mod tests {
             ],
         };
 
-        let matrix: dense::Matrix<f64> = matrix.into();
+        let dense: Dense<f64> = band.into();
 
-        assert::equal(&matrix[..], &vec![
+        assert::equal(&dense[..], &vec![
             1.0, 4.0,  8.0,  0.0,  0.0,  0.0, 0.0,
             2.0, 5.0,  9.0, 12.0,  0.0,  0.0, 0.0,
             3.0, 6.0, 10.0, 13.0, 15.0,  0.0, 0.0,
@@ -92,7 +92,7 @@ mod tests {
 
     #[test]
     fn into_wide_dense() {
-        let matrix = super::Matrix {
+        let band = Band {
             rows: 4,
             columns: 7,
             superdiagonals: 2,
@@ -108,9 +108,9 @@ mod tests {
             ],
         };
 
-        let matrix: dense::Matrix<f64> = matrix.into();
+        let dense: Dense<f64> = band.into();
 
-        assert::equal(&matrix[..], &vec![
+        assert::equal(&dense[..], &vec![
             1.0, 4.0,  8.0,  0.0,
             2.0, 5.0,  9.0, 13.0,
             3.0, 6.0, 10.0, 14.0,

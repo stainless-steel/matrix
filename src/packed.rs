@@ -7,42 +7,42 @@
 
 use num::{Num, Zero};
 
-use dense;
+use Dense;
 
 /// A packed matrix.
 #[derive(Debug)]
-pub struct Matrix<T> {
+pub struct Packed<T> {
     /// The number of rows or columns.
     pub size: usize,
     /// The storage format.
-    pub format: Format,
+    pub format: PackedFormat,
     /// The data stored in the column-major order.
     pub data: Vec<T>,
 }
 
 /// The storage format of a packed matrix.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Format {
+pub enum PackedFormat {
     /// The lower triangular format.
     Lower,
     /// The upper triangular format.
     Upper,
 }
 
-impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
-    fn from(matrix: Matrix<T>) -> dense::Matrix<T> {
-        let Matrix { size, format, ref data } = matrix;
+impl<T> From<Packed<T>> for Dense<T> where T: Copy + Num {
+    fn from(packed: Packed<T>) -> Dense<T> {
+        let Packed { size, format, ref data } = packed;
 
         debug_assert_eq!(data.len(), size * (size + 1) / 2);
 
-        let mut dense = dense::Matrix {
+        let mut dense = Dense {
             rows: size,
             columns: size,
             data: vec![Zero::zero(); size * size],
         };
 
         match format {
-            Format::Lower => {
+            PackedFormat::Lower => {
                 let mut k = 0;
                 for j in 0..size {
                     for i in j..size {
@@ -51,7 +51,7 @@ impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
                     }
                 }
             },
-            Format::Upper => {
+            PackedFormat::Upper => {
                 let mut k = 0;
                 for j in 0..size {
                     for i in 0..(j + 1) {
@@ -68,19 +68,19 @@ impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
 
 #[cfg(test)]
 mod tests {
-    use {assert, dense};
+    use {assert, Dense, Packed, PackedFormat};
 
     #[test]
     fn into_lower_dense() {
-        let matrix = super::Matrix {
+        let packed = Packed {
             size: 4,
-            format: super::Format::Lower,
+            format: PackedFormat::Lower,
             data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
-        let matrix: dense::Matrix<f64> = matrix.into();
+        let dense: Dense<f64> = packed.into();
 
-        assert::equal(&matrix[..], &vec![
+        assert::equal(&dense[..], &vec![
             1.0, 2.0, 3.0,  4.0,
             0.0, 5.0, 6.0,  7.0,
             0.0, 0.0, 8.0,  9.0,
@@ -90,15 +90,15 @@ mod tests {
 
     #[test]
     fn into_upper_dense() {
-        let matrix = super::Matrix {
+        let packed = Packed {
             size: 4,
-            format: super::Format::Upper,
+            format: PackedFormat::Upper,
             data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
-        let matrix: dense::Matrix<f64> = matrix.into();
+        let dense: Dense<f64> = packed.into();
 
-        assert::equal(&matrix[..], &vec![
+        assert::equal(&dense[..], &vec![
             1.0, 0.0, 0.0,  0.0,
             2.0, 3.0, 0.0,  0.0,
             4.0, 5.0, 6.0,  0.0,
