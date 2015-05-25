@@ -5,17 +5,19 @@
 /// [1]: http://www.netlib.org/lapack/lug/node123.html
 /// [2]: http://www.netlib.org/lapack
 
+use num::{Num, Zero};
+
 use dense;
 
 /// A packed matrix.
 #[derive(Debug)]
-pub struct Matrix {
+pub struct Matrix<T> {
     /// The number of rows or columns.
     pub size: usize,
     /// The storage format.
     pub format: Format,
     /// The data stored in the column-major order.
-    pub data: Vec<f64>,
+    pub data: Vec<T>,
 }
 
 /// The storage format of a packed matrix.
@@ -27,8 +29,8 @@ pub enum Format {
     Upper,
 }
 
-impl From<Matrix> for dense::Matrix {
-    fn from(matrix: Matrix) -> dense::Matrix {
+impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
+    fn from(matrix: Matrix<T>) -> dense::Matrix<T> {
         let Matrix { size, format, ref data } = matrix;
 
         debug_assert_eq!(data.len(), size * (size + 1) / 2);
@@ -36,7 +38,7 @@ impl From<Matrix> for dense::Matrix {
         let mut dense = dense::Matrix {
             rows: size,
             columns: size,
-            data: vec![0.0; size * size],
+            data: vec![Zero::zero(); size * size],
         };
 
         match format {
@@ -76,7 +78,7 @@ mod tests {
             data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
-        let matrix: dense::Matrix = matrix.into();
+        let matrix: dense::Matrix<f64> = matrix.into();
 
         assert::equal(&matrix[..], &vec![
             1.0, 2.0, 3.0,  4.0,
@@ -94,7 +96,7 @@ mod tests {
             data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
-        let matrix: dense::Matrix = matrix.into();
+        let matrix: dense::Matrix<f64> = matrix.into();
 
         assert::equal(&matrix[..], &vec![
             1.0, 0.0, 0.0,  0.0,

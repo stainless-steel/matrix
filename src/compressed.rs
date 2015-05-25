@@ -8,11 +8,13 @@
 //! [1]: http://netlib.org/linalg/html_templates/node91.html
 //! [2]: http://netlib.org/linalg/html_templates/node92.html
 
+use num::{Num, Zero};
+
 use dense;
 
 /// A compressed matrix.
 #[derive(Debug)]
-pub struct Matrix {
+pub struct Matrix<T> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -22,7 +24,7 @@ pub struct Matrix {
     /// The storage format.
     pub format: Format,
     /// The values of the nonzero elements.
-    pub data: Vec<f64>,
+    pub data: Vec<T>,
     /// The indices of columns (rows) the nonzero elements.
     pub indices: Vec<usize>,
     /// The offsets of columns (rows) such that the values and indices of the `i`th column (row)
@@ -41,8 +43,8 @@ pub enum Format {
     Column,
 }
 
-impl From<Matrix> for dense::Matrix {
-    fn from(matrix: Matrix) -> dense::Matrix {
+impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
+    fn from(matrix: Matrix<T>) -> dense::Matrix<T> {
         let Matrix { rows, columns, nonzeros, format, ref data, ref indices, ref offsets } = matrix;
 
         debug_assert_eq!(data.len(), nonzeros);
@@ -51,7 +53,7 @@ impl From<Matrix> for dense::Matrix {
         let mut dense = dense::Matrix {
             rows: rows,
             columns: columns,
-            data: vec![0.0; rows * columns],
+            data: vec![Zero::zero(); rows * columns],
         };
 
         match format {
@@ -95,7 +97,7 @@ mod tests {
             offsets: vec![0, 1, 2, 3],
         };
 
-        let matrix: dense::Matrix = matrix.into();
+        let matrix: dense::Matrix<f64> = matrix.into();
 
         assert::equal(&matrix[..], &vec![
             1.0, 0.0, 0.0, 0.0, 0.0,

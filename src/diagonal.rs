@@ -1,23 +1,24 @@
 //! Diagonal matrices.
 
+use num::Num;
 use std::ops::{Deref, DerefMut};
 
 use {band, dense};
 
 /// A diagonal matrix.
 #[derive(Debug)]
-pub struct Matrix {
+pub struct Matrix<T> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
     pub columns: usize,
     /// The values of the diagonal elements.
-    pub data: Vec<f64>,
+    pub data: Vec<T>,
 }
 
-impl From<Matrix> for band::Matrix {
+impl<T> From<Matrix<T>> for band::Matrix<T> where T: Copy + Num {
     #[inline]
-    fn from(matrix: Matrix) -> band::Matrix {
+    fn from(matrix: Matrix<T>) -> band::Matrix<T> {
         band::Matrix {
             rows: matrix.rows,
             columns: matrix.columns,
@@ -28,25 +29,25 @@ impl From<Matrix> for band::Matrix {
     }
 }
 
-impl From<Matrix> for dense::Matrix {
+impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
     #[inline]
-    fn from(matrix: Matrix) -> dense::Matrix {
-        <Matrix as Into<band::Matrix>>::into(matrix).into()
+    fn from(matrix: Matrix<T>) -> dense::Matrix<T> {
+        <Matrix<T> as Into<band::Matrix<T>>>::into(matrix).into()
     }
 }
 
-impl Deref for Matrix {
-    type Target = [f64];
+impl<T> Deref for Matrix<T> {
+    type Target = [T];
 
     #[inline]
-    fn deref(&self) -> &[f64] {
+    fn deref(&self) -> &[T] {
         self.data.deref()
     }
 }
 
-impl DerefMut for Matrix {
+impl<T> DerefMut for Matrix<T> {
     #[inline]
-    fn deref_mut(&mut self) -> &mut [f64] {
+    fn deref_mut(&mut self) -> &mut [T] {
         self.data.deref_mut()
     }
 }

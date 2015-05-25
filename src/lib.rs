@@ -3,6 +3,8 @@
 #[cfg(test)]
 extern crate assert;
 
+extern crate num;
+
 mod band;
 mod compressed;
 mod dense;

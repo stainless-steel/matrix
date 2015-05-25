@@ -5,34 +5,34 @@ use std::ops::{Deref, DerefMut};
 
 /// A dense matrix.
 #[derive(Debug)]
-pub struct Matrix {
+pub struct Matrix<T> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
     pub columns: usize,
     /// The data stored in the column-major order.
-    pub data: Vec<f64>,
+    pub data: Vec<T>,
 }
 
-impl Into<Vec<f64>> for Matrix {
+impl<T> Into<Vec<T>> for Matrix<T> {
     #[inline]
-    fn into(self) -> Vec<f64> {
+    fn into(self) -> Vec<T> {
         self.data
     }
 }
 
-impl Deref for Matrix {
-    type Target = [f64];
+impl<T> Deref for Matrix<T> {
+    type Target = [T];
 
     #[inline]
-    fn deref(&self) -> &[f64] {
+    fn deref(&self) -> &[T] {
         self.data.deref()
     }
 }
 
-impl DerefMut for Matrix {
+impl<T> DerefMut for Matrix<T> {
     #[inline]
-    fn deref_mut(&mut self) -> &mut [f64] {
+    fn deref_mut(&mut self) -> &mut [T] {
         self.data.deref_mut()
     }
 }

@@ -5,11 +5,13 @@
 /// [1]: http://www.netlib.org/lapack/lug/node124.html
 /// [2]: http://www.netlib.org/lapack
 
+use num::{Num, Zero};
+
 use dense;
 
 /// A band matrix.
 #[derive(Debug)]
-pub struct Matrix {
+pub struct Matrix<T> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -20,11 +22,11 @@ pub struct Matrix {
     pub subdiagonals: usize,
     /// The values of the diagonal elements such that the first row corresponds to the uppermost
     /// superdiagonal while the last row corresponds to the lowest supdiagonal.
-    pub data: Vec<f64>,
+    pub data: Vec<T>,
 }
 
-impl From<Matrix> for dense::Matrix {
-    fn from(matrix: Matrix) -> dense::Matrix {
+impl<T> From<Matrix<T>> for dense::Matrix<T> where T: Copy + Num {
+    fn from(matrix: Matrix<T>) -> dense::Matrix<T> {
         let Matrix { rows, columns, superdiagonals, subdiagonals, ref data } = matrix;
 
         let diagonals = superdiagonals + 1 + subdiagonals;
@@ -33,7 +35,7 @@ impl From<Matrix> for dense::Matrix {
         let mut dense = dense::Matrix {
             rows: rows,
             columns: columns,
-            data: vec![0.0; rows * columns],
+            data: vec![Zero::zero(); rows * columns],
         };
 
         for k in 1..(superdiagonals + 1) {
@@ -78,7 +80,7 @@ mod tests {
             ],
         };
 
-        let matrix: dense::Matrix = matrix.into();
+        let matrix: dense::Matrix<f64> = matrix.into();
 
         assert::equal(&matrix[..], &vec![
             1.0, 4.0,  8.0,  0.0,  0.0,  0.0, 0.0,
@@ -106,7 +108,7 @@ mod tests {
             ],
         };
 
-        let matrix: dense::Matrix = matrix.into();
+        let matrix: dense::Matrix<f64> = matrix.into();
 
         assert::equal(&matrix[..], &vec![
             1.0, 4.0,  8.0,  0.0,
