@@ -12,7 +12,7 @@ pub struct Matrix {
     /// The number of columns.
     pub columns: usize,
     /// The values of the diagonal elements.
-    pub values: Vec<f64>,
+    pub data: Vec<f64>,
 }
 
 impl From<Matrix> for band::Matrix {
@@ -23,7 +23,7 @@ impl From<Matrix> for band::Matrix {
             columns: matrix.columns,
             superdiagonals: 0,
             subdiagonals: 0,
-            values: matrix.values,
+            data: matrix.data,
         }
     }
 }
@@ -40,13 +40,13 @@ impl Deref for Matrix {
 
     #[inline]
     fn deref(&self) -> &[f64] {
-        self.values.deref()
+        self.data.deref()
     }
 }
 
 impl DerefMut for Matrix {
     #[inline]
     fn deref_mut(&mut self) -> &mut [f64] {
-        self.values.deref_mut()
+        self.data.deref_mut()
     }
 }

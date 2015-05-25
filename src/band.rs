@@ -20,38 +20,38 @@ pub struct Matrix {
     pub subdiagonals: usize,
     /// The values of the diagonal elements such that the first row corresponds to the uppermost
     /// superdiagonal while the last row corresponds to the lowest supdiagonal.
-    pub values: Vec<f64>,
+    pub data: Vec<f64>,
 }
 
 impl From<Matrix> for dense::Matrix {
     fn from(matrix: Matrix) -> dense::Matrix {
-        let Matrix { rows, columns, superdiagonals, subdiagonals, ref values } = matrix;
+        let Matrix { rows, columns, superdiagonals, subdiagonals, ref data } = matrix;
 
         let diagonals = superdiagonals + 1 + subdiagonals;
-        debug_assert_eq!(values.len(), diagonals * columns);
+        debug_assert_eq!(data.len(), diagonals * columns);
 
         let mut dense = dense::Matrix {
             rows: rows,
             columns: columns,
-            values: vec![0.0; rows * columns],
+            data: vec![0.0; rows * columns],
         };
 
         for k in 1..(superdiagonals + 1) {
             for j in k..columns {
                 let i = j - k;
                 if i >= rows { break; }
-                dense.values[j * rows + i] = values[j * diagonals + superdiagonals - k];
+                dense.data[j * rows + i] = data[j * diagonals + superdiagonals - k];
             }
         }
         for i in 0..columns {
             if i >= rows || i >= columns { break; }
-            dense.values[i * rows + i] = values[i * diagonals + superdiagonals];
+            dense.data[i * rows + i] = data[i * diagonals + superdiagonals];
         }
         for k in 1..(subdiagonals + 1) {
             for j in 0..columns {
                 let i = j + k;
                 if i >= rows { break; }
-                dense.values[j * rows + i] = values[j * diagonals + superdiagonals + k];
+                dense.data[j * rows + i] = data[j * diagonals + superdiagonals + k];
             }
         }
 
@@ -70,7 +70,7 @@ mod tests {
             columns: 4,
             superdiagonals: 2,
             subdiagonals: 2,
-            values: vec![
+            data: vec![
                 0.0,  0.0,  1.0,  4.0,  8.0,
                 0.0,  2.0,  5.0,  9.0, 12.0,
                 3.0,  6.0, 10.0, 13.0, 15.0,
@@ -95,7 +95,7 @@ mod tests {
             columns: 7,
             superdiagonals: 2,
             subdiagonals: 2,
-            values: vec![
+            data: vec![
                  0.0,  0.0,  1.0,  4.0,  8.0,
                  0.0,  2.0,  5.0,  9.0, 13.0,
                  3.0,  6.0, 10.0, 14.0,  0.0,

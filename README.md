@@ -1,6 +1,6 @@
 # Matrix [![Build Status][status-img]][status-url]
 
-The package provides algorithms for manipulating real matrices.
+The package provides matrix storage schemes.
 
 ## [Documentation][docs]
 

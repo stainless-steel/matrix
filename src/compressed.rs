@@ -22,13 +22,13 @@ pub struct Matrix {
     /// The storage format.
     pub format: Format,
     /// The values of the nonzero elements.
-    pub values: Vec<f64>,
+    pub data: Vec<f64>,
     /// The indices of columns (rows) the nonzero elements.
     pub indices: Vec<usize>,
     /// The offsets of columns (rows) such that the values and indices of the `i`th column (row)
-    /// are stored starting from `values[j]` and `indices[j]`, respectively, where `j =
-    /// offsets[i]`. The vector has one additional element, which is always equal to `nonzeros`,
-    /// that is, `offsets[columns] = nonzeros` (`offsets[rows] = nonzeros`).
+    /// are stored starting from `data[j]` and `indices[j]`, respectively, where `j = offsets[i]`.
+    /// The vector has one additional element, which is always equal to `nonzeros`, that is,
+    /// `offsets[columns] = nonzeros` (`offsets[rows] = nonzeros`).
     pub offsets: Vec<usize>,
 }
 
@@ -43,15 +43,15 @@ pub enum Format {
 
 impl From<Matrix> for dense::Matrix {
     fn from(matrix: Matrix) -> dense::Matrix {
-        let Matrix { rows, columns, nonzeros, format, ref values, ref indices, ref offsets } = matrix;
+        let Matrix { rows, columns, nonzeros, format, ref data, ref indices, ref offsets } = matrix;
 
-        debug_assert_eq!(values.len(), nonzeros);
+        debug_assert_eq!(data.len(), nonzeros);
         debug_assert_eq!(indices.len(), nonzeros);
 
         let mut dense = dense::Matrix {
             rows: rows,
             columns: columns,
-            values: vec![0.0; rows * columns],
+            data: vec![0.0; rows * columns],
         };
 
         match format {
@@ -60,7 +60,7 @@ impl From<Matrix> for dense::Matrix {
                 for i in 0..rows {
                     for k in offsets[i]..offsets[i + 1] {
                         let j = indices[k];
-                        dense.values[j * rows + i] = values[k];
+                        dense.data[j * rows + i] = data[k];
                     }
                 }
             },
@@ -69,7 +69,7 @@ impl From<Matrix> for dense::Matrix {
                 for j in 0..columns {
                     for k in offsets[j]..offsets[j + 1] {
                         let i = indices[k];
-                        dense.values[j * rows + i] = values[k];
+                        dense.data[j * rows + i] = data[k];
                     }
                 }
             },
@@ -90,7 +90,7 @@ mod tests {
             columns: 3,
             nonzeros: 3,
             format: super::Format::Column,
-            values: vec![1.0, 2.0, 3.0],
+            data: vec![1.0, 2.0, 3.0],
             indices: vec![0, 1, 2],
             offsets: vec![0, 1, 2, 3],
         };

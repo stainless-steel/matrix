@@ -1,32 +1,18 @@
-//! Algorithms for manipulating real matrices.
-
-#![allow(non_snake_case)]
+//! Matrix storage schemes.
 
 #[cfg(test)]
 extern crate assert;
 
-extern crate blas;
-extern crate lapack;
+mod band;
+mod compressed;
+mod dense;
+mod diagonal;
+mod packed;
 
-pub mod band;
-pub mod compressed;
-pub mod dense;
-pub mod diagonal;
-
-mod algebra;
-mod decomposition;
-
-pub use algebra::{dot, scale, sum, times};
-pub use decomposition::symmetric_eigen;
-
-/// An error.
-#[derive(Clone, Copy)]
-pub enum Error {
-    /// One or more arguments have illegal values.
-    InvalidArguments,
-    /// The algorithm failed to converge.
-    FailedToConverge,
-}
-
-/// A result.
-pub type Result<T> = std::result::Result<T, Error>;
+pub use band::Matrix as Band;
+pub use compressed::Matrix as Compressed;
+pub use compressed::Format as CompressedFormat;
+pub use dense::Matrix as Dense;
+pub use diagonal::Matrix as Diagonal;
+pub use packed::Matrix as Packed;
+pub use packed::Format as PackedFormat;

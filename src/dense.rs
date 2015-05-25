@@ -10,14 +10,14 @@ pub struct Matrix {
     pub rows: usize,
     /// The number of columns.
     pub columns: usize,
-    /// The actual data.
-    pub values: Vec<f64>,
+    /// The data stored in the column-major order.
+    pub data: Vec<f64>,
 }
 
 impl Into<Vec<f64>> for Matrix {
     #[inline]
     fn into(self) -> Vec<f64> {
-        self.values
+        self.data
     }
 }
 
@@ -26,13 +26,13 @@ impl Deref for Matrix {
 
     #[inline]
     fn deref(&self) -> &[f64] {
-        self.values.deref()
+        self.data.deref()
     }
 }
 
 impl DerefMut for Matrix {
     #[inline]
     fn deref_mut(&mut self) -> &mut [f64] {
-        self.values.deref_mut()
+        self.data.deref_mut()
     }
 }
