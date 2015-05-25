@@ -1,6 +1,9 @@
 //! Compressed matrices.
 //!
-//! The data are stored in either the [compressed-row][1] or [compressed-column][2] format.
+//! Data are stored in one of the following formats:
+//!
+//! * the [compressed-row][1] format or
+//! * the [compressed-column][2] format.
 //!
 //! [1]: http://netlib.org/linalg/html_templates/node91.html
 //! [2]: http://netlib.org/linalg/html_templates/node92.html

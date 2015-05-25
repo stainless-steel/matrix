@@ -1,6 +1,6 @@
 //! Band matrices.
 ///
-/// Matrices are stored in the [format][1] adopted by [LAPACK][2].
+/// Data are stored in the [format][1] adopted by [LAPACK][2].
 ///
 /// [1]: http://www.netlib.org/lapack/lug/node124.html
 /// [2]: http://www.netlib.org/lapack
@@ -18,7 +18,8 @@ pub struct Matrix {
     pub superdiagonals: usize,
     /// The number of subdiagonals.
     pub subdiagonals: usize,
-    /// The values of the diagonal elements.
+    /// The values of the diagonal elements such that the first row corresponds to the uppermost
+    /// superdiagonal while the last row corresponds to the lowest supdiagonal.
     pub values: Vec<f64>,
 }
 
