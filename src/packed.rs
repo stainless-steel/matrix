@@ -1,15 +1,13 @@
-//! Packed matrices.
-///
-/// Data are stored in the [format][1] adopted by [LAPACK][2].
-///
-/// [1]: http://www.netlib.org/lapack/lug/node123.html
-/// [2]: http://www.netlib.org/lapack
-
 use num::{Num, Zero};
 
 use dense;
 
 /// A packed matrix.
+///
+/// Data are stored in the [format][1] adopted by [LAPACK][2].
+///
+/// [1]: http://www.netlib.org/lapack/lug/node123.html
+/// [2]: http://www.netlib.org/lapack
 #[derive(Debug)]
 pub struct Matrix<T> {
     /// The number of rows or columns.

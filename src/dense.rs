@@ -1,5 +1,3 @@
-//! Dense matrices.
-
 use std::convert::Into;
 use std::ops::{Deref, DerefMut};
 

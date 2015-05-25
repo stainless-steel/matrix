@@ -1,5 +1,3 @@
-//! Diagonal matrices.
-
 use num::Num;
 use std::ops::{Deref, DerefMut};
 
