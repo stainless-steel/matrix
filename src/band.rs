@@ -1,6 +1,6 @@
 use num::{Num, Zero};
 
-use Dense;
+use DenseMatrix;
 
 /// A band matrix.
 ///
@@ -9,7 +9,7 @@ use Dense;
 /// [1]: http://www.netlib.org/lapack/lug/node124.html
 /// [2]: http://www.netlib.org/lapack
 #[derive(Debug)]
-pub struct Band<T> {
+pub struct BandMatrix<T> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -23,14 +23,14 @@ pub struct Band<T> {
     pub data: Vec<T>,
 }
 
-impl<T> From<Band<T>> for Dense<T> where T: Copy + Num {
-    fn from(band: Band<T>) -> Dense<T> {
-        let Band { rows, columns, superdiagonals, subdiagonals, ref data } = band;
+impl<T> From<BandMatrix<T>> for DenseMatrix<T> where T: Copy + Num {
+    fn from(band: BandMatrix<T>) -> DenseMatrix<T> {
+        let BandMatrix { rows, columns, superdiagonals, subdiagonals, ref data } = band;
 
         let diagonals = superdiagonals + 1 + subdiagonals;
         debug_assert_eq!(data.len(), diagonals * columns);
 
-        let mut dense = Dense {
+        let mut dense = DenseMatrix {
             rows: rows,
             columns: columns,
             data: vec![Zero::zero(); rows * columns],
@@ -61,11 +61,11 @@ impl<T> From<Band<T>> for Dense<T> where T: Copy + Num {
 
 #[cfg(test)]
 mod tests {
-    use {assert, Band, Dense};
+    use {assert, BandMatrix, DenseMatrix};
 
     #[test]
     fn into_tall_dense() {
-        let band = Band {
+        let band = BandMatrix {
             rows: 7,
             columns: 4,
             superdiagonals: 2,
@@ -78,7 +78,7 @@ mod tests {
             ],
         };
 
-        let dense: Dense<f64> = band.into();
+        let dense: DenseMatrix<f64> = band.into();
 
         assert::equal(&dense[..], &vec![
             1.0, 4.0,  8.0,  0.0,  0.0,  0.0, 0.0,
@@ -90,7 +90,7 @@ mod tests {
 
     #[test]
     fn into_wide_dense() {
-        let band = Band {
+        let band = BandMatrix {
             rows: 4,
             columns: 7,
             superdiagonals: 2,
@@ -106,7 +106,7 @@ mod tests {
             ],
         };
 
-        let dense: Dense<f64> = band.into();
+        let dense: DenseMatrix<f64> = band.into();
 
         assert::equal(&dense[..], &vec![
             1.0, 4.0,  8.0,  0.0,

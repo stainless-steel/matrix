@@ -11,8 +11,8 @@ mod dense;
 mod diagonal;
 mod packed;
 
-pub use band::Band;
-pub use compressed::{Compressed, CompressedFormat};
-pub use dense::Dense;
-pub use diagonal::Diagonal;
-pub use packed::{Packed, PackedFormat};
+pub use band::BandMatrix;
+pub use compressed::{CompressedMatrix, CompressedFormat};
+pub use dense::DenseMatrix;
+pub use diagonal::DiagonalMatrix;
+pub use packed::{PackedMatrix, PackedFormat};
