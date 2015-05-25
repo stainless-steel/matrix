@@ -1,5 +1,7 @@
 //! Diagonal matrices.
 
+use std::ops::{Deref, DerefMut};
+
 use {band, dense};
 
 /// A diagonal matrix.
@@ -30,5 +32,21 @@ impl From<Matrix> for dense::Matrix {
     #[inline]
     fn from(matrix: Matrix) -> dense::Matrix {
         <Matrix as Into<band::Matrix>>::into(matrix).into()
+    }
+}
+
+impl Deref for Matrix {
+    type Target = [f64];
+
+    #[inline]
+    fn deref(&self) -> &[f64] {
+        self.values.deref()
+    }
+}
+
+impl DerefMut for Matrix {
+    #[inline]
+    fn deref_mut(&mut self) -> &mut [f64] {
+        self.values.deref_mut()
     }
 }
