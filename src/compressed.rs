@@ -1,18 +1,16 @@
-//! Compressed matrices.
-//!
-//! Data are stored in one of the following formats:
-//!
-//! * the [compressed-row][1] format or
-//! * the [compressed-column][2] format.
-//!
-//! [1]: http://netlib.org/linalg/html_templates/node91.html
-//! [2]: http://netlib.org/linalg/html_templates/node92.html
-
 use num::{Num, Zero};
 
 use Dense;
 
 /// A compressed matrix.
+///
+/// Data are stored in one of the following formats:
+///
+/// * the [compressed-row][1] format or
+/// * the [compressed-column][2] format.
+///
+/// [1]: http://netlib.org/linalg/html_templates/node91.html
+/// [2]: http://netlib.org/linalg/html_templates/node92.html
 #[derive(Debug)]
 pub struct Compressed<T> {
     /// The number of rows.

@@ -1,15 +1,13 @@
-//! Band matrices.
-//!
-//! Data are stored in the [format][1] adopted by [LAPACK][2].
-//!
-//! [1]: http://www.netlib.org/lapack/lug/node124.html
-//! [2]: http://www.netlib.org/lapack
-
 use num::{Num, Zero};
 
 use Dense;
 
 /// A band matrix.
+///
+/// Data are stored in the [format][1] adopted by [LAPACK][2].
+///
+/// [1]: http://www.netlib.org/lapack/lug/node124.html
+/// [2]: http://www.netlib.org/lapack
 #[derive(Debug)]
 pub struct Band<T> {
     /// The number of rows.
