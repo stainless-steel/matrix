@@ -1,8 +1,9 @@
 //! Band matrices.
 ///
-/// The data are stored in the [compressed-diagonal][1] format.
+/// Matrices are stored in the [format][1] adopted by [LAPACK][2].
 ///
-/// [1]: http://netlib.org/linalg/html_templates/node94.html
+/// [1]: http://www.netlib.org/lapack/lug/node124.html
+/// [2]: http://www.netlib.org/lapack
 
 use dense;
 
