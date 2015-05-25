@@ -8,9 +8,10 @@ extern crate assert;
 extern crate blas;
 extern crate lapack;
 
+pub mod band;
+pub mod compressed;
 pub mod dense;
-pub mod generic;
-pub mod sparse;
+pub mod diagonal;
 
 mod algebra;
 mod decomposition;

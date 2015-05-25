@@ -3,8 +3,6 @@
 use std::convert::Into;
 use std::ops::{Deref, DerefMut};
 
-use generic;
-
 /// A dense matrix.
 #[derive(Debug)]
 pub struct Matrix {
@@ -13,31 +11,13 @@ pub struct Matrix {
     /// The number of columns.
     pub columns: usize,
     /// The actual data.
-    pub data: Data,
+    pub values: Vec<f64>,
 }
 
-/// Data of a dense matrix.
-pub type Data = Vec<f64>;
-
-impl Matrix {
-}
-
-impl generic::Matrix for Matrix {
+impl Into<Vec<f64>> for Matrix {
     #[inline]
-    fn rows(&self) -> usize {
-        self.rows
-    }
-
-    #[inline]
-    fn columns(&self) -> usize {
-        self.columns
-    }
-}
-
-impl Into<Data> for Matrix {
-    #[inline]
-    fn into(self) -> Data {
-        self.data
+    fn into(self) -> Vec<f64> {
+        self.values
     }
 }
 
@@ -46,13 +26,13 @@ impl Deref for Matrix {
 
     #[inline]
     fn deref(&self) -> &[f64] {
-        self.data.deref()
+        self.values.deref()
     }
 }
 
 impl DerefMut for Matrix {
     #[inline]
     fn deref_mut(&mut self) -> &mut [f64] {
-        self.data.deref_mut()
+        self.values.deref_mut()
     }
 }
