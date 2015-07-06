@@ -23,10 +23,11 @@ pub struct CompressedMatrix<T> {
     pub data: Vec<T>,
     /// The indices of columns (rows) the nonzero elements.
     pub indices: Vec<usize>,
-    /// The offsets of columns (rows) such that the values and indices of the `i`th column (row)
-    /// are stored starting from `data[j]` and `indices[j]`, respectively, where `j = offsets[i]`.
-    /// The vector has one additional element, which is always equal to `nonzeros`, that is,
-    /// `offsets[columns] = nonzeros` (`offsets[rows] = nonzeros`).
+    /// The offsets of columns (rows) such that the values and indices of the
+    /// `i`th column (row) are stored starting from `data[j]` and `indices[j]`,
+    /// respectively, where `j = offsets[i]`. The vector has one additional
+    /// element, which is always equal to `nonzeros`, that is, `offsets[columns]
+    /// = nonzeros` (`offsets[rows] = nonzeros`).
     pub offsets: Vec<usize>,
 }
 
@@ -41,7 +42,9 @@ pub enum CompressedFormat {
 
 impl<T> From<CompressedMatrix<T>> for DenseMatrix<T> where T: Element {
     fn from(compressed: CompressedMatrix<T>) -> DenseMatrix<T> {
-        let CompressedMatrix { rows, columns, nonzeros, format, ref data, ref indices, ref offsets } = compressed;
+        let CompressedMatrix {
+            rows, columns, nonzeros, format, ref data, ref indices, ref offsets
+        } = compressed;
 
         debug_assert_eq!(data.len(), nonzeros);
         debug_assert_eq!(indices.len(), nonzeros);
