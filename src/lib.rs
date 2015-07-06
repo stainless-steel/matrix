@@ -12,7 +12,9 @@ pub use dense::DenseMatrix;
 pub use diagonal::DiagonalMatrix;
 pub use packed::{PackedMatrix, PackedFormat};
 
+/// An element of a matrix.
 trait Element: Copy {
+    /// Return the zero element.
     fn zero() -> Self;
 }
 
