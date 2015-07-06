@@ -3,7 +3,7 @@ use std::ops::{Deref, DerefMut};
 use {BandMatrix, DenseMatrix, Element};
 
 /// A diagonal matrix.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct DiagonalMatrix<T> {
     /// The number of rows.
     pub rows: usize,

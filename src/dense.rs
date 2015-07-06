@@ -2,7 +2,7 @@ use std::convert::Into;
 use std::ops::{Deref, DerefMut};
 
 /// A dense matrix.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct DenseMatrix<T> {
     /// The number of rows.
     pub rows: usize,

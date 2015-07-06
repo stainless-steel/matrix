@@ -6,7 +6,7 @@ use {DenseMatrix, Element};
 ///
 /// [1]: http://www.netlib.org/lapack/lug/node123.html
 /// [2]: http://www.netlib.org/lapack
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct PackedMatrix<T> {
     /// The number of rows or columns.
     pub size: usize,

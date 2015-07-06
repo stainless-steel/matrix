@@ -9,7 +9,7 @@ use {DenseMatrix, Element};
 ///
 /// [1]: http://netlib.org/linalg/html_templates/node91.html
 /// [2]: http://netlib.org/linalg/html_templates/node92.html
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CompressedMatrix<T> {
     /// The number of rows.
     pub rows: usize,
