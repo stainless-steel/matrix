@@ -7,7 +7,7 @@ use {DenseMatrix, Element};
 /// [1]: http://www.netlib.org/lapack/lug/node123.html
 /// [2]: http://www.netlib.org/lapack
 #[derive(Clone, Debug)]
-pub struct PackedMatrix<T> {
+pub struct PackedMatrix<T: Element> {
     /// The number of rows or columns.
     pub size: usize,
     /// The storage format.
@@ -25,7 +25,7 @@ pub enum PackedFormat {
     Upper,
 }
 
-impl<T> From<PackedMatrix<T>> for DenseMatrix<T> where T: Element {
+impl<T: Element> From<PackedMatrix<T>> for DenseMatrix<T> {
     fn from(packed: PackedMatrix<T>) -> DenseMatrix<T> {
         let PackedMatrix { size, format, ref data } = packed;
 

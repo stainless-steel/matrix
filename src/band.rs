@@ -7,7 +7,7 @@ use {DenseMatrix, Element};
 /// [1]: http://www.netlib.org/lapack/lug/node124.html
 /// [2]: http://www.netlib.org/lapack
 #[derive(Clone, Debug)]
-pub struct BandMatrix<T> {
+pub struct BandMatrix<T: Element> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -22,7 +22,7 @@ pub struct BandMatrix<T> {
     pub data: Vec<T>,
 }
 
-impl<T> From<BandMatrix<T>> for DenseMatrix<T> where T: Element {
+impl<T: Element> From<BandMatrix<T>> for DenseMatrix<T> {
     fn from(band: BandMatrix<T>) -> DenseMatrix<T> {
         let BandMatrix { rows, columns, superdiagonals, subdiagonals, ref data } = band;
 

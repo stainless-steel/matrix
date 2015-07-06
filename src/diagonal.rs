@@ -4,7 +4,7 @@ use {BandMatrix, DenseMatrix, Element};
 
 /// A diagonal matrix.
 #[derive(Clone, Debug)]
-pub struct DiagonalMatrix<T> {
+pub struct DiagonalMatrix<T: Element> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -13,7 +13,7 @@ pub struct DiagonalMatrix<T> {
     pub data: Vec<T>,
 }
 
-impl<T> From<DiagonalMatrix<T>> for BandMatrix<T> where T: Element {
+impl<T: Element> From<DiagonalMatrix<T>> for BandMatrix<T> {
     #[inline]
     fn from(diagonal: DiagonalMatrix<T>) -> BandMatrix<T> {
         BandMatrix {
@@ -26,14 +26,14 @@ impl<T> From<DiagonalMatrix<T>> for BandMatrix<T> where T: Element {
     }
 }
 
-impl<T> From<DiagonalMatrix<T>> for DenseMatrix<T> where T: Element {
+impl<T: Element> From<DiagonalMatrix<T>> for DenseMatrix<T> {
     #[inline]
     fn from(diagonal: DiagonalMatrix<T>) -> DenseMatrix<T> {
         <DiagonalMatrix<T> as Into<BandMatrix<T>>>::into(diagonal).into()
     }
 }
 
-impl<T> Deref for DiagonalMatrix<T> {
+impl<T: Element> Deref for DiagonalMatrix<T> {
     type Target = [T];
 
     #[inline]
@@ -42,7 +42,7 @@ impl<T> Deref for DiagonalMatrix<T> {
     }
 }
 
-impl<T> DerefMut for DiagonalMatrix<T> {
+impl<T: Element> DerefMut for DiagonalMatrix<T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut [T] {
         self.data.deref_mut()

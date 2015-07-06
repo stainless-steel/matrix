@@ -10,7 +10,7 @@ use {DenseMatrix, Element};
 /// [1]: http://netlib.org/linalg/html_templates/node91.html
 /// [2]: http://netlib.org/linalg/html_templates/node92.html
 #[derive(Clone, Debug)]
-pub struct CompressedMatrix<T> {
+pub struct CompressedMatrix<T: Element> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -40,7 +40,7 @@ pub enum CompressedFormat {
     Column,
 }
 
-impl<T> From<CompressedMatrix<T>> for DenseMatrix<T> where T: Element {
+impl<T: Element> From<CompressedMatrix<T>> for DenseMatrix<T> {
     fn from(compressed: CompressedMatrix<T>) -> DenseMatrix<T> {
         let CompressedMatrix {
             rows, columns, nonzeros, format, ref data, ref indices, ref offsets
