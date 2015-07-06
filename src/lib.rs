@@ -13,7 +13,7 @@ pub use diagonal::DiagonalMatrix;
 pub use packed::{PackedMatrix, PackedFormat};
 
 /// An element of a matrix.
-trait Element: Copy {
+pub trait Element: Copy {
     /// Return the zero element.
     fn zero() -> Self;
 }
