@@ -1,6 +1,4 @@
-use num::{Num, Zero};
-
-use DenseMatrix;
+use {DenseMatrix, Element};
 
 /// A packed matrix.
 ///
@@ -27,7 +25,7 @@ pub enum PackedFormat {
     Upper,
 }
 
-impl<T> From<PackedMatrix<T>> for DenseMatrix<T> where T: Copy + Num {
+impl<T> From<PackedMatrix<T>> for DenseMatrix<T> where T: Element {
     fn from(packed: PackedMatrix<T>) -> DenseMatrix<T> {
         let PackedMatrix { size, format, ref data } = packed;
 
@@ -36,7 +34,7 @@ impl<T> From<PackedMatrix<T>> for DenseMatrix<T> where T: Copy + Num {
         let mut dense = DenseMatrix {
             rows: size,
             columns: size,
-            data: vec![Zero::zero(); size * size],
+            data: vec![Element::zero(); size * size],
         };
 
         match format {

@@ -1,6 +1,4 @@
-use num::{Num, Zero};
-
-use DenseMatrix;
+use {DenseMatrix, Element};
 
 /// A compressed matrix.
 ///
@@ -41,7 +39,7 @@ pub enum CompressedFormat {
     Column,
 }
 
-impl<T> From<CompressedMatrix<T>> for DenseMatrix<T> where T: Copy + Num {
+impl<T> From<CompressedMatrix<T>> for DenseMatrix<T> where T: Element {
     fn from(compressed: CompressedMatrix<T>) -> DenseMatrix<T> {
         let CompressedMatrix { rows, columns, nonzeros, format, ref data, ref indices, ref offsets } = compressed;
 
@@ -51,7 +49,7 @@ impl<T> From<CompressedMatrix<T>> for DenseMatrix<T> where T: Copy + Num {
         let mut dense = DenseMatrix {
             rows: rows,
             columns: columns,
-            data: vec![Zero::zero(); rows * columns],
+            data: vec![Element::zero(); rows * columns],
         };
 
         match format {

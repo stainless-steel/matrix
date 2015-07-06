@@ -1,7 +1,6 @@
-use num::Num;
 use std::ops::{Deref, DerefMut};
 
-use {BandMatrix, DenseMatrix};
+use {BandMatrix, DenseMatrix, Element};
 
 /// A diagonal matrix.
 #[derive(Debug)]
@@ -14,7 +13,7 @@ pub struct DiagonalMatrix<T> {
     pub data: Vec<T>,
 }
 
-impl<T> From<DiagonalMatrix<T>> for BandMatrix<T> where T: Copy + Num {
+impl<T> From<DiagonalMatrix<T>> for BandMatrix<T> where T: Element {
     #[inline]
     fn from(diagonal: DiagonalMatrix<T>) -> BandMatrix<T> {
         BandMatrix {
@@ -27,7 +26,7 @@ impl<T> From<DiagonalMatrix<T>> for BandMatrix<T> where T: Copy + Num {
     }
 }
 
-impl<T> From<DiagonalMatrix<T>> for DenseMatrix<T> where T: Copy + Num {
+impl<T> From<DiagonalMatrix<T>> for DenseMatrix<T> where T: Element {
     #[inline]
     fn from(diagonal: DiagonalMatrix<T>) -> DenseMatrix<T> {
         <DiagonalMatrix<T> as Into<BandMatrix<T>>>::into(diagonal).into()

@@ -1,6 +1,4 @@
-use num::{Num, Zero};
-
-use DenseMatrix;
+use {DenseMatrix, Element};
 
 /// A band matrix.
 ///
@@ -23,7 +21,7 @@ pub struct BandMatrix<T> {
     pub data: Vec<T>,
 }
 
-impl<T> From<BandMatrix<T>> for DenseMatrix<T> where T: Copy + Num {
+impl<T> From<BandMatrix<T>> for DenseMatrix<T> where T: Element {
     fn from(band: BandMatrix<T>) -> DenseMatrix<T> {
         let BandMatrix { rows, columns, superdiagonals, subdiagonals, ref data } = band;
 
@@ -33,7 +31,7 @@ impl<T> From<BandMatrix<T>> for DenseMatrix<T> where T: Copy + Num {
         let mut dense = DenseMatrix {
             rows: rows,
             columns: columns,
-            data: vec![Zero::zero(); rows * columns],
+            data: vec![Element::zero(); rows * columns],
         };
 
         for k in 1..(superdiagonals + 1) {
