@@ -66,7 +66,7 @@ impl<T> From<PackedMatrix<T>> for DenseMatrix<T> where T: Copy + Num {
 
 #[cfg(test)]
 mod tests {
-    use {assert, DenseMatrix, PackedMatrix, PackedFormat};
+    use {DenseMatrix, PackedMatrix, PackedFormat};
 
     #[test]
     fn into_lower_dense() {
@@ -78,7 +78,7 @@ mod tests {
 
         let dense: DenseMatrix<f64> = packed.into();
 
-        assert::equal(&dense[..], &vec![
+        assert_eq!(&dense[..], &[
             1.0, 2.0, 3.0,  4.0,
             0.0, 5.0, 6.0,  7.0,
             0.0, 0.0, 8.0,  9.0,
@@ -96,7 +96,7 @@ mod tests {
 
         let dense: DenseMatrix<f64> = packed.into();
 
-        assert::equal(&dense[..], &vec![
+        assert_eq!(&dense[..], &[
             1.0, 0.0, 0.0,  0.0,
             2.0, 3.0, 0.0,  0.0,
             4.0, 5.0, 6.0,  0.0,

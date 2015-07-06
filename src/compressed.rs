@@ -81,7 +81,7 @@ impl<T> From<CompressedMatrix<T>> for DenseMatrix<T> where T: Copy + Num {
 
 #[cfg(test)]
 mod tests {
-    use {assert, CompressedMatrix, CompressedFormat, DenseMatrix};
+    use {CompressedMatrix, CompressedFormat, DenseMatrix};
 
     #[test]
     fn into_dense() {
@@ -97,7 +97,7 @@ mod tests {
 
         let dense: DenseMatrix<f64> = compressed.into();
 
-        assert::equal(&dense[..], &vec![
+        assert_eq!(&dense[..], &[
             1.0, 0.0, 0.0, 0.0, 0.0,
             0.0, 2.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 3.0, 0.0, 0.0,

@@ -1,8 +1,5 @@
 //! Matrix storage schemes.
 
-#[cfg(test)]
-extern crate assert;
-
 extern crate num;
 
 mod band;

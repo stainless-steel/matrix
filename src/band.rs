@@ -61,7 +61,7 @@ impl<T> From<BandMatrix<T>> for DenseMatrix<T> where T: Copy + Num {
 
 #[cfg(test)]
 mod tests {
-    use {assert, BandMatrix, DenseMatrix};
+    use {BandMatrix, DenseMatrix};
 
     #[test]
     fn into_tall_dense() {
@@ -80,7 +80,7 @@ mod tests {
 
         let dense: DenseMatrix<f64> = band.into();
 
-        assert::equal(&dense[..], &vec![
+        assert_eq!(&dense[..], &[
             1.0, 4.0,  8.0,  0.0,  0.0,  0.0, 0.0,
             2.0, 5.0,  9.0, 12.0,  0.0,  0.0, 0.0,
             3.0, 6.0, 10.0, 13.0, 15.0,  0.0, 0.0,
@@ -108,7 +108,7 @@ mod tests {
 
         let dense: DenseMatrix<f64> = band.into();
 
-        assert::equal(&dense[..], &vec![
+        assert_eq!(&dense[..], &[
             1.0, 4.0,  8.0,  0.0,
             2.0, 5.0,  9.0, 13.0,
             3.0, 6.0, 10.0, 14.0,
