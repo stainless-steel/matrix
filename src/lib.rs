@@ -6,11 +6,11 @@ mod dense;
 mod diagonal;
 mod packed;
 
-pub use band::BandMatrix;
-pub use compressed::{CompressedMatrix, CompressedFormat};
-pub use dense::DenseMatrix;
-pub use diagonal::DiagonalMatrix;
-pub use packed::{PackedMatrix, PackedFormat};
+pub use band::Band;
+pub use compressed::{Compressed, CompressedFormat};
+pub use dense::Dense;
+pub use diagonal::Diagonal;
+pub use packed::{Packed, PackedFormat};
 
 /// An element of a matrix.
 pub trait Element: Copy {
@@ -18,7 +18,7 @@ pub trait Element: Copy {
     fn zero() -> Self;
 }
 
-macro_rules! implement(
+macro_rules! element(
     ($kind:ty, $zero:expr) => (
         impl Element for $kind {
             #[inline(always)]
@@ -27,20 +27,23 @@ macro_rules! implement(
             }
         }
     );
+    ($kind:ty) => (
+        element!($kind, 0);
+    );
 );
 
-implement!(u8, 0);
-implement!(u16, 0);
-implement!(u32, 0);
-implement!(u64, 0);
+element!(u8);
+element!(u16);
+element!(u32);
+element!(u64);
 
-implement!(i8, 0);
-implement!(i16, 0);
-implement!(i32, 0);
-implement!(i64, 0);
+element!(i8);
+element!(i16);
+element!(i32);
+element!(i64);
 
-implement!(f32, 0.0);
-implement!(f64, 0.0);
+element!(f32, 0.0);
+element!(f64, 0.0);
 
-implement!(isize, 0);
-implement!(usize, 0);
+element!(isize);
+element!(usize);

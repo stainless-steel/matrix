@@ -1,4 +1,4 @@
-use {DenseMatrix, Element};
+use {Dense, Element};
 
 /// A compressed matrix.
 ///
@@ -10,7 +10,7 @@ use {DenseMatrix, Element};
 /// [1]: http://netlib.org/linalg/html_templates/node91.html
 /// [2]: http://netlib.org/linalg/html_templates/node92.html
 #[derive(Clone, Debug)]
-pub struct CompressedMatrix<T: Element> {
+pub struct Compressed<T: Element> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -40,16 +40,16 @@ pub enum CompressedFormat {
     Column,
 }
 
-impl<T: Element> From<CompressedMatrix<T>> for DenseMatrix<T> {
-    fn from(compressed: CompressedMatrix<T>) -> DenseMatrix<T> {
-        let CompressedMatrix {
+impl<T: Element> From<Compressed<T>> for Dense<T> {
+    fn from(compressed: Compressed<T>) -> Dense<T> {
+        let Compressed {
             rows, columns, nonzeros, format, ref data, ref indices, ref offsets
         } = compressed;
 
         debug_assert_eq!(data.len(), nonzeros);
         debug_assert_eq!(indices.len(), nonzeros);
 
-        let mut dense = DenseMatrix {
+        let mut dense = Dense {
             rows: rows,
             columns: columns,
             data: vec![Element::zero(); rows * columns],
@@ -82,11 +82,11 @@ impl<T: Element> From<CompressedMatrix<T>> for DenseMatrix<T> {
 
 #[cfg(test)]
 mod tests {
-    use {CompressedMatrix, CompressedFormat, DenseMatrix};
+    use {Compressed, CompressedFormat, Dense};
 
     #[test]
     fn into_dense() {
-        let compressed = CompressedMatrix {
+        let compressed = Compressed {
             rows: 5,
             columns: 3,
             nonzeros: 3,
@@ -96,7 +96,7 @@ mod tests {
             offsets: vec![0, 1, 2, 3],
         };
 
-        let dense: DenseMatrix<f64> = compressed.into();
+        let dense: Dense<f64> = compressed.into();
 
         assert_eq!(&dense[..], &[
             1.0, 0.0, 0.0, 0.0, 0.0,

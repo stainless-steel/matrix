@@ -1,10 +1,10 @@
 use std::ops::{Deref, DerefMut};
 
-use {BandMatrix, DenseMatrix, Element};
+use {Band, Dense, Element};
 
 /// A diagonal matrix.
 #[derive(Clone, Debug)]
-pub struct DiagonalMatrix<T: Element> {
+pub struct Diagonal<T: Element> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -13,10 +13,10 @@ pub struct DiagonalMatrix<T: Element> {
     pub data: Vec<T>,
 }
 
-impl<T: Element> From<DiagonalMatrix<T>> for BandMatrix<T> {
+impl<T: Element> From<Diagonal<T>> for Band<T> {
     #[inline]
-    fn from(diagonal: DiagonalMatrix<T>) -> BandMatrix<T> {
-        BandMatrix {
+    fn from(diagonal: Diagonal<T>) -> Band<T> {
+        Band {
             rows: diagonal.rows,
             columns: diagonal.columns,
             superdiagonals: 0,
@@ -26,14 +26,14 @@ impl<T: Element> From<DiagonalMatrix<T>> for BandMatrix<T> {
     }
 }
 
-impl<T: Element> From<DiagonalMatrix<T>> for DenseMatrix<T> {
+impl<T: Element> From<Diagonal<T>> for Dense<T> {
     #[inline]
-    fn from(diagonal: DiagonalMatrix<T>) -> DenseMatrix<T> {
-        <DiagonalMatrix<T> as Into<BandMatrix<T>>>::into(diagonal).into()
+    fn from(diagonal: Diagonal<T>) -> Dense<T> {
+        <Diagonal<T> as Into<Band<T>>>::into(diagonal).into()
     }
 }
 
-impl<T: Element> Deref for DiagonalMatrix<T> {
+impl<T: Element> Deref for Diagonal<T> {
     type Target = [T];
 
     #[inline]
@@ -42,7 +42,7 @@ impl<T: Element> Deref for DiagonalMatrix<T> {
     }
 }
 
-impl<T: Element> DerefMut for DiagonalMatrix<T> {
+impl<T: Element> DerefMut for Diagonal<T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut [T] {
         self.data.deref_mut()

@@ -1,4 +1,4 @@
-use {DenseMatrix, Element};
+use {Dense, Element};
 
 /// A packed matrix.
 ///
@@ -7,7 +7,7 @@ use {DenseMatrix, Element};
 /// [1]: http://www.netlib.org/lapack/lug/node123.html
 /// [2]: http://www.netlib.org/lapack
 #[derive(Clone, Debug)]
-pub struct PackedMatrix<T: Element> {
+pub struct Packed<T: Element> {
     /// The number of rows or columns.
     pub size: usize,
     /// The storage format.
@@ -25,13 +25,13 @@ pub enum PackedFormat {
     Upper,
 }
 
-impl<T: Element> From<PackedMatrix<T>> for DenseMatrix<T> {
-    fn from(packed: PackedMatrix<T>) -> DenseMatrix<T> {
-        let PackedMatrix { size, format, ref data } = packed;
+impl<T: Element> From<Packed<T>> for Dense<T> {
+    fn from(packed: Packed<T>) -> Dense<T> {
+        let Packed { size, format, ref data } = packed;
 
         debug_assert_eq!(data.len(), size * (size + 1) / 2);
 
-        let mut dense = DenseMatrix {
+        let mut dense = Dense {
             rows: size,
             columns: size,
             data: vec![Element::zero(); size * size],
@@ -64,17 +64,17 @@ impl<T: Element> From<PackedMatrix<T>> for DenseMatrix<T> {
 
 #[cfg(test)]
 mod tests {
-    use {DenseMatrix, PackedMatrix, PackedFormat};
+    use {Dense, Packed, PackedFormat};
 
     #[test]
     fn into_lower_dense() {
-        let packed = PackedMatrix {
+        let packed = Packed {
             size: 4,
             format: PackedFormat::Lower,
             data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
-        let dense: DenseMatrix<f64> = packed.into();
+        let dense: Dense<f64> = packed.into();
 
         assert_eq!(&dense[..], &[
             1.0, 2.0, 3.0,  4.0,
@@ -86,13 +86,13 @@ mod tests {
 
     #[test]
     fn into_upper_dense() {
-        let packed = PackedMatrix {
+        let packed = Packed {
             size: 4,
             format: PackedFormat::Upper,
             data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
-        let dense: DenseMatrix<f64> = packed.into();
+        let dense: Dense<f64> = packed.into();
 
         assert_eq!(&dense[..], &[
             1.0, 0.0, 0.0,  0.0,
