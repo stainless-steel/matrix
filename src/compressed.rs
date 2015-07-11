@@ -21,7 +21,7 @@ pub struct Compressed<T: Element> {
     pub format: CompressedFormat,
     /// The values of the nonzero elements.
     pub data: Vec<T>,
-    /// The indices of columns (rows) the nonzero elements.
+    /// The indices of columns (rows) of the nonzero elements.
     pub indices: Vec<usize>,
     /// The offsets of columns (rows) such that the values and indices of the
     /// `i`th column (row) are stored starting from `data[j]` and `indices[j]`,
