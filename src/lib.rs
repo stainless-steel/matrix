@@ -12,6 +12,12 @@ pub trait Matrix {
     fn columns(&self) -> usize;
 }
 
+/// A square matrix.
+pub trait Square: Matrix {
+    /// Return the number of rows or columns.
+    fn size(&self) -> usize;
+}
+
 /// An element of a matrix.
 pub trait Element: Copy {
     /// Return the zero element.
@@ -36,6 +42,20 @@ macro_rules! matrix(
     );
     ($kind:ident) => (
         matrix!($kind, rows, columns);
+    );
+);
+
+macro_rules! square(
+    ($kind:ident, $size:ident) => (
+        impl<T: ::Element> ::Square for $kind<T> {
+            #[inline]
+            fn size(&self) -> usize {
+                self.$size
+            }
+        }
+    );
+    ($kind:ident) => (
+        square!($kind, size);
     );
 );
 

@@ -1,4 +1,4 @@
-use {Dense, Element};
+use {Dense, Element, Square};
 
 /// A packed matrix.
 ///
@@ -26,6 +26,7 @@ pub enum PackedFormat {
 }
 
 matrix!(Packed, size, size);
+square!(Packed);
 
 impl<T: Element> From<Packed<T>> for Dense<T> {
     fn from(packed: Packed<T>) -> Dense<T> {
