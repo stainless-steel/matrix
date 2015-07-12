@@ -27,6 +27,13 @@ matrix!(Band);
 
 impl<T: Element> From<Band<T>> for Dense<T> {
     fn from(band: Band<T>) -> Dense<T> {
+        macro_rules! min(
+            ($left:expr, $right:expr) => ({
+                let (left, right) = ($left, $right);
+                if left < right { left } else { right }
+            });
+        );
+
         let Band { rows, columns, superdiagonals, subdiagonals, ref data } = band;
 
         let diagonals = superdiagonals + 1 + subdiagonals;
@@ -38,27 +45,15 @@ impl<T: Element> From<Band<T>> for Dense<T> {
             data: vec![T::zero(); rows * columns],
         };
 
-        for k in 1..(superdiagonals + 1) {
-            for j in k..columns {
-                let i = j - k;
-                if i >= rows {
-                    break;
-                }
+        for k in 0..(superdiagonals + 1) {
+            for i in 0..min!(columns - k, rows) {
+                let j = i + k;
                 dense.data[j * rows + i] = data[j * diagonals + superdiagonals - k];
             }
         }
-        for i in 0..columns {
-            if i >= rows || i >= columns {
-                break;
-            }
-            dense.data[i * rows + i] = data[i * diagonals + superdiagonals];
-        }
         for k in 1..(subdiagonals + 1) {
-            for j in 0..columns {
-                let i = j + k;
-                if i >= rows {
-                    break;
-                }
+            for i in k..min!(columns + k, rows) {
+                let j = i - k;
                 dense.data[j * rows + i] = data[j * diagonals + superdiagonals + k];
             }
         }
