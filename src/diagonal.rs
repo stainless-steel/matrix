@@ -23,7 +23,13 @@ impl<T: Element> From<Diagonal<T>> for Band<T> {
             columns: diagonal.columns,
             superdiagonals: 0,
             subdiagonals: 0,
-            data: diagonal.data,
+            data: {
+                let mut data = diagonal.data;
+                for _ in diagonal.rows..diagonal.columns {
+                    data.push(T::zero());
+                }
+                data
+            },
         }
     }
 }
@@ -48,5 +54,36 @@ impl<T: Element> DerefMut for Diagonal<T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut [T] {
         self.data.deref_mut()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use {Band, Diagonal};
+
+    #[test]
+    fn into_tall_band() {
+        let diagonal = Diagonal {
+            rows: 5,
+            columns: 3,
+            data: vec![1.0, 2.0, 3.0],
+        };
+
+        let band: Band<f64> = diagonal.into();
+
+        assert_eq!(&band.data, &[1.0, 2.0, 3.0]);
+    }
+
+    #[test]
+    fn into_wide_band() {
+        let diagonal = Diagonal {
+            rows: 3,
+            columns: 5,
+            data: vec![1.0, 2.0, 3.0],
+        };
+
+        let band: Band<f64> = diagonal.into();
+
+        assert_eq!(&band.data, &[1.0, 2.0, 3.0, 0.0, 0.0]);
     }
 }
