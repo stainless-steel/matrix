@@ -115,10 +115,10 @@ mod band;
 mod compressed;
 mod dense;
 mod diagonal;
-mod packed;
+mod triangular;
 
 pub use band::Band;
 pub use compressed::{Compressed, CompressedFormat};
 pub use dense::Dense;
 pub use diagonal::Diagonal;
-pub use packed::{Packed, PackedFormat};
+pub use triangular::{Triangular, TriangularFormat};

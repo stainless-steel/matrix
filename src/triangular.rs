@@ -1,44 +1,45 @@
 use {Dense, Element, Sparse, Square};
 
-/// A packed matrix.
+/// A triangular matrix.
 ///
-/// The storage is suitable for symmetric, Hermitian, and square triangular
-/// matrices. Data are stored in the [format][1] adopted by [LAPACK][2].
+/// Apart from triangular matrices, the storage is suitable for symmetric and
+/// Hermitian matrices. Data are stored in the [format][1] adopted by
+/// [LAPACK][2].
 ///
 /// [1]: http://www.netlib.org/lapack/lug/node123.html
 /// [2]: http://www.netlib.org/lapack
 #[derive(Clone, Debug)]
-pub struct Packed<T: Element> {
+pub struct Triangular<T: Element> {
     /// The number of rows or columns.
     pub size: usize,
     /// The storage format.
-    pub format: PackedFormat,
+    pub format: TriangularFormat,
     /// The data stored in the column-major order.
     pub data: Vec<T>,
 }
 
-/// The storage format of a packed matrix.
+/// The storage format of a triangular matrix.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum PackedFormat {
+pub enum TriangularFormat {
     /// The lower triangular format.
     Lower,
     /// The upper triangular format.
     Upper,
 }
 
-matrix!(Packed, size, size);
-square!(Packed);
+matrix!(Triangular, size, size);
+square!(Triangular);
 
-impl<T: Element> Sparse for Packed<T> {
+impl<T: Element> Sparse for Triangular<T> {
     #[inline]
     fn nonzeros(&self) -> usize {
         self.size * (self.size + 1) / 2
     }
 }
 
-impl<T: Element> From<Packed<T>> for Dense<T> {
-    fn from(packed: Packed<T>) -> Dense<T> {
-        let Packed { size, format, ref data } = packed;
+impl<T: Element> From<Triangular<T>> for Dense<T> {
+    fn from(triangular: Triangular<T>) -> Dense<T> {
+        let Triangular { size, format, ref data } = triangular;
 
         debug_assert_eq!(data.len(), size * (size + 1) / 2);
 
@@ -49,7 +50,7 @@ impl<T: Element> From<Packed<T>> for Dense<T> {
         };
 
         match format {
-            PackedFormat::Lower => {
+            TriangularFormat::Lower => {
                 let mut k = 0;
                 for j in 0..size {
                     for i in j..size {
@@ -58,7 +59,7 @@ impl<T: Element> From<Packed<T>> for Dense<T> {
                     }
                 }
             },
-            PackedFormat::Upper => {
+            TriangularFormat::Upper => {
                 let mut k = 0;
                 for j in 0..size {
                     for i in 0..(j + 1) {
@@ -75,17 +76,17 @@ impl<T: Element> From<Packed<T>> for Dense<T> {
 
 #[cfg(test)]
 mod tests {
-    use {Dense, Packed, PackedFormat};
+    use {Dense, Triangular, TriangularFormat};
 
     #[test]
     fn into_lower_dense() {
-        let packed = Packed {
+        let triangular = Triangular {
             size: 4,
-            format: PackedFormat::Lower,
+            format: TriangularFormat::Lower,
             data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
-        let dense: Dense<f64> = packed.into();
+        let dense: Dense<f64> = triangular.into();
 
         assert_eq!(&dense[..], &[
             1.0, 2.0, 3.0,  4.0,
@@ -97,13 +98,13 @@ mod tests {
 
     #[test]
     fn into_upper_dense() {
-        let packed = Packed {
+        let triangular = Triangular {
             size: 4,
-            format: PackedFormat::Upper,
+            format: TriangularFormat::Upper,
             data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
-        let dense: Dense<f64> = packed.into();
+        let dense: Dense<f64> = triangular.into();
 
         assert_eq!(&dense[..], &[
             1.0, 0.0, 0.0,  0.0,
