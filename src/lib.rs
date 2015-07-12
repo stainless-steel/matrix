@@ -122,3 +122,6 @@ pub use compressed::{Compressed, CompressedFormat};
 pub use dense::Dense;
 pub use diagonal::Diagonal;
 pub use triangular::{Triangular, TriangularFormat};
+
+/// A symmetric matrix.
+pub type Symmetric<T> = Triangular<T>;
