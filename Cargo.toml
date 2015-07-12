@@ -7,3 +7,7 @@ repository = "https://github.com/stainless-steel/matrix"
 homepage = "https://github.com/stainless-steel/matrix"
 documentation = "https://stainless-steel.github.io/matrix"
 description = "The package provides matrix storage schemes."
+
+[dependencies.complex]
+version = "0.7"
+optional = true

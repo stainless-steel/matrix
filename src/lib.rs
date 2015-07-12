@@ -1,6 +1,12 @@
 //! Matrix storage schemes.
 
+#[cfg(feature = "complex")]
+extern crate complex;
+
 use std::convert::Into;
+
+#[cfg(feature = "complex")]
+use complex::{c32, c64};
 
 /// A matrix.
 pub trait Matrix {
@@ -110,6 +116,12 @@ element!(f64, 0.0);
 
 element!(isize);
 element!(usize);
+
+#[cfg(feature = "complex")]
+element!(c32, c32(0.0, 0.0));
+
+#[cfg(feature = "complex")]
+element!(c64, c64(0.0, 0.0));
 
 mod band;
 mod compressed;
