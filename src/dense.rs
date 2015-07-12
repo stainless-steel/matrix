@@ -4,6 +4,8 @@ use std::ops::{Deref, DerefMut};
 use Element;
 
 /// A dense matrix.
+///
+/// The storage is suitable for generic matrices.
 #[derive(Clone, Debug)]
 pub struct Dense<T: Element> {
     /// The number of rows.

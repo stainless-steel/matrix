@@ -2,7 +2,8 @@ use {Dense, Element, Sparse, Square};
 
 /// A packed matrix.
 ///
-/// Data are stored in the [format][1] adopted by [LAPACK][2].
+/// The storage is suitable for symmetric, Hermitian, and square triangular
+/// matrices. Data are stored in the [format][1] adopted by [LAPACK][2].
 ///
 /// [1]: http://www.netlib.org/lapack/lug/node123.html
 /// [2]: http://www.netlib.org/lapack

@@ -2,7 +2,8 @@ use {Dense, Element};
 
 /// A compressed matrix.
 ///
-/// Data are stored in one of the following formats:
+/// The storage is suitable for generic sparse matrices. Data are stored in one
+/// of the following formats:
 ///
 /// * the [compressed-row][1] format or
 /// * the [compressed-column][2] format.

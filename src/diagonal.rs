@@ -3,6 +3,8 @@ use std::ops::{Deref, DerefMut};
 use {Band, Dense, Element, Sparse};
 
 /// A diagonal matrix.
+///
+/// The storage is suitable for generic diagonal matrices.
 #[derive(Clone, Debug)]
 pub struct Diagonal<T: Element> {
     /// The number of rows.

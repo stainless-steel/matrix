@@ -9,7 +9,9 @@ macro_rules! min(
 
 /// A band matrix.
 ///
-/// Data are stored in the [format][1] adopted by [LAPACK][2].
+/// The storage is suitable for matrices with a small number of superdiagonals
+/// and/or subdiagonals relative to the smallest dimension. Data are stored in
+/// the [format][1] adopted by [LAPACK][2].
 ///
 /// [1]: http://www.netlib.org/lapack/lug/node124.html
 /// [2]: http://www.netlib.org/lapack
