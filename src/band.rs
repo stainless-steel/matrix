@@ -16,8 +16,9 @@ pub struct Band<T: Element> {
     pub superdiagonals: usize,
     /// The number of subdiagonals.
     pub subdiagonals: usize,
-    /// The values of the diagonal elements such that the first row corresponds
-    /// to the uppermost superdiagonal while the last row corresponds to the
+    /// The values of the diagonal elements stored as a `(superdiagonals + 1 +
+    /// subdiagonals) × columns` matrix such that the first row corresponds to
+    /// the uppermost superdiagonal whereas the last row corresponds to the
     /// lowest supdiagonal.
     pub data: Vec<T>,
 }

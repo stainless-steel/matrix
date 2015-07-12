@@ -12,6 +12,12 @@ pub trait Matrix {
     fn columns(&self) -> usize;
 }
 
+/// A sparse matrix.
+pub trait Sparse: Matrix {
+    /// Return the number of nonzero elements.
+    fn nonzeros(&self) -> usize;
+}
+
 /// A square matrix.
 pub trait Square: Matrix {
     /// Return the number of rows or columns.
@@ -42,6 +48,20 @@ macro_rules! matrix(
     );
     ($kind:ident) => (
         matrix!($kind, rows, columns);
+    );
+);
+
+macro_rules! sparse(
+    ($kind:ident, $nonzeros:ident) => (
+        impl<T: ::Element> ::Sparse for $kind<T> {
+            #[inline]
+            fn nonzeros(&self) -> usize {
+                self.$nonzeros
+            }
+        }
+    );
+    ($kind:ident) => (
+        sparse!($kind, nonzeros);
     );
 );
 

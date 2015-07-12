@@ -1,4 +1,4 @@
-use {Dense, Element, Square};
+use {Dense, Element, Sparse, Square};
 
 /// A packed matrix.
 ///
@@ -27,6 +27,13 @@ pub enum PackedFormat {
 
 matrix!(Packed, size, size);
 square!(Packed);
+
+impl<T: Element> Sparse for Packed<T> {
+    #[inline]
+    fn nonzeros(&self) -> usize {
+        self.size * (self.size + 1) / 2
+    }
+}
 
 impl<T: Element> From<Packed<T>> for Dense<T> {
     fn from(packed: Packed<T>) -> Dense<T> {

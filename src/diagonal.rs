@@ -1,6 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
-use {Band, Dense, Element};
+use {Band, Dense, Element, Sparse};
 
 /// A diagonal matrix.
 #[derive(Clone, Debug)]
@@ -14,6 +14,13 @@ pub struct Diagonal<T: Element> {
 }
 
 matrix!(Diagonal);
+
+impl<T: Element> Sparse for Diagonal<T> {
+    #[inline]
+    fn nonzeros(&self) -> usize {
+        if self.rows < self.columns { self.rows } else { self.columns }
+    }
+}
 
 impl<T: Element> From<Diagonal<T>> for Band<T> {
     #[inline]
