@@ -1,22 +1,43 @@
 //! Matrix storage schemes.
 
-mod band;
-mod compressed;
-mod dense;
-mod diagonal;
-mod packed;
+/// A matrix.
+pub trait Matrix {
+    /// The element type.
+    type Element: Element;
 
-pub use band::Band;
-pub use compressed::{Compressed, CompressedFormat};
-pub use dense::Dense;
-pub use diagonal::Diagonal;
-pub use packed::{Packed, PackedFormat};
+    /// Return the number of rows.
+    fn rows(&self) -> usize;
+
+    /// Return the number of columns.
+    fn columns(&self) -> usize;
+}
 
 /// An element of a matrix.
 pub trait Element: Copy {
     /// Return the zero element.
     fn zero() -> Self;
 }
+
+macro_rules! matrix(
+    ($kind:ident, $rows:ident, $columns:ident) => (
+        impl<T: ::Element> ::Matrix for $kind<T> {
+            type Element = T;
+
+            #[inline]
+            fn rows(&self) -> usize {
+                self.$rows
+            }
+
+            #[inline]
+            fn columns(&self) -> usize {
+                self.$columns
+            }
+        }
+    );
+    ($kind:ident) => (
+        matrix!($kind, rows, columns);
+    );
+);
 
 macro_rules! element(
     ($kind:ty, $zero:expr) => (
@@ -47,3 +68,15 @@ element!(f64, 0.0);
 
 element!(isize);
 element!(usize);
+
+mod band;
+mod compressed;
+mod dense;
+mod diagonal;
+mod packed;
+
+pub use band::Band;
+pub use compressed::{Compressed, CompressedFormat};
+pub use dense::Dense;
+pub use diagonal::Diagonal;
+pub use packed::{Packed, PackedFormat};

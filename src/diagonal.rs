@@ -13,6 +13,8 @@ pub struct Diagonal<T: Element> {
     pub data: Vec<T>,
 }
 
+matrix!(Diagonal);
+
 impl<T: Element> From<Diagonal<T>> for Band<T> {
     #[inline]
     fn from(diagonal: Diagonal<T>) -> Band<T> {

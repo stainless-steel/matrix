@@ -25,6 +25,8 @@ pub enum PackedFormat {
     Upper,
 }
 
+matrix!(Packed, size, size);
+
 impl<T: Element> From<Packed<T>> for Dense<T> {
     fn from(packed: Packed<T>) -> Dense<T> {
         let Packed { size, format, ref data } = packed;

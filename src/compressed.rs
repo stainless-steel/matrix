@@ -40,6 +40,8 @@ pub enum CompressedFormat {
     Column,
 }
 
+matrix!(Compressed);
+
 impl<T: Element> From<Compressed<T>> for Dense<T> {
     fn from(compressed: Compressed<T>) -> Dense<T> {
         let Compressed {

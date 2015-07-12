@@ -22,6 +22,8 @@ pub struct Band<T: Element> {
     pub data: Vec<T>,
 }
 
+matrix!(Band);
+
 impl<T: Element> From<Band<T>> for Dense<T> {
     fn from(band: Band<T>) -> Dense<T> {
         let Band { rows, columns, superdiagonals, subdiagonals, ref data } = band;

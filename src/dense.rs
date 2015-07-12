@@ -14,6 +14,8 @@ pub struct Dense<T: Element> {
     pub data: Vec<T>,
 }
 
+matrix!(Dense);
+
 impl<T: Element> Into<Vec<T>> for Dense<T> {
     #[inline]
     fn into(self) -> Vec<T> {
