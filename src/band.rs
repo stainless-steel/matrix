@@ -38,18 +38,24 @@ impl<T: Element> From<Band<T>> for Dense<T> {
         for k in 1..(superdiagonals + 1) {
             for j in k..columns {
                 let i = j - k;
-                if i >= rows { break; }
+                if i >= rows {
+                    break;
+                }
                 dense.data[j * rows + i] = data[j * diagonals + superdiagonals - k];
             }
         }
         for i in 0..columns {
-            if i >= rows || i >= columns { break; }
+            if i >= rows || i >= columns {
+                break;
+            }
             dense.data[i * rows + i] = data[i * diagonals + superdiagonals];
         }
         for k in 1..(subdiagonals + 1) {
             for j in 0..columns {
                 let i = j + k;
-                if i >= rows { break; }
+                if i >= rows {
+                    break;
+                }
                 dense.data[j * rows + i] = data[j * diagonals + superdiagonals + k];
             }
         }
