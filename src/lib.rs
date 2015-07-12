@@ -1,5 +1,7 @@
 //! Matrix storage schemes.
 
+use std::convert::Into;
+
 /// A matrix.
 pub trait Matrix {
     /// The element type.
@@ -13,7 +15,7 @@ pub trait Matrix {
 }
 
 /// A sparse matrix.
-pub trait Sparse: Matrix {
+pub trait Sparse: Matrix + Into<Dense<<Self as Matrix>::Element>> {
     /// Return the number of nonzero elements.
     fn nonzeros(&self) -> usize;
 }
