@@ -44,7 +44,7 @@ impl<T: Element> From<Packed<T>> for Dense<T> {
         let mut dense = Dense {
             rows: size,
             columns: size,
-            data: vec![Element::zero(); size * size],
+            data: vec![T::zero(); size * size],
         };
 
         match format {

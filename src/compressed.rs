@@ -55,7 +55,7 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
         let mut dense = Dense {
             rows: rows,
             columns: columns,
-            data: vec![Element::zero(); rows * columns],
+            data: vec![T::zero(); rows * columns],
         };
 
         match format {

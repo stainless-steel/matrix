@@ -35,7 +35,7 @@ impl<T: Element> From<Band<T>> for Dense<T> {
         let mut dense = Dense {
             rows: rows,
             columns: columns,
-            data: vec![Element::zero(); rows * columns],
+            data: vec![T::zero(); rows * columns],
         };
 
         for k in 1..(superdiagonals + 1) {
