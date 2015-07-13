@@ -100,7 +100,7 @@ mod tests {
             7.0, 11.0, 14.0, 16.0, 17.0,
         ]);
 
-        let dense: Dense<f64> = band.into();
+        let dense: Dense<_> = band.into();
 
         assert_eq!(&dense[..], &[
             1.0, 4.0,  8.0,  0.0,  0.0,  0.0, 0.0,
@@ -122,7 +122,7 @@ mod tests {
              0.0,  0.0,  0.0,  0.0,  0.0,
         ]);
 
-        let dense: Dense<f64> = band.into();
+        let dense: Dense<_> = band.into();
 
         assert_eq!(&dense[..], &[
             1.0, 4.0,  8.0,  0.0,

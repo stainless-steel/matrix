@@ -133,7 +133,7 @@ mod tests {
             0.0, 0.0, 0.0, 0.0, 4.0,
         ][..], Shape::Rectangular(5, 3));
 
-        let compressed: Compressed<f64> = (&dense).into();
+        let compressed: Compressed<_> = (&dense).into();
 
         assert_eq!(compressed.rows, 5);
         assert_eq!(compressed.columns, 3);
@@ -158,7 +158,7 @@ mod tests {
             offsets: vec![0, 1, 2, 3],
         };
 
-        let dense: Dense<f64> = compressed.into();
+        let dense: Dense<_> = compressed.into();
 
         assert_eq!(&dense[..], &[
             1.0, 0.0, 0.0, 0.0, 0.0,
