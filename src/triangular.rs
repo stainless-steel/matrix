@@ -1,4 +1,4 @@
-use {Dense, Element, Sparse, Square};
+use {Dense, Element, Sparse};
 
 /// A triangular matrix.
 ///
@@ -28,7 +28,6 @@ pub enum TriangularFormat {
 }
 
 matrix!(Triangular, size, size);
-square!(Triangular);
 
 impl<T: Element> Sparse for Triangular<T> {
     #[inline]

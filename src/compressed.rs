@@ -1,4 +1,4 @@
-use {Dense, Element};
+use {Dense, Element, Sparse};
 
 /// A compressed matrix.
 ///
@@ -42,7 +42,13 @@ pub enum CompressedFormat {
 }
 
 matrix!(Compressed);
-sparse!(Compressed);
+
+impl<T: Element> Sparse for Compressed<T> {
+    #[inline]
+    fn nonzeros(&self) -> usize {
+        self.nonzeros
+    }
+}
 
 impl<T: Element> From<Compressed<T>> for Dense<T> {
     fn from(compressed: Compressed<T>) -> Dense<T> {

@@ -26,16 +26,23 @@ pub trait Sparse: Matrix + Into<Dense<<Self as Matrix>::Element>> {
     fn nonzeros(&self) -> usize;
 }
 
-/// A square matrix.
-pub trait Square: Matrix {
-    /// Return the number of rows or columns.
-    fn size(&self) -> usize;
-}
-
-/// An element of a matrix.
+/// A matrix element.
 pub trait Element: Copy {
     /// Return the zero element.
     fn zero() -> Self;
+}
+
+/// A means of constructing matrices.
+pub trait Make<T>: Matrix {
+    fn make(T, Shape) -> Self;
+}
+
+/// A matrix shape.
+pub enum Shape {
+    /// A square shape.
+    Square(usize),
+    /// A rectangular shape.
+    Rectangular(usize, usize),
 }
 
 macro_rules! matrix(
@@ -56,34 +63,6 @@ macro_rules! matrix(
     );
     ($kind:ident) => (
         matrix!($kind, rows, columns);
-    );
-);
-
-macro_rules! sparse(
-    ($kind:ident, $nonzeros:ident) => (
-        impl<T: ::Element> ::Sparse for $kind<T> {
-            #[inline]
-            fn nonzeros(&self) -> usize {
-                self.$nonzeros
-            }
-        }
-    );
-    ($kind:ident) => (
-        sparse!($kind, nonzeros);
-    );
-);
-
-macro_rules! square(
-    ($kind:ident, $size:ident) => (
-        impl<T: ::Element> ::Square for $kind<T> {
-            #[inline]
-            fn size(&self) -> usize {
-                self.$size
-            }
-        }
-    );
-    ($kind:ident) => (
-        square!($kind, size);
     );
 );
 
@@ -134,6 +113,3 @@ pub use compressed::{Compressed, CompressedFormat};
 pub use dense::Dense;
 pub use diagonal::Diagonal;
 pub use triangular::{Triangular, TriangularFormat};
-
-/// A symmetric matrix.
-pub type Symmetric<T> = Triangular<T>;

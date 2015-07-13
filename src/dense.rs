@@ -1,7 +1,7 @@
 use std::convert::Into;
 use std::ops::{Deref, DerefMut};
 
-use Element;
+use {Element, Make, Shape};
 
 /// A dense matrix.
 ///
@@ -17,6 +17,28 @@ pub struct Dense<T: Element> {
 }
 
 matrix!(Dense);
+
+impl<'l, T: Element> Make<&'l [T]> for Dense<T> {
+    fn make(data: &'l [T], shape: Shape) -> Self {
+        let (rows, columns) = match shape {
+            Shape::Square(size) => (size, size),
+            Shape::Rectangular(rows, columns) => (rows, columns),
+        };
+        debug_assert_eq!(data.len(), rows * columns);
+        Dense { rows: rows, columns: columns, data: data.to_vec() }
+    }
+}
+
+impl<T: Element> Make<Vec<T>> for Dense<T> {
+    fn make(data: Vec<T>, shape: Shape) -> Self {
+        let (rows, columns) = match shape {
+            Shape::Square(size) => (size, size),
+            Shape::Rectangular(rows, columns) => (rows, columns),
+        };
+        debug_assert_eq!(data.len(), rows * columns);
+        Dense { rows: rows, columns: columns, data: data }
+    }
+}
 
 impl<T: Element> Into<Vec<T>> for Dense<T> {
     #[inline]
