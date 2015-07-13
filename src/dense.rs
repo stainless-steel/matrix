@@ -6,7 +6,7 @@ use {Element, Make, Shape};
 /// A dense matrix.
 ///
 /// The storage is suitable for generic matrices.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Dense<T: Element> {
     /// The number of rows.
     pub rows: usize,

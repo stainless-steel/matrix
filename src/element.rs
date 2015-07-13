@@ -2,7 +2,7 @@
 use complex::{c32, c64};
 
 /// A matrix element.
-pub trait Element: Copy {
+pub trait Element: Copy + PartialEq {
     /// Return the zero element.
     fn zero() -> Self;
 }

@@ -8,7 +8,7 @@ use {Dense, Element, Sparse};
 ///
 /// [1]: http://www.netlib.org/lapack/lug/node124.html
 /// [2]: http://www.netlib.org/lapack
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Band<T: Element> {
     /// The number of rows.
     pub rows: usize,

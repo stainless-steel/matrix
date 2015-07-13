@@ -8,7 +8,7 @@ use {Dense, Element, Part, Sparse};
 ///
 /// [1]: http://www.netlib.org/lapack/lug/node123.html
 /// [2]: http://www.netlib.org/lapack
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Triangular<T: Element> {
     /// The number of rows or columns.
     pub size: usize,

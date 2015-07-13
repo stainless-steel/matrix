@@ -5,7 +5,7 @@ use {Band, Dense, Element, Make, Shape, Sparse};
 /// A diagonal matrix.
 ///
 /// The storage is suitable for generic diagonal matrices.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Diagonal<T: Element> {
     /// The number of rows.
     pub rows: usize,
