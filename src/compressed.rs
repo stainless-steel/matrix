@@ -74,16 +74,16 @@ impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
     }
 }
 
-impl< T: Element> From<Dense<T>> for Compressed<T> {
+impl<T: Element> From<Dense<T>> for Compressed<T> {
     #[inline]
     fn from(dense: Dense<T>) -> Compressed<T> {
         (&dense).into()
     }
 }
 
-impl<T: Element> From<Compressed<T>> for Dense<T> {
-    fn from(compressed: Compressed<T>) -> Dense<T> {
-        let Compressed {
+impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
+    fn from(compressed: &'l Compressed<T>) -> Dense<T> {
+        let &Compressed {
             rows, columns, nonzeros, format, ref data, ref indices, ref offsets
         } = compressed;
 
@@ -118,6 +118,12 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
         }
 
         dense
+    }
+}
+
+impl<T: Element> From<Compressed<T>> for Dense<T> {
+    fn from(compressed: Compressed<T>) -> Dense<T> {
+        (&compressed).into()
     }
 }
 
