@@ -92,6 +92,13 @@ impl<T: Element> From<Diagonal<T>> for Dense<T> {
     }
 }
 
+impl<T: Element> Into<Vec<T>> for Diagonal<T> {
+    #[inline]
+    fn into(self) -> Vec<T> {
+        self.data
+    }
+}
+
 impl<T: Element> Deref for Diagonal<T> {
     type Target = [T];
 
