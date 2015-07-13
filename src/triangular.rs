@@ -27,9 +27,9 @@ impl<T: Element> Sparse for Triangular<T> {
     }
 }
 
-impl<T: Element> From<Triangular<T>> for Dense<T> {
-    fn from(triangular: Triangular<T>) -> Dense<T> {
-        let Triangular { size, format, ref data } = triangular;
+impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
+    fn from(triangular: &'l Triangular<T>) -> Dense<T> {
+        let &Triangular { size, format, ref data } = triangular;
 
         debug_assert_eq!(data.len(), size * (size + 1) / 2);
 
@@ -61,6 +61,12 @@ impl<T: Element> From<Triangular<T>> for Dense<T> {
         }
 
         dense
+    }
+}
+
+impl<T: Element> From<Triangular<T>> for Dense<T> {
+    fn from(triangular: Triangular<T>) -> Dense<T> {
+        (&triangular).into()
     }
 }
 

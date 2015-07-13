@@ -41,9 +41,9 @@ impl<T: Element> Sparse for Band<T> {
     }
 }
 
-impl<T: Element> From<Band<T>> for Dense<T> {
-    fn from(band: Band<T>) -> Dense<T> {
-        let Band { rows, columns, superdiagonals, subdiagonals, ref data } = band;
+impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
+    fn from(band: &'l Band<T>) -> Dense<T> {
+        let &Band { rows, columns, superdiagonals, subdiagonals, ref data } = band;
 
         let diagonals = superdiagonals + 1 + subdiagonals;
         debug_assert_eq!(data.len(), diagonals * columns);
@@ -68,6 +68,12 @@ impl<T: Element> From<Band<T>> for Dense<T> {
         }
 
         dense
+    }
+}
+
+impl<T: Element> From<Band<T>> for Dense<T> {
+    fn from(band: Band<T>) -> Dense<T> {
+        (&band).into()
     }
 }
 
