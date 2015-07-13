@@ -64,6 +64,20 @@ pub enum Shape {
     Rectangular(usize, usize),
 }
 
+macro_rules! element(
+    ($kind:ty, $zero:expr) => (
+        impl Element for $kind {
+            #[inline(always)]
+            fn zero() -> Self {
+                $zero
+            }
+        }
+    );
+    ($kind:ty) => (
+        element!($kind, 0);
+    );
+);
+
 macro_rules! matrix(
     ($kind:ident, $rows:ident, $columns:ident) => (
         impl<T: ::Element> ::Matrix for $kind<T> {
@@ -85,18 +99,11 @@ macro_rules! matrix(
     );
 );
 
-macro_rules! element(
-    ($kind:ty, $zero:expr) => (
-        impl Element for $kind {
-            #[inline(always)]
-            fn zero() -> Self {
-                $zero
-            }
-        }
-    );
-    ($kind:ty) => (
-        element!($kind, 0);
-    );
+macro_rules! min(
+    ($left:expr, $right:expr) => ({
+        let (left, right) = ($left, $right);
+        if left < right { left } else { right }
+    });
 );
 
 element!(u8);

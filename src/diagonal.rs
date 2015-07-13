@@ -1,6 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
-use {Band, Dense, Element, Sparse};
+use {Band, Dense, Element, Make, Shape, Sparse};
 
 /// A diagonal matrix.
 ///
@@ -16,6 +16,28 @@ pub struct Diagonal<T: Element> {
 }
 
 matrix!(Diagonal);
+
+impl<'l, T: Element> Make<&'l [T]> for Diagonal<T> {
+    fn make(data: &'l [T], shape: Shape) -> Self {
+        let (rows, columns) = match shape {
+            Shape::Square(size) => (size, size),
+            Shape::Rectangular(rows, columns) => (rows, columns),
+        };
+        debug_assert_eq!(data.len(), min!(rows, columns));
+        Diagonal { rows: rows, columns: columns, data: data.to_vec() }
+    }
+}
+
+impl<T: Element> Make<Vec<T>> for Diagonal<T> {
+    fn make(data: Vec<T>, shape: Shape) -> Self {
+        let (rows, columns) = match shape {
+            Shape::Square(size) => (size, size),
+            Shape::Rectangular(rows, columns) => (rows, columns),
+        };
+        debug_assert_eq!(data.len(), min!(rows, columns));
+        Diagonal { rows: rows, columns: columns, data: data }
+    }
+}
 
 impl<T: Element> Sparse for Diagonal<T> {
     #[inline]

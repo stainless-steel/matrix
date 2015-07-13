@@ -1,12 +1,5 @@
 use {Dense, Element, Sparse};
 
-macro_rules! min(
-    ($left:expr, $right:expr) => ({
-        let (left, right) = ($left, $right);
-        if left < right { left } else { right }
-    });
-);
-
 /// A band matrix.
 ///
 /// The storage is suitable for matrices with a small number of superdiagonals
