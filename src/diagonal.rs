@@ -65,10 +65,30 @@ impl<T: Element> From<Diagonal<T>> for Band<T> {
     }
 }
 
+impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
+    #[inline]
+    fn from(diagonal: &Diagonal<T>) -> Dense<T> {
+        let &Diagonal { rows, columns, ref data } = diagonal;
+
+        let mut dense = Dense {
+            rows: rows,
+            columns: columns,
+            data: vec![T::zero(); rows * columns],
+        };
+
+        debug_assert_eq!(data.len(), min!(rows, columns));
+        for i in 0..min!(rows, columns) {
+            dense.data[i * rows + i] = data[i];
+        }
+
+        dense
+    }
+}
+
 impl<T: Element> From<Diagonal<T>> for Dense<T> {
     #[inline]
     fn from(diagonal: Diagonal<T>) -> Dense<T> {
-        <Diagonal<T> as Into<Band<T>>>::into(diagonal).into()
+        (&diagonal).into()
     }
 }
 
@@ -90,7 +110,7 @@ impl<T: Element> DerefMut for Diagonal<T> {
 
 #[cfg(test)]
 mod tests {
-    use {Band, Diagonal};
+    use {Band, Dense, Diagonal};
 
     #[test]
     fn into_tall_band() {
@@ -100,7 +120,7 @@ mod tests {
             data: vec![1.0, 2.0, 3.0],
         };
 
-        let band: Band<f64> = diagonal.into();
+        let band: Band<_> = diagonal.into();
 
         assert_eq!(&band.data, &[1.0, 2.0, 3.0]);
     }
@@ -113,8 +133,29 @@ mod tests {
             data: vec![1.0, 2.0, 3.0],
         };
 
-        let band: Band<f64> = diagonal.into();
+        let band: Band<_> = diagonal.into();
 
         assert_eq!(&band.data, &[1.0, 2.0, 3.0, 0.0, 0.0]);
+    }
+
+    #[test]
+    fn into_dense() {
+        let diagonal = Diagonal {
+            rows: 3,
+            columns: 5,
+            data: vec![1.0, 2.0, 3.0],
+        };
+
+        let dense: Dense<_> = diagonal.into();
+
+        assert_eq!(dense.rows, 3);
+        assert_eq!(dense.columns, 5);
+        assert_eq!(&dense.data, &[
+            1.0, 0.0, 0.0,
+            0.0, 2.0, 0.0,
+            0.0, 0.0, 3.0,
+            0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0,
+        ]);
     }
 }
