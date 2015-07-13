@@ -46,6 +46,15 @@ pub enum Major {
     Row,
 }
 
+/// A matrix part.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Part {
+    /// The lower triangular part.
+    Lower,
+    /// The upper triangular part.
+    Upper,
+}
+
 /// A matrix shape.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Shape {
@@ -122,4 +131,4 @@ pub use band::Band;
 pub use compressed::Compressed;
 pub use dense::Dense;
 pub use diagonal::Diagonal;
-pub use triangular::{Triangular, TriangularFormat};
+pub use triangular::Triangular;
