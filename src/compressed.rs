@@ -1,4 +1,4 @@
-use {Dense, Element, Sparse};
+use {Dense, Element, Major, Sparse};
 
 /// A compressed matrix.
 ///
@@ -19,7 +19,7 @@ pub struct Compressed<T: Element> {
     /// The number of nonzero elements.
     pub nonzeros: usize,
     /// The storage format.
-    pub format: CompressedFormat,
+    pub format: Major,
     /// The values of the nonzero elements.
     pub data: Vec<T>,
     /// The indices of columns (rows) of the nonzero elements.
@@ -30,15 +30,6 @@ pub struct Compressed<T: Element> {
     /// element, which is always equal to `nonzeros`, that is, `offsets[columns]
     /// = nonzeros` (`offsets[rows] = nonzeros`).
     pub offsets: Vec<usize>,
-}
-
-/// The storage format of a compressed matrix.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum CompressedFormat {
-    /// The compressed-row format.
-    Row,
-    /// The compressed-column format.
-    Column,
 }
 
 matrix!(Compressed);
@@ -66,7 +57,7 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
         };
 
         match format {
-            CompressedFormat::Row => {
+            Major::Row => {
                 debug_assert_eq!(offsets.len(), rows + 1);
                 for i in 0..rows {
                     for k in offsets[i]..offsets[i + 1] {
@@ -75,7 +66,7 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
                     }
                 }
             },
-            CompressedFormat::Column => {
+            Major::Column => {
                 debug_assert_eq!(offsets.len(), columns + 1);
                 for j in 0..columns {
                     for k in offsets[j]..offsets[j + 1] {
@@ -92,7 +83,7 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
 
 #[cfg(test)]
 mod tests {
-    use {Compressed, CompressedFormat, Dense};
+    use {Compressed, Dense, Major};
 
     #[test]
     fn into_dense() {
@@ -100,7 +91,7 @@ mod tests {
             rows: 5,
             columns: 3,
             nonzeros: 3,
-            format: CompressedFormat::Column,
+            format: Major::Column,
             data: vec![1.0, 2.0, 3.0],
             indices: vec![0, 1, 2],
             offsets: vec![0, 1, 2, 3],

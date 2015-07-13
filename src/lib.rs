@@ -37,7 +37,17 @@ pub trait Make<T>: Matrix {
     fn make(T, Shape) -> Self;
 }
 
+/// A major dimension.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Major {
+    /// The column major.
+    Column,
+    /// The row major.
+    Row,
+}
+
 /// A matrix shape.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Shape {
     /// A square shape.
     Square(usize),
@@ -109,7 +119,7 @@ mod diagonal;
 mod triangular;
 
 pub use band::Band;
-pub use compressed::{Compressed, CompressedFormat};
+pub use compressed::Compressed;
 pub use dense::Dense;
 pub use diagonal::Diagonal;
 pub use triangular::{Triangular, TriangularFormat};
