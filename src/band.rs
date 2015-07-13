@@ -98,7 +98,7 @@ mod tests {
     );
 
     #[test]
-    fn into_tall_dense() {
+    fn into_dense_tall() {
         let band = new!(7, 4, 2, 2, vec![
             0.0,  0.0,  1.0,  4.0,  8.0,
             0.0,  2.0,  5.0,  9.0, 12.0,
@@ -117,7 +117,7 @@ mod tests {
     }
 
     #[test]
-    fn into_wide_dense() {
+    fn into_dense_wide() {
         let band = new!(4, 7, 2, 2, vec![
              0.0,  0.0,  1.0,  4.0,  8.0,
              0.0,  2.0,  5.0,  9.0, 13.0,

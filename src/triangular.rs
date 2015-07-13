@@ -75,7 +75,7 @@ mod tests {
     use {Dense, Part, Triangular};
 
     #[test]
-    fn into_lower_dense() {
+    fn into_dense_lower() {
         let triangular = Triangular {
             size: 4,
             format: Part::Lower,
@@ -93,7 +93,7 @@ mod tests {
     }
 
     #[test]
-    fn into_upper_dense() {
+    fn into_dense_upper() {
         let triangular = Triangular {
             size: 4,
             format: Part::Upper,

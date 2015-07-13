@@ -1,4 +1,4 @@
-use {Dense, Element, Major, Sparse};
+use {Dense, Diagonal, Element, Major, Sparse};
 
 /// A compressed matrix.
 ///
@@ -127,9 +127,34 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
     }
 }
 
+impl<'l, T: Element> From<&'l Diagonal<T>> for Compressed<T> {
+    #[inline]
+    fn from(diagonal: &'l Diagonal<T>) -> Compressed<T> {
+        diagonal.clone().into()
+    }
+}
+
+impl<T: Element> From<Diagonal<T>> for Compressed<T> {
+    #[inline]
+    fn from(diagonal: Diagonal<T>) -> Compressed<T> {
+        let Diagonal { rows, columns, data } = diagonal;
+        let nonzeros = data.len();
+        debug_assert_eq!(nonzeros, min!(rows, columns));
+        Compressed {
+            rows: rows,
+            columns: columns,
+            nonzeros: nonzeros,
+            data: data,
+            format: Major::Column,
+            indices: (0..nonzeros).collect(),
+            offsets: (0..(nonzeros + 1)).collect(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use {Compressed, Dense, Major, Make, Shape};
+    use {Compressed, Dense, Diagonal, Major, Make, Shape};
 
     #[test]
     fn from_dense() {
@@ -171,5 +196,24 @@ mod tests {
             0.0, 2.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 3.0, 0.0, 0.0,
         ]);
+    }
+
+    #[test]
+    fn from_diagonal() {
+        let diagonal = Diagonal {
+            rows: 5,
+            columns: 3,
+            data: vec![1.0, 2.0, 0.0],
+        };
+
+        let compressed: Compressed<_> = diagonal.into();
+
+        assert_eq!(compressed.rows, 5);
+        assert_eq!(compressed.columns, 3);
+        assert_eq!(compressed.nonzeros, 3);
+        assert_eq!(compressed.format, Major::Column);
+        assert_eq!(&compressed.data[..], &[1.0, 2.0, 0.0][..]);
+        assert_eq!(&compressed.indices[..], &[0, 1, 2][..]);
+        assert_eq!(&compressed.offsets[..], &[0, 1, 2, 3][..]);
     }
 }

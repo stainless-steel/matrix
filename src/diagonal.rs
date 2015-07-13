@@ -46,8 +46,14 @@ impl<T: Element> Sparse for Diagonal<T> {
     }
 }
 
-impl<T: Element> From<Diagonal<T>> for Band<T> {
+impl<'l, T: Element> From<&'l Diagonal<T>> for Band<T> {
     #[inline]
+    fn from(diagonal: &'l Diagonal<T>) -> Band<T> {
+        diagonal.clone().into()
+    }
+}
+
+impl<T: Element> From<Diagonal<T>> for Band<T> {
     fn from(diagonal: Diagonal<T>) -> Band<T> {
         Band {
             rows: diagonal.rows,
@@ -120,7 +126,7 @@ mod tests {
     use {Band, Dense, Diagonal};
 
     #[test]
-    fn into_tall_band() {
+    fn into_band_tall() {
         let diagonal = Diagonal {
             rows: 5,
             columns: 3,
@@ -133,7 +139,7 @@ mod tests {
     }
 
     #[test]
-    fn into_wide_band() {
+    fn into_band_wide() {
         let diagonal = Diagonal {
             rows: 3,
             columns: 5,
