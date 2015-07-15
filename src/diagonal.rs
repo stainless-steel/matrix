@@ -1,6 +1,7 @@
 use std::ops::{Deref, DerefMut};
 
-use {Band, Compressed, Dense, Element, Major, Size, Sparse};
+use compressed::Format;
+use {Band, Compressed, Dense, Element, Size, Sparse};
 
 /// A diagonal matrix.
 ///
@@ -90,7 +91,7 @@ impl<T: Element> From<Diagonal<T>> for Compressed<T> {
             columns: columns,
             nonzeros: nonzeros,
             values: values,
-            format: Major::Column,
+            format: Format::Column,
             indices: (0..nonzeros).collect(),
             offsets: (0..(nonzeros + 1)).collect(),
         }
@@ -150,7 +151,8 @@ impl<T: Element> DerefMut for Diagonal<T> {
 
 #[cfg(test)]
 mod tests {
-    use {Band, Compressed, Dense, Diagonal, Major};
+    use compressed::Format;
+    use {Band, Compressed, Dense, Diagonal};
 
     #[test]
     fn into_band_tall() {
@@ -173,7 +175,7 @@ mod tests {
         let matrix: Compressed<_> = matrix.into();
 
         assert_eq!(matrix, Compressed {
-            rows: 5, columns: 3, nonzeros: 3, format: Major::Column, values: vec![1.0, 2.0, 0.0],
+            rows: 5, columns: 3, nonzeros: 3, format: Format::Column, values: vec![1.0, 2.0, 0.0],
             indices: vec![0, 1, 2], offsets: vec![0, 1, 2, 3]
         });
     }

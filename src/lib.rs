@@ -17,15 +17,6 @@ pub trait Sparse: Matrix + Into<Dense<<Self as Matrix>::Element>> {
     fn nonzeros(&self) -> usize;
 }
 
-/// A major dimension.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Major {
-    /// The column major.
-    Column,
-    /// The row major.
-    Row,
-}
-
 /// A part of a matrix.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Part {
@@ -66,7 +57,7 @@ macro_rules! min(
 );
 
 mod band;
-mod compressed;
+pub mod compressed;
 mod dense;
 mod diagonal;
 mod element;
@@ -75,7 +66,7 @@ mod size;
 mod triangular;
 
 pub use band::Band;
-pub use compressed::{Compressed, CompressedIterator};
+pub use compressed::Compressed;
 pub use dense::Dense;
 pub use diagonal::Diagonal;
 pub use element::Element;

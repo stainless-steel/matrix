@@ -1,6 +1,6 @@
 use std::mem;
 
-use {Dense, Element, Major, Position, Size, Sparse};
+use {Dense, Element, Position, Size, Sparse};
 
 /// A compressed matrix.
 ///
@@ -21,23 +21,31 @@ pub struct Compressed<T: Element> {
     /// The number of nonzero elements.
     pub nonzeros: usize,
     /// The storage format.
-    pub format: Major,
+    pub format: Format,
     /// The values of the nonzero elements.
     pub values: Vec<T>,
-    /// The indices of rows when `format = Major::Column` or columns when
-    /// `format = Major::Row` of the nonzero elements.
+    /// The indices of rows when `format = Column` or columns when `format =
+    /// Row` of the nonzero elements.
     pub indices: Vec<usize>,
-    /// The offsets of columns when `format = Major::Column` or rows when
-    /// `format = Major::Row` such that the values and indices of the `i`th
-    /// column when `format = Major::Column` or the `i`th row when `format =
-    /// Major::Row` are stored starting from `values[j]` and `indices[j]`,
-    /// respectively, where `j = offsets[i]`. The vector has one additional
-    /// element, which is always equal to `nonzeros`.
+    /// The offsets of columns when `format = Column` or rows when `format =
+    /// Row` such that the values and indices of the `i`th column when `format =
+    /// Column` or the `i`th row when `format = Row` are stored starting from
+    /// `values[j]` and `indices[j]`, respectively, where `j = offsets[i]`. The
+    /// vector has one additional element, which is always equal to `nonzeros`.
     pub offsets: Vec<usize>,
 }
 
+/// A format of a compressed matrix.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Format {
+    /// The compressed-column format.
+    Column,
+    /// The compressed-row format.
+    Row,
+}
+
 /// A sparse iterator of a compressed matrix.
-pub struct CompressedIterator<'l, T: 'l + Element> {
+pub struct Iterator<'l, T: 'l + Element> {
     matrix: &'l Compressed<T>,
     taken: usize,
     major: usize,
@@ -48,8 +56,8 @@ macro_rules! debug_valid(
         $matrix.nonzeros == $matrix.values.len() &&
         $matrix.nonzeros == $matrix.indices.len() &&
         match $matrix.format {
-            Major::Column => $matrix.columns + 1 == $matrix.offsets.len(),
-            Major::Row => $matrix.rows + 1 == $matrix.offsets.len(),
+            Format::Column => $matrix.columns + 1 == $matrix.offsets.len(),
+            Format::Row => $matrix.rows + 1 == $matrix.offsets.len(),
         }
     ));
 );
@@ -61,7 +69,7 @@ impl<T: Element> Compressed<T> {
     pub fn get<P: Position>(&self, position: P) -> T {
         let (mut i, mut j) = position.coordinates();
         debug_assert!(i < self.rows && j < self.columns);
-        if let Major::Row = self.format {
+        if let Format::Row = self.format {
             mem::swap(&mut i, &mut j);
         }
         for k in self.offsets[j]..self.offsets[j + 1] {
@@ -81,7 +89,7 @@ impl<T: Element> Compressed<T> {
     pub fn set<P: Position>(&mut self, position: P, value: T) {
         let (mut i, mut j) = position.coordinates();
         debug_assert!(i < self.rows && j < self.columns);
-        if let Major::Row = self.format {
+        if let Format::Row = self.format {
             mem::swap(&mut i, &mut j);
         }
         let mut k = self.offsets[j];
@@ -105,8 +113,8 @@ impl<T: Element> Compressed<T> {
 
     /// Return an iterator over the stored elements.
     #[inline]
-    pub fn iter<'l>(&'l self) -> CompressedIterator<'l, T> {
-        CompressedIterator { matrix: self, taken: 0, major: 0 }
+    pub fn iter<'l>(&'l self) -> Iterator<'l, T> {
+        Iterator { matrix: self, taken: 0, major: 0 }
     }
 
     /// Resize the matrix.
@@ -116,8 +124,8 @@ impl<T: Element> Compressed<T> {
             self.retain(|i, j, _| i < rows && j < columns);
         }
         let (from, into) = match self.format {
-            Major::Column => (self.columns, columns),
-            Major::Row => (self.rows, rows),
+            Format::Column => (self.columns, columns),
+            Format::Row => (self.rows, rows),
         };
         if from > into {
             self.offsets.truncate(into + 1);
@@ -131,8 +139,8 @@ impl<T: Element> Compressed<T> {
     /// Retain the elements that satisfy a condition and discard the rest.
     pub fn retain<F>(&mut self, mut condition: F) where F: FnMut(usize, usize, &T) -> bool {
         let major = match self.format {
-            Major::Column => self.columns,
-            Major::Row => self.rows,
+            Format::Column => self.columns,
+            Format::Row => self.rows,
         };
         let (mut i, mut k) = (0, 0);
         while k < self.indices.len() {
@@ -140,8 +148,8 @@ impl<T: Element> Compressed<T> {
                 i += 1;
             }
             let condition = match self.format {
-                Major::Column => condition(self.indices[k], i, &self.values[k]),
-                Major::Row => condition(i, self.indices[k], &self.values[k]),
+                Format::Column => condition(self.indices[k], i, &self.values[k]),
+                Format::Row => condition(i, self.indices[k], &self.values[k]),
             };
             if condition {
                 k += 1;
@@ -188,7 +196,7 @@ impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
             rows: matrix.rows,
             columns: matrix.columns,
             nonzeros: values.len(),
-            format: Major::Column,
+            format: Format::Column,
             values: values,
             indices: indices,
             offsets: offsets,
@@ -218,14 +226,14 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
         };
 
         match format {
-            Major::Row => {
+            Format::Row => {
                 for i in 0..rows {
                     for k in offsets[i]..offsets[i + 1] {
                         matrix.values[indices[k] * rows + i] = values[k];
                     }
                 }
             },
-            Major::Column => {
+            Format::Column => {
                 for j in 0..columns {
                     for k in offsets[j]..offsets[j + 1] {
                         matrix.values[j * rows + indices[k]] = values[k];
@@ -244,11 +252,11 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
     }
 }
 
-impl<'l, T: Element> Iterator for CompressedIterator<'l, T> {
+impl<'l, T: Element> ::std::iter::Iterator for Iterator<'l, T> {
     type Item = (usize, usize, &'l T);
 
     fn next(&mut self) -> Option<(usize, usize, &'l T)> {
-        let &mut CompressedIterator { matrix, taken, mut major } = self;
+        let &mut Iterator { matrix, taken, mut major } = self;
         if taken == matrix.nonzeros {
             return None;
         }
@@ -258,15 +266,16 @@ impl<'l, T: Element> Iterator for CompressedIterator<'l, T> {
         self.taken += 1;
         self.major = major;
         Some(match matrix.format {
-            Major::Column => (matrix.indices[taken], major, &matrix.values[taken]),
-            Major::Row => (major, matrix.indices[taken], &matrix.values[taken]),
+            Format::Column => (matrix.indices[taken], major, &matrix.values[taken]),
+            Format::Row => (major, matrix.indices[taken], &matrix.values[taken]),
         })
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use {Compressed, Dense, Major};
+    use compressed::Format;
+    use {Compressed, Dense};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,
@@ -328,7 +337,7 @@ mod tests {
 
     #[test]
     fn iter() {
-        let matrix = new!(5, 7, 5, Major::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+        let matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
                           vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
         let result = matrix.iter().map(|(i, _, _)| i).collect::<Vec<_>>();
@@ -343,61 +352,61 @@ mod tests {
 
     #[test]
     fn resize_fewer_columns() {
-        let mut matrix = new!(5, 7, 5, Major::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+        let mut matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
                               vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
         matrix.resize((5, 5));
-        assert_eq!(matrix, new!(5, 5, 2, Major::Column, vec![1.0, 2.0],
+        assert_eq!(matrix, new!(5, 5, 2, Format::Column, vec![1.0, 2.0],
                                 vec![1, 0], vec![0, 0, 0, 1, 2, 2]));
 
         matrix.resize((5, 3));
-        assert_eq!(matrix, new!(5, 3, 1, Major::Column, vec![1.0],
+        assert_eq!(matrix, new!(5, 3, 1, Format::Column, vec![1.0],
                                 vec![1], vec![0, 0, 0, 1]));
 
         matrix.resize((5, 1));
-        assert_eq!(matrix, new!(5, 1, 0, Major::Column, vec![],
+        assert_eq!(matrix, new!(5, 1, 0, Format::Column, vec![],
                                 vec![], vec![0, 0]));
     }
 
     #[test]
     fn resize_fewer_rows() {
-        let mut matrix = new!(5, 7, 5, Major::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+        let mut matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
                               vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
         matrix.resize((3, 7));
-        assert_eq!(matrix, new!(3, 7, 3, Major::Column, vec![1.0, 2.0, 4.0],
+        assert_eq!(matrix, new!(3, 7, 3, Format::Column, vec![1.0, 2.0, 4.0],
                                 vec![1, 0, 1], vec![0, 0, 0, 1, 2, 2, 2, 3]));
 
         matrix.resize((1, 7));
-        assert_eq!(matrix, new!(1, 7, 1, Major::Column, vec![2.0],
+        assert_eq!(matrix, new!(1, 7, 1, Format::Column, vec![2.0],
                                 vec![0], vec![0, 0, 0, 0, 1, 1, 1, 1]));
     }
 
     #[test]
     fn resize_more_columns() {
-        let mut matrix = new!(5, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+        let mut matrix = new!(5, 7, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
                               vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
 
         matrix.resize((5, 9));
-        assert_eq!(matrix, new!(5, 9, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+        assert_eq!(matrix, new!(5, 9, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4]));
 
         matrix.resize((5, 11));
-        assert_eq!(matrix, new!(5, 11, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+        assert_eq!(matrix, new!(5, 11, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4, 4, 4]));
     }
 
     #[test]
     fn resize_more_rows() {
-        let mut matrix = new!(5, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+        let mut matrix = new!(5, 7, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
                               vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
 
         matrix.resize((7, 7));
-        assert_eq!(matrix, new!(7, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+        assert_eq!(matrix, new!(7, 7, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
 
         matrix.resize((9, 7));
-        assert_eq!(matrix, new!(9, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+        assert_eq!(matrix, new!(9, 7, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
     }
 
@@ -411,13 +420,13 @@ mod tests {
 
         let matrix: Compressed<_> = matrix.into();
 
-        assert_eq!(matrix, new!(5, 3, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+        assert_eq!(matrix, new!(5, 3, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 3, 4, 4], vec![0, 1, 3, 4]));
     }
 
     #[test]
     fn into_dense() {
-        let matrix = new!(5, 3, 3, Major::Column, vec![1.0, 2.0, 3.0],
+        let matrix = new!(5, 3, 3, Format::Column, vec![1.0, 2.0, 3.0],
                           vec![0, 1, 2], vec![0, 1, 2, 3]);
 
         let matrix: Dense<_> = matrix.into();
