@@ -98,7 +98,9 @@ impl<T: Element> Compressed<T> {
     /// Resize the matrix.
     pub fn resize<S: Size>(&mut self, size: S) {
         let (rows, columns) = size.dimensions();
-        self.retain(|i, j, _| i < rows && j < columns);
+        if rows < self.rows || columns < self.columns {
+            self.retain(|i, j, _| i < rows && j < columns);
+        }
         let (from, into) = match self.format {
             Major::Column => (self.columns, columns),
             Major::Row => (self.rows, rows),
