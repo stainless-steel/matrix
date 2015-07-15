@@ -172,9 +172,7 @@ impl<T: Element> Sparse for Compressed<T> {
 
 impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
     fn from(matrix: &'l Dense<T>) -> Compressed<T> {
-        let mut values = vec![];
-        let mut indices = vec![];
-        let mut offsets = vec![];
+        let (mut values, mut indices, mut offsets) = (vec![], vec![], vec![]);
 
         let mut k = 0;
         let zero = T::zero();
@@ -224,18 +222,14 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
         };
 
         match format {
-            Format::Row => {
-                for i in 0..rows {
-                    for k in offsets[i]..offsets[i + 1] {
-                        matrix.values[indices[k] * rows + i] = values[k];
-                    }
+            Format::Row => for i in 0..rows {
+                for k in offsets[i]..offsets[i + 1] {
+                    matrix.values[indices[k] * rows + i] = values[k];
                 }
             },
-            Format::Column => {
-                for j in 0..columns {
-                    for k in offsets[j]..offsets[j + 1] {
-                        matrix.values[j * rows + indices[k]] = values[k];
-                    }
+            Format::Column => for j in 0..columns {
+                for k in offsets[j]..offsets[j + 1] {
+                    matrix.values[j * rows + indices[k]] = values[k];
                 }
             },
         }
