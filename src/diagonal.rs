@@ -127,37 +127,21 @@ mod tests {
 
     #[test]
     fn into_band_tall() {
-        let diagonal = Diagonal {
-            rows: 5,
-            columns: 3,
-            values: vec![1.0, 2.0, 3.0],
-        };
-
+        let diagonal = Diagonal { rows: 5, columns: 3, values: vec![1.0, 2.0, 3.0] };
         let band: Band<_> = diagonal.into();
-
         assert_eq!(&band.values, &[1.0, 2.0, 3.0]);
     }
 
     #[test]
     fn into_band_wide() {
-        let diagonal = Diagonal {
-            rows: 3,
-            columns: 5,
-            values: vec![1.0, 2.0, 3.0],
-        };
-
+        let diagonal = Diagonal { rows: 3, columns: 5, values: vec![1.0, 2.0, 3.0] };
         let band: Band<_> = diagonal.into();
-
         assert_eq!(&band.values, &[1.0, 2.0, 3.0, 0.0, 0.0]);
     }
 
     #[test]
     fn into_dense() {
-        let diagonal = Diagonal {
-            rows: 3,
-            columns: 5,
-            values: vec![1.0, 2.0, 3.0],
-        };
+        let diagonal = Diagonal { rows: 3, columns: 5, values: vec![1.0, 2.0, 3.0] };
 
         let dense: Dense<_> = diagonal.into();
 
