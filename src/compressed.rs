@@ -49,7 +49,7 @@ macro_rules! debug_valid(
 matrix!(Compressed);
 
 impl<T: Element> Compressed<T> {
-    /// Return an element.
+    /// Read an element.
     pub fn get<P: Position>(&self, position: P) -> T {
         let (mut i, mut j) = position.coordinates();
         debug_assert!(i < self.rows && j < self.columns);
@@ -60,8 +60,39 @@ impl<T: Element> Compressed<T> {
             if self.indices[k] == i {
                 return self.values[k];
             }
+            if self.indices[k] > i {
+                break;
+            }
         }
         T::zero()
+    }
+
+    /// Assign a value to an element.
+    ///
+    /// Note that the function treats zero values as any other.
+    pub fn set<P: Position>(&mut self, position: P, value: T) {
+        let (mut i, mut j) = position.coordinates();
+        debug_assert!(i < self.rows && j < self.columns);
+        if let Major::Row = self.format {
+            mem::swap(&mut i, &mut j);
+        }
+        let mut k = self.offsets[j];
+        while k < self.offsets[j + 1] {
+            if self.indices[k] == i {
+                self.values[k] = value;
+                return;
+            }
+            if self.indices[k] > i {
+                break;
+            }
+            k += 1;
+        }
+        self.nonzeros += 1;
+        self.values.insert(k, value);
+        self.indices.insert(k, i);
+        for offset in &mut self.offsets[(j + 1)..] {
+            *offset += 1;
+        }
     }
 
     /// Resize the matrix.
@@ -81,7 +112,7 @@ impl<T: Element> Compressed<T> {
         self.rows = rows;
     }
 
-    /// Retain only those elements that satisfy a condition.
+    /// Retain the elements that satisfy a condition and discard the rest.
     pub fn retain<F>(&mut self, mut condition: F) where F: FnMut(usize, usize, &T) -> bool {
         let (mut i, mut k) = (0, 0);
         while k < self.indices.len() {
@@ -219,19 +250,52 @@ mod tests {
 
     #[test]
     fn get() {
-        let origin = Dense::from_vec(vec![
+        let dense = Dense::from_vec(vec![
             0.0, 1.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 2.0, 3.0,
             0.0, 0.0, 0.0, 0.0, 4.0,
         ], (5, 3));
 
-        let matrix: Compressed<_> = (&origin).into();
+        let matrix: Compressed<_> = (&dense).into();
+        assert_eq!(matrix.nonzeros, 4);
 
         for i in 0..5 {
             for j in 0..3 {
-                assert_eq!(origin[(i, j)], matrix.get((i, j)));
+                assert_eq!(dense[(i, j)], matrix.get((i, j)));
             }
         }
+    }
+
+    #[test]
+    fn set() {
+        let mut dense = Dense::from_vec(vec![
+            0.0, 1.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 2.0, 3.0,
+            0.0, 0.0, 0.0, 0.0, 4.0,
+        ], (5, 3));
+
+        let mut matrix: Compressed<_> = (&dense).into();
+        assert_eq!(matrix.nonzeros, 4);
+
+        dense[(0, 0)] = 42.0;
+        dense[(3, 1)] = 69.0;
+
+        matrix.set((0, 0), 42.0);
+        matrix.set((3, 1), 69.0);
+        matrix.set((4, 0), 0.0);
+
+        assert_eq!(matrix.nonzeros, 4 + 1 + (1 - 1) + 1);
+        assert_eq!(dense, (&matrix).into());
+
+        for i in 0..5 {
+            for j in 0..3 {
+                dense[(i, j)] = (j * 5 + i) as f64;
+                matrix.set((i, j), (j * 5 + i) as f64);
+            }
+        }
+
+        assert_eq!(matrix.nonzeros, 5 * 3);
+        assert_eq!(dense, (&matrix).into());
     }
 
     #[test]
