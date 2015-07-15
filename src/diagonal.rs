@@ -5,7 +5,7 @@
 use std::ops::{Deref, DerefMut};
 
 use compressed::Format;
-use {Band, Compressed, Dense, Element, Size, Sparse};
+use {Band, Compressed, Dense, Element, Matrix, Size, Sparse};
 
 /// A diagonal matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -24,7 +24,16 @@ macro_rules! debug_valid(
     ));
 );
 
-matrix!(Diagonal);
+size!(Diagonal);
+
+impl<T: Element> Matrix for Diagonal<T> {
+    type Element = T;
+
+    fn zero<S: Size>(size: S) -> Self {
+        let (rows, columns) = size.dimensions();
+        Diagonal { rows: rows, columns: columns, values: vec![T::zero(); min!(rows, columns)] }
+    }
+}
 
 impl<T: Element> Diagonal<T> {
     /// Create a matrix from a slice.

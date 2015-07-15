@@ -5,7 +5,7 @@
 use std::convert::Into;
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 
-use {Element, Position, Size};
+use {Element, Matrix, Position, Size};
 
 /// A dense matrix.
 ///
@@ -20,7 +20,16 @@ pub struct Dense<T: Element> {
     pub values: Vec<T>,
 }
 
-matrix!(Dense);
+size!(Dense);
+
+impl<T: Element> Matrix for Dense<T> {
+    type Element = T;
+
+    fn zero<S: Size>(size: S) -> Self {
+        let (rows, columns) = size.dimensions();
+        Dense { rows: rows, columns: columns, values: vec![T::zero(); rows * columns] }
+    }
+}
 
 impl<T: Element> Dense<T> {
     /// Create a matrix from a slice.

@@ -7,7 +7,7 @@
 //! [1]: http://www.netlib.org/lapack/lug/node124.html
 //! [2]: http://www.netlib.org/lapack
 
-use {Dense, Element, Sparse};
+use {Dense, Element, Matrix, Size, Sparse};
 
 /// A band matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -34,7 +34,22 @@ macro_rules! debug_valid(
     ));
 );
 
-matrix!(Band);
+size!(Band);
+
+impl<T: Element> Matrix for Band<T> {
+    type Element = T;
+
+    fn zero<S: Size>(size: S) -> Self {
+        let (rows, columns) = size.dimensions();
+        Band {
+            rows: rows,
+            columns: columns,
+            superdiagonals: 0,
+            subdiagonals: 0,
+            values: vec![T::zero(); min!(rows, columns)],
+        }
+    }
+}
 
 impl<T: Element> Sparse for Band<T> {
     fn nonzeros(&self) -> usize {

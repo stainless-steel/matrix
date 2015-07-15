@@ -9,6 +9,9 @@ use std::convert::Into;
 pub trait Matrix: Size {
     /// The element type.
     type Element: Element;
+
+    /// Construct a zero matrix.
+    fn zero<S: Size>(S) -> Self;
 }
 
 /// A sparse matrix.
@@ -17,12 +20,8 @@ pub trait Sparse: Matrix + Into<Dense<<Self as Matrix>::Element>> {
     fn nonzeros(&self) -> usize;
 }
 
-macro_rules! matrix(
+macro_rules! size(
     ($kind:ident, $rows:ident, $columns:ident) => (
-        impl<T: ::Element> ::Matrix for $kind<T> {
-            type Element = T;
-        }
-
         impl<T: ::Element> ::Size for $kind<T> {
             #[inline(always)]
             fn rows(&self) -> usize {
@@ -36,7 +35,7 @@ macro_rules! matrix(
         }
     );
     ($kind:ident) => (
-        matrix!($kind, rows, columns);
+        size!($kind, rows, columns);
     );
 );
 

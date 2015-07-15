@@ -7,7 +7,7 @@
 //! [1]: http://www.netlib.org/lapack/lug/node123.html
 //! [2]: http://www.netlib.org/lapack
 
-use {Dense, Element, Sparse};
+use {Dense, Element, Matrix, Size, Sparse};
 
 /// A triangular matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -35,7 +35,21 @@ macro_rules! debug_valid(
     ));
 );
 
-matrix!(Triangular, size, size);
+size!(Triangular, size, size);
+
+impl<T: Element> Matrix for Triangular<T> {
+    type Element = T;
+
+    fn zero<S: Size>(size: S) -> Self {
+        let (rows, _columns) = size.dimensions();
+        debug_assert!(rows == _columns);
+        Triangular {
+            size: rows,
+            format: Format::Lower,
+            values: vec![T::zero(); rows * (rows + 1) / 2],
+        }
+    }
+}
 
 impl<T: Element> Sparse for Triangular<T> {
     #[inline]
