@@ -34,12 +34,12 @@ impl<T: Element> Sparse for Triangular<T> {
 }
 
 impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
-    fn from(triangular: &'l Triangular<T>) -> Dense<T> {
-        debug_valid!(triangular);
+    fn from(matrix: &'l Triangular<T>) -> Dense<T> {
+        debug_valid!(matrix);
 
-        let &Triangular { size, format, ref values } = triangular;
+        let &Triangular { size, format, ref values } = matrix;
 
-        let mut dense = Dense {
+        let mut matrix = Dense {
             rows: size,
             columns: size,
             values: vec![T::zero(); size * size],
@@ -50,7 +50,7 @@ impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
                 let mut k = 0;
                 for j in 0..size {
                     for i in j..size {
-                        dense.values[j * size + i] = values[k];
+                        matrix.values[j * size + i] = values[k];
                         k += 1;
                     }
                 }
@@ -59,20 +59,20 @@ impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
                 let mut k = 0;
                 for j in 0..size {
                     for i in 0..(j + 1) {
-                        dense.values[j * size + i] = values[k];
+                        matrix.values[j * size + i] = values[k];
                         k += 1;
                     }
                 }
             },
         }
 
-        dense
+        matrix
     }
 }
 
 impl<T: Element> From<Triangular<T>> for Dense<T> {
-    fn from(triangular: Triangular<T>) -> Dense<T> {
-        (&triangular).into()
+    fn from(matrix: Triangular<T>) -> Dense<T> {
+        (&matrix).into()
     }
 }
 
@@ -82,15 +82,15 @@ mod tests {
 
     #[test]
     fn into_dense_lower() {
-        let triangular = Triangular {
+        let matrix = Triangular {
             size: 4,
             format: Part::Lower,
             values: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
-        let dense: Dense<_> = triangular.into();
+        let matrix: Dense<_> = matrix.into();
 
-        assert_eq!(&dense[..], &[
+        assert_eq!(&matrix[..], &[
             1.0, 2.0, 3.0,  4.0,
             0.0, 5.0, 6.0,  7.0,
             0.0, 0.0, 8.0,  9.0,
@@ -100,15 +100,15 @@ mod tests {
 
     #[test]
     fn into_dense_upper() {
-        let triangular = Triangular {
+        let matrix = Triangular {
             size: 4,
             format: Part::Upper,
             values: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
-        let dense: Dense<_> = triangular.into();
+        let matrix: Dense<_> = matrix.into();
 
-        assert_eq!(&dense[..], &[
+        assert_eq!(&matrix[..], &[
             1.0, 0.0, 0.0,  0.0,
             2.0, 3.0, 0.0,  0.0,
             4.0, 5.0, 6.0,  0.0,

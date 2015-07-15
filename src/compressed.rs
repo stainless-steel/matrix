@@ -109,18 +109,18 @@ impl<T: Element> Sparse for Compressed<T> {
 }
 
 impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
-    fn from(dense: &'l Dense<T>) -> Compressed<T> {
+    fn from(matrix: &'l Dense<T>) -> Compressed<T> {
         let mut values = vec![];
         let mut indices = vec![];
         let mut offsets = vec![];
 
         let mut k = 0;
         let zero = T::zero();
-        for _ in 0..dense.columns {
+        for _ in 0..matrix.columns {
             offsets.push(values.len());
-            for i in 0..dense.rows {
-                if dense.values[k] != zero {
-                    values.push(dense.values[k]);
+            for i in 0..matrix.rows {
+                if matrix.values[k] != zero {
+                    values.push(matrix.values[k]);
                     indices.push(i);
                 }
                 k += 1;
@@ -129,8 +129,8 @@ impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
         offsets.push(values.len());
 
         Compressed {
-            rows: dense.rows,
-            columns: dense.columns,
+            rows: matrix.rows,
+            columns: matrix.columns,
             nonzeros: values.len(),
             format: Major::Column,
             values: values,
@@ -142,20 +142,20 @@ impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
 
 impl<T: Element> From<Dense<T>> for Compressed<T> {
     #[inline]
-    fn from(dense: Dense<T>) -> Compressed<T> {
-        (&dense).into()
+    fn from(matrix: Dense<T>) -> Compressed<T> {
+        (&matrix).into()
     }
 }
 
 impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
-    fn from(compressed: &'l Compressed<T>) -> Dense<T> {
-        debug_valid!(compressed);
+    fn from(matrix: &'l Compressed<T>) -> Dense<T> {
+        debug_valid!(matrix);
 
         let &Compressed {
             rows, columns, format, ref values, ref indices, ref offsets, ..
-        } = compressed;
+        } = matrix;
 
-        let mut dense = Dense {
+        let mut matrix = Dense {
             rows: rows,
             columns: columns,
             values: vec![T::zero(); rows * columns],
@@ -165,26 +165,26 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
             Major::Row => {
                 for i in 0..rows {
                     for k in offsets[i]..offsets[i + 1] {
-                        dense.values[indices[k] * rows + i] = values[k];
+                        matrix.values[indices[k] * rows + i] = values[k];
                     }
                 }
             },
             Major::Column => {
                 for j in 0..columns {
                     for k in offsets[j]..offsets[j + 1] {
-                        dense.values[j * rows + indices[k]] = values[k];
+                        matrix.values[j * rows + indices[k]] = values[k];
                     }
                 }
             },
         }
 
-        dense
+        matrix
     }
 }
 
 impl<T: Element> From<Compressed<T>> for Dense<T> {
-    fn from(compressed: Compressed<T>) -> Dense<T> {
-        (&compressed).into()
+    fn from(matrix: Compressed<T>) -> Dense<T> {
+        (&matrix).into()
     }
 }
 
@@ -202,28 +202,26 @@ mod tests {
 
     #[test]
     fn from_dense() {
-        let dense = Dense::make(&[
+        let matrix = Dense::make(&[
             0.0, 1.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 2.0, 3.0,
             0.0, 0.0, 0.0, 0.0, 4.0,
         ][..], Shape::Rectangular(5, 3));
 
-        let compressed: Compressed<_> = (&dense).into();
+        let matrix: Compressed<_> = matrix.into();
 
-        assert_eq!(compressed, new!(5, 3, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
-                                    vec![1, 3, 4, 4], vec![0, 1, 3, 4]));
-
-        assert_eq!(dense, compressed.into());
+        assert_eq!(matrix, new!(5, 3, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+                                vec![1, 3, 4, 4], vec![0, 1, 3, 4]));
     }
 
     #[test]
     fn into_dense() {
-        let compressed = new!(5, 3, 3, Major::Column, vec![1.0, 2.0, 3.0],
-                              vec![0, 1, 2], vec![0, 1, 2, 3]);
+        let matrix = new!(5, 3, 3, Major::Column, vec![1.0, 2.0, 3.0],
+                          vec![0, 1, 2], vec![0, 1, 2, 3]);
 
-        let dense: Dense<_> = compressed.into();
+        let matrix: Dense<_> = matrix.into();
 
-        assert_eq!(&dense[..], &[
+        assert_eq!(&matrix[..], &[
             1.0, 0.0, 0.0, 0.0, 0.0,
             0.0, 2.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 3.0, 0.0, 0.0,
@@ -232,61 +230,61 @@ mod tests {
 
     #[test]
     fn resize_fewer_columns() {
-        let mut compressed = new!(5, 7, 5, Major::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
-                                  vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+        let mut matrix = new!(5, 7, 5, Major::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+                              vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
-        compressed.resize(5, 5);
-        assert_eq!(compressed, new!(5, 5, 2, Major::Column, vec![1.0, 2.0],
-                               vec![1, 0], vec![0, 0, 0, 1, 2, 2]));
+        matrix.resize(5, 5);
+        assert_eq!(matrix, new!(5, 5, 2, Major::Column, vec![1.0, 2.0],
+                                vec![1, 0], vec![0, 0, 0, 1, 2, 2]));
 
-        compressed.resize(5, 3);
-        assert_eq!(compressed, new!(5, 3, 1, Major::Column, vec![1.0],
-                               vec![1], vec![0, 0, 0, 1]));
+        matrix.resize(5, 3);
+        assert_eq!(matrix, new!(5, 3, 1, Major::Column, vec![1.0],
+                                vec![1], vec![0, 0, 0, 1]));
 
-        compressed.resize(5, 1);
-        assert_eq!(compressed, new!(5, 1, 0, Major::Column, vec![],
-                               vec![], vec![0, 0]));
+        matrix.resize(5, 1);
+        assert_eq!(matrix, new!(5, 1, 0, Major::Column, vec![],
+                                vec![], vec![0, 0]));
     }
 
     #[test]
     fn resize_fewer_rows() {
-        let mut compressed = new!(5, 7, 5, Major::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
-                                  vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+        let mut matrix = new!(5, 7, 5, Major::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+                              vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
-        compressed.resize(3, 7);
-        assert_eq!(compressed, new!(3, 7, 3, Major::Column, vec![1.0, 2.0, 4.0],
-                                    vec![1, 0, 1], vec![0, 0, 0, 1, 2, 2, 2, 3]));
+        matrix.resize(3, 7);
+        assert_eq!(matrix, new!(3, 7, 3, Major::Column, vec![1.0, 2.0, 4.0],
+                                vec![1, 0, 1], vec![0, 0, 0, 1, 2, 2, 2, 3]));
 
-        compressed.resize(1, 7);
-        assert_eq!(compressed, new!(1, 7, 1, Major::Column, vec![2.0],
-                                    vec![0], vec![0, 0, 0, 0, 1, 1, 1, 1]));
+        matrix.resize(1, 7);
+        assert_eq!(matrix, new!(1, 7, 1, Major::Column, vec![2.0],
+                                vec![0], vec![0, 0, 0, 0, 1, 1, 1, 1]));
     }
 
     #[test]
     fn resize_more_columns() {
-        let mut compressed = new!(5, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
-                                  vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
+        let mut matrix = new!(5, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+                              vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
 
-        compressed.resize(5, 9);
-        assert_eq!(compressed, new!(5, 9, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
-                               vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4]));
+        matrix.resize(5, 9);
+        assert_eq!(matrix, new!(5, 9, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+                                vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4]));
 
-        compressed.resize(5, 11);
-        assert_eq!(compressed, new!(5, 11, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
-                               vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4, 4, 4]));
+        matrix.resize(5, 11);
+        assert_eq!(matrix, new!(5, 11, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+                                vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4, 4, 4]));
     }
 
     #[test]
     fn resize_more_rows() {
-        let mut compressed = new!(5, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
-                                  vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
+        let mut matrix = new!(5, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+                              vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
 
-        compressed.resize(7, 7);
-        assert_eq!(compressed, new!(7, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
-                               vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
+        matrix.resize(7, 7);
+        assert_eq!(matrix, new!(7, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+                                vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
 
-        compressed.resize(9, 7);
-        assert_eq!(compressed, new!(9, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
-                               vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
+        matrix.resize(9, 7);
+        assert_eq!(matrix, new!(9, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+                                vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
     }
 }

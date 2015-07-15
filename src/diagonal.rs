@@ -54,22 +54,22 @@ impl<T: Element> Sparse for Diagonal<T> {
 
 impl<'l, T: Element> From<&'l Diagonal<T>> for Band<T> {
     #[inline]
-    fn from(diagonal: &'l Diagonal<T>) -> Band<T> {
-        diagonal.clone().into()
+    fn from(matrix: &'l Diagonal<T>) -> Band<T> {
+        matrix.clone().into()
     }
 }
 
 impl<T: Element> From<Diagonal<T>> for Band<T> {
-    fn from(diagonal: Diagonal<T>) -> Band<T> {
-        debug_valid!(diagonal);
+    fn from(matrix: Diagonal<T>) -> Band<T> {
+        debug_valid!(matrix);
         Band {
-            rows: diagonal.rows,
-            columns: diagonal.columns,
+            rows: matrix.rows,
+            columns: matrix.columns,
             superdiagonals: 0,
             subdiagonals: 0,
             values: {
-                let mut values = diagonal.values;
-                for _ in diagonal.rows..diagonal.columns {
+                let mut values = matrix.values;
+                for _ in matrix.rows..matrix.columns {
                     values.push(T::zero());
                 }
                 values
@@ -80,16 +80,16 @@ impl<T: Element> From<Diagonal<T>> for Band<T> {
 
 impl<'l, T: Element> From<&'l Diagonal<T>> for Compressed<T> {
     #[inline]
-    fn from(diagonal: &'l Diagonal<T>) -> Compressed<T> {
-        diagonal.clone().into()
+    fn from(matrix: &'l Diagonal<T>) -> Compressed<T> {
+        matrix.clone().into()
     }
 }
 
 impl<T: Element> From<Diagonal<T>> for Compressed<T> {
     #[inline]
-    fn from(diagonal: Diagonal<T>) -> Compressed<T> {
-        debug_valid!(diagonal);
-        let Diagonal { rows, columns, values } = diagonal;
+    fn from(matrix: Diagonal<T>) -> Compressed<T> {
+        debug_valid!(matrix);
+        let Diagonal { rows, columns, values } = matrix;
         let nonzeros = values.len();
         Compressed {
             rows: rows,
@@ -105,10 +105,10 @@ impl<T: Element> From<Diagonal<T>> for Compressed<T> {
 
 impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
     #[inline]
-    fn from(diagonal: &Diagonal<T>) -> Dense<T> {
-        debug_valid!(diagonal);
+    fn from(matrix: &Diagonal<T>) -> Dense<T> {
+        debug_valid!(matrix);
 
-        let &Diagonal { rows, columns, ref values } = diagonal;
+        let &Diagonal { rows, columns, ref values } = matrix;
 
         let mut dense = Dense {
             rows: rows,
@@ -126,8 +126,8 @@ impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
 
 impl<T: Element> From<Diagonal<T>> for Dense<T> {
     #[inline]
-    fn from(diagonal: Diagonal<T>) -> Dense<T> {
-        (&diagonal).into()
+    fn from(matrix: Diagonal<T>) -> Dense<T> {
+        (&matrix).into()
     }
 }
 
@@ -160,25 +160,25 @@ mod tests {
 
     #[test]
     fn into_band_tall() {
-        let diagonal = Diagonal { rows: 5, columns: 3, values: vec![1.0, 2.0, 3.0] };
-        let band: Band<_> = diagonal.into();
-        assert_eq!(&band.values, &[1.0, 2.0, 3.0]);
+        let matrix = Diagonal { rows: 5, columns: 3, values: vec![1.0, 2.0, 3.0] };
+        let matrix: Band<_> = matrix.into();
+        assert_eq!(&matrix.values, &[1.0, 2.0, 3.0]);
     }
 
     #[test]
     fn into_band_wide() {
-        let diagonal = Diagonal { rows: 3, columns: 5, values: vec![1.0, 2.0, 3.0] };
-        let band: Band<_> = diagonal.into();
-        assert_eq!(&band.values, &[1.0, 2.0, 3.0, 0.0, 0.0]);
+        let matrix = Diagonal { rows: 3, columns: 5, values: vec![1.0, 2.0, 3.0] };
+        let matrix: Band<_> = matrix.into();
+        assert_eq!(&matrix.values, &[1.0, 2.0, 3.0, 0.0, 0.0]);
     }
 
     #[test]
     fn into_compressed() {
-        let diagonal = Diagonal { rows: 5, columns: 3, values: vec![1.0, 2.0, 0.0] };
+        let matrix = Diagonal { rows: 5, columns: 3, values: vec![1.0, 2.0, 0.0] };
 
-        let compressed: Compressed<_> = diagonal.into();
+        let matrix: Compressed<_> = matrix.into();
 
-        assert_eq!(compressed, Compressed {
+        assert_eq!(matrix, Compressed {
             rows: 5, columns: 3, nonzeros: 3, format: Major::Column, values: vec![1.0, 2.0, 0.0],
             indices: vec![0, 1, 2], offsets: vec![0, 1, 2, 3]
         });
@@ -186,13 +186,13 @@ mod tests {
 
     #[test]
     fn into_dense() {
-        let diagonal = Diagonal { rows: 3, columns: 5, values: vec![1.0, 2.0, 3.0] };
+        let matrix = Diagonal { rows: 3, columns: 5, values: vec![1.0, 2.0, 3.0] };
 
-        let dense: Dense<_> = diagonal.into();
+        let matrix: Dense<_> = matrix.into();
 
-        assert_eq!(dense.rows, 3);
-        assert_eq!(dense.columns, 5);
-        assert_eq!(&dense.values, &[
+        assert_eq!(matrix.rows, 3);
+        assert_eq!(matrix.columns, 5);
+        assert_eq!(&matrix.values, &[
             1.0, 0.0, 0.0,
             0.0, 2.0, 0.0,
             0.0, 0.0, 3.0,

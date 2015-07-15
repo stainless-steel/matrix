@@ -49,13 +49,13 @@ impl<T: Element> Sparse for Band<T> {
 }
 
 impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
-    fn from(band: &'l Band<T>) -> Dense<T> {
-        debug_valid!(band);
+    fn from(matrix: &'l Band<T>) -> Dense<T> {
+        debug_valid!(matrix);
 
-        let &Band { rows, columns, superdiagonals, subdiagonals, ref values } = band;
+        let &Band { rows, columns, superdiagonals, subdiagonals, ref values } = matrix;
         let diagonals = superdiagonals + 1 + subdiagonals;
 
-        let mut dense = Dense {
+        let mut matrix = Dense {
             rows: rows,
             columns: columns,
             values: vec![T::zero(); rows * columns],
@@ -64,23 +64,23 @@ impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
         for k in 0..(superdiagonals + 1) {
             for i in 0..min!(columns - k, rows) {
                 let j = i + k;
-                dense.values[j * rows + i] = values[j * diagonals + superdiagonals - k];
+                matrix.values[j * rows + i] = values[j * diagonals + superdiagonals - k];
             }
         }
         for k in 1..(subdiagonals + 1) {
             for i in k..min!(columns + k, rows) {
                 let j = i - k;
-                dense.values[j * rows + i] = values[j * diagonals + superdiagonals + k];
+                matrix.values[j * rows + i] = values[j * diagonals + superdiagonals + k];
             }
         }
 
-        dense
+        matrix
     }
 }
 
 impl<T: Element> From<Band<T>> for Dense<T> {
-    fn from(band: Band<T>) -> Dense<T> {
-        (&band).into()
+    fn from(matrix: Band<T>) -> Dense<T> {
+        (&matrix).into()
     }
 }
 
@@ -101,16 +101,16 @@ mod tests {
 
     #[test]
     fn into_dense_tall() {
-        let band = new!(7, 4, 2, 2, vec![
+        let matrix = new!(7, 4, 2, 2, vec![
             0.0,  0.0,  1.0,  4.0,  8.0,
             0.0,  2.0,  5.0,  9.0, 12.0,
             3.0,  6.0, 10.0, 13.0, 15.0,
             7.0, 11.0, 14.0, 16.0, 17.0,
         ]);
 
-        let dense: Dense<_> = band.into();
+        let matrix: Dense<_> = matrix.into();
 
-        assert_eq!(&dense[..], &[
+        assert_eq!(&matrix[..], &[
             1.0, 4.0,  8.0,  0.0,  0.0,  0.0, 0.0,
             2.0, 5.0,  9.0, 12.0,  0.0,  0.0, 0.0,
             3.0, 6.0, 10.0, 13.0, 15.0,  0.0, 0.0,
@@ -120,7 +120,7 @@ mod tests {
 
     #[test]
     fn into_dense_wide() {
-        let band = new!(4, 7, 2, 2, vec![
+        let matrix = new!(4, 7, 2, 2, vec![
              0.0,  0.0,  1.0,  4.0,  8.0,
              0.0,  2.0,  5.0,  9.0, 13.0,
              3.0,  6.0, 10.0, 14.0,  0.0,
@@ -130,9 +130,9 @@ mod tests {
              0.0,  0.0,  0.0,  0.0,  0.0,
         ]);
 
-        let dense: Dense<_> = band.into();
+        let matrix: Dense<_> = matrix.into();
 
-        assert_eq!(&dense[..], &[
+        assert_eq!(&matrix[..], &[
             1.0, 4.0,  8.0,  0.0,
             2.0, 5.0,  9.0, 13.0,
             3.0, 6.0, 10.0, 14.0,
