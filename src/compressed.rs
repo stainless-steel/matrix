@@ -24,14 +24,15 @@ pub struct Compressed<T: Element> {
     pub format: Major,
     /// The values of the nonzero elements.
     pub values: Vec<T>,
-    /// The indices of rows for `Major::Column` or columns for `Major::Row` of
-    /// the nonzero elements.
+    /// The indices of rows when `format = Major::Column` or columns when
+    /// `format = Major::Row` of the nonzero elements.
     pub indices: Vec<usize>,
-    /// The offsets of columns for `Major::Column` or rows for `Major::Row` such
-    /// that the values and indices of the `i`th column for `Major::Column` or
-    /// the `i`th row for `Major::Row` are stored starting from `values[j]` and
-    /// `indices[j]`, respectively, where `j = offsets[i]`. The vector has one
-    /// additional element, which is always equal to `nonzeros`.
+    /// The offsets of columns when `format = Major::Column` or rows when
+    /// `format = Major::Row` such that the values and indices of the `i`th
+    /// column when `format = Major::Column` or the `i`th row when `format =
+    /// Major::Row` are stored starting from `values[j]` and `indices[j]`,
+    /// respectively, where `j = offsets[i]`. The vector has one additional
+    /// element, which is always equal to `nonzeros`.
     pub offsets: Vec<usize>,
 }
 

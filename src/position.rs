@@ -1,4 +1,4 @@
-/// A position in a matrix.
+/// A position.
 pub trait Position {
     /// Return the row.
     fn row(&self) -> usize;

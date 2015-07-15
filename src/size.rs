@@ -1,4 +1,4 @@
-/// A size of a matrix.
+/// A size.
 pub trait Size {
     /// Return the number of rows.
     fn rows(&self) -> usize;
