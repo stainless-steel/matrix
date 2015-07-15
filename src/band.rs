@@ -66,7 +66,7 @@ impl<T: Element> Sparse for Band<T> {
 }
 
 impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
-    fn from(matrix: &'l Band<T>) -> Dense<T> {
+    fn from(matrix: &'l Band<T>) -> Self {
         debug_valid!(matrix);
 
         let &Band { rows, columns, superdiagonals, subdiagonals, ref values } = matrix;
@@ -96,7 +96,7 @@ impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
 }
 
 impl<T: Element> From<Band<T>> for Dense<T> {
-    fn from(matrix: Band<T>) -> Dense<T> {
+    fn from(matrix: Band<T>) -> Self {
         (&matrix).into()
     }
 }

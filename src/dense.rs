@@ -33,14 +33,14 @@ impl<T: Element> Matrix for Dense<T> {
 
 impl<T: Element> Dense<T> {
     /// Create a matrix from a slice.
-    pub fn from_slice<S: Size>(values: &[T], size: S) -> Dense<T> {
+    pub fn from_slice<S: Size>(values: &[T], size: S) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), rows * columns);
         Dense { rows: rows, columns: columns, values: values.to_vec() }
     }
 
     /// Create a matrix from a vector.
-    pub fn from_vec<S: Size>(values: Vec<T>, size: S) -> Dense<T> {
+    pub fn from_vec<S: Size>(values: Vec<T>, size: S) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), rows * columns);
         Dense { rows: rows, columns: columns, values: values }
@@ -51,7 +51,7 @@ impl<T: Element, P: Position> Index<P> for Dense<T> {
     type Output = T;
 
     #[inline]
-    fn index(&self, index: P) -> &T {
+    fn index(&self, index: P) -> &Self::Output {
         let (i, j) = index.coordinates();
         &self.values[j * self.rows + i]
     }
@@ -59,7 +59,7 @@ impl<T: Element, P: Position> Index<P> for Dense<T> {
 
 impl<T: Element, P: Position> IndexMut<P> for Dense<T> {
     #[inline]
-    fn index_mut(&mut self, index: P) -> &mut T {
+    fn index_mut(&mut self, index: P) -> &mut Self::Output {
         let (i, j) = index.coordinates();
         &mut self.values[j * self.rows + i]
     }
@@ -76,14 +76,14 @@ impl<T: Element> Deref for Dense<T> {
     type Target = [T];
 
     #[inline]
-    fn deref(&self) -> &[T] {
+    fn deref(&self) -> &Self::Target {
         self.values.deref()
     }
 }
 
 impl<T: Element> DerefMut for Dense<T> {
     #[inline]
-    fn deref_mut(&mut self) -> &mut [T] {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         self.values.deref_mut()
     }
 }

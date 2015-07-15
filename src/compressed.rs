@@ -188,7 +188,7 @@ impl<T: Element> Sparse for Compressed<T> {
 }
 
 impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
-    fn from(matrix: &'l Dense<T>) -> Compressed<T> {
+    fn from(matrix: &'l Dense<T>) -> Self {
         let (mut values, mut indices, mut offsets) = (vec![], vec![], vec![]);
 
         let mut k = 0;
@@ -219,13 +219,13 @@ impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
 
 impl<T: Element> From<Dense<T>> for Compressed<T> {
     #[inline]
-    fn from(matrix: Dense<T>) -> Compressed<T> {
+    fn from(matrix: Dense<T>) -> Self {
         (&matrix).into()
     }
 }
 
 impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
-    fn from(matrix: &'l Compressed<T>) -> Dense<T> {
+    fn from(matrix: &'l Compressed<T>) -> Self {
         debug_valid!(matrix);
 
         let &Compressed {
@@ -256,7 +256,7 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
 }
 
 impl<T: Element> From<Compressed<T>> for Dense<T> {
-    fn from(matrix: Compressed<T>) -> Dense<T> {
+    fn from(matrix: Compressed<T>) -> Self {
         (&matrix).into()
     }
 }
@@ -264,7 +264,7 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
 impl<'l, T: Element> ::std::iter::Iterator for Iterator<'l, T> {
     type Item = (usize, usize, &'l T);
 
-    fn next(&mut self) -> Option<(usize, usize, &'l T)> {
+    fn next(&mut self) -> Option<Self::Item> {
         let &mut Iterator { matrix, taken, mut major } = self;
         if taken == matrix.nonzeros {
             return None;

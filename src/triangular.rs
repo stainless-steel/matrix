@@ -59,7 +59,7 @@ impl<T: Element> Sparse for Triangular<T> {
 }
 
 impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
-    fn from(matrix: &'l Triangular<T>) -> Dense<T> {
+    fn from(matrix: &'l Triangular<T>) -> Self {
         debug_valid!(matrix);
 
         let &Triangular { size, format, ref values } = matrix;
@@ -96,7 +96,7 @@ impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
 }
 
 impl<T: Element> From<Triangular<T>> for Dense<T> {
-    fn from(matrix: Triangular<T>) -> Dense<T> {
+    fn from(matrix: Triangular<T>) -> Self {
         (&matrix).into()
     }
 }

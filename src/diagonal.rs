@@ -37,14 +37,14 @@ impl<T: Element> Matrix for Diagonal<T> {
 
 impl<T: Element> Diagonal<T> {
     /// Create a matrix from a slice.
-    pub fn from_slice<S: Size>(values: &[T], size: S) -> Diagonal<T> {
+    pub fn from_slice<S: Size>(values: &[T], size: S) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), min!(rows, columns));
         Diagonal { rows: rows, columns: columns, values: values.to_vec() }
     }
 
     /// Create a matrix from a vector.
-    pub fn from_vec<S: Size>(values: Vec<T>, size: S) -> Diagonal<T> {
+    pub fn from_vec<S: Size>(values: Vec<T>, size: S) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), min!(rows, columns));
         Diagonal { rows: rows, columns: columns, values: values }
@@ -60,13 +60,13 @@ impl<T: Element> Sparse for Diagonal<T> {
 
 impl<'l, T: Element> From<&'l Diagonal<T>> for Band<T> {
     #[inline]
-    fn from(matrix: &'l Diagonal<T>) -> Band<T> {
+    fn from(matrix: &'l Diagonal<T>) -> Self {
         matrix.clone().into()
     }
 }
 
 impl<T: Element> From<Diagonal<T>> for Band<T> {
-    fn from(matrix: Diagonal<T>) -> Band<T> {
+    fn from(matrix: Diagonal<T>) -> Self {
         debug_valid!(matrix);
         Band {
             rows: matrix.rows,
@@ -86,14 +86,14 @@ impl<T: Element> From<Diagonal<T>> for Band<T> {
 
 impl<'l, T: Element> From<&'l Diagonal<T>> for Compressed<T> {
     #[inline]
-    fn from(matrix: &'l Diagonal<T>) -> Compressed<T> {
+    fn from(matrix: &'l Diagonal<T>) -> Self {
         matrix.clone().into()
     }
 }
 
 impl<T: Element> From<Diagonal<T>> for Compressed<T> {
     #[inline]
-    fn from(matrix: Diagonal<T>) -> Compressed<T> {
+    fn from(matrix: Diagonal<T>) -> Self {
         debug_valid!(matrix);
         let Diagonal { rows, columns, values } = matrix;
         let nonzeros = values.len();
@@ -111,7 +111,7 @@ impl<T: Element> From<Diagonal<T>> for Compressed<T> {
 
 impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
     #[inline]
-    fn from(matrix: &Diagonal<T>) -> Dense<T> {
+    fn from(matrix: &Diagonal<T>) -> Self {
         debug_valid!(matrix);
 
         let &Diagonal { rows, columns, ref values } = matrix;
@@ -132,7 +132,7 @@ impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
 
 impl<T: Element> From<Diagonal<T>> for Dense<T> {
     #[inline]
-    fn from(matrix: Diagonal<T>) -> Dense<T> {
+    fn from(matrix: Diagonal<T>) -> Self {
         (&matrix).into()
     }
 }
@@ -148,14 +148,14 @@ impl<T: Element> Deref for Diagonal<T> {
     type Target = [T];
 
     #[inline]
-    fn deref(&self) -> &[T] {
+    fn deref(&self) -> &Self::Target {
         self.values.deref()
     }
 }
 
 impl<T: Element> DerefMut for Diagonal<T> {
     #[inline]
-    fn deref_mut(&mut self) -> &mut [T] {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         self.values.deref_mut()
     }
 }
