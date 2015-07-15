@@ -1,4 +1,4 @@
-use {Dense, Element, Major, Sparse};
+use {Dense, Element, Major, Size, Sparse};
 
 /// A compressed matrix.
 ///
@@ -46,7 +46,8 @@ macro_rules! debug_valid(
 
 impl<T: Element> Compressed<T> {
     /// Resize the matrix.
-    pub fn resize(&mut self, rows: usize, columns: usize) {
+    pub fn resize<S: Size>(&mut self, size: S) {
+        let (rows, columns) = size.dimensions();
         self.retain(|i, j, _| i < rows && j < columns);
         let (from, into) = match self.format {
             Major::Column => (self.columns, columns),
@@ -190,7 +191,7 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
 
 #[cfg(test)]
 mod tests {
-    use {Compressed, Dense, Major, Shape};
+    use {Compressed, Dense, Major};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,
@@ -206,7 +207,7 @@ mod tests {
             0.0, 1.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 2.0, 3.0,
             0.0, 0.0, 0.0, 0.0, 4.0,
-        ], Shape::Rectangular(5, 3));
+        ], (5, 3));
 
         let matrix: Compressed<_> = matrix.into();
 
@@ -233,15 +234,15 @@ mod tests {
         let mut matrix = new!(5, 7, 5, Major::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
                               vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
-        matrix.resize(5, 5);
+        matrix.resize((5, 5));
         assert_eq!(matrix, new!(5, 5, 2, Major::Column, vec![1.0, 2.0],
                                 vec![1, 0], vec![0, 0, 0, 1, 2, 2]));
 
-        matrix.resize(5, 3);
+        matrix.resize((5, 3));
         assert_eq!(matrix, new!(5, 3, 1, Major::Column, vec![1.0],
                                 vec![1], vec![0, 0, 0, 1]));
 
-        matrix.resize(5, 1);
+        matrix.resize((5, 1));
         assert_eq!(matrix, new!(5, 1, 0, Major::Column, vec![],
                                 vec![], vec![0, 0]));
     }
@@ -251,11 +252,11 @@ mod tests {
         let mut matrix = new!(5, 7, 5, Major::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
                               vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
-        matrix.resize(3, 7);
+        matrix.resize((3, 7));
         assert_eq!(matrix, new!(3, 7, 3, Major::Column, vec![1.0, 2.0, 4.0],
                                 vec![1, 0, 1], vec![0, 0, 0, 1, 2, 2, 2, 3]));
 
-        matrix.resize(1, 7);
+        matrix.resize((1, 7));
         assert_eq!(matrix, new!(1, 7, 1, Major::Column, vec![2.0],
                                 vec![0], vec![0, 0, 0, 0, 1, 1, 1, 1]));
     }
@@ -265,11 +266,11 @@ mod tests {
         let mut matrix = new!(5, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
                               vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
 
-        matrix.resize(5, 9);
+        matrix.resize((5, 9));
         assert_eq!(matrix, new!(5, 9, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4]));
 
-        matrix.resize(5, 11);
+        matrix.resize((5, 11));
         assert_eq!(matrix, new!(5, 11, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4, 4, 4]));
     }
@@ -279,11 +280,11 @@ mod tests {
         let mut matrix = new!(5, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
                               vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
 
-        matrix.resize(7, 7);
+        matrix.resize((7, 7));
         assert_eq!(matrix, new!(7, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
 
-        matrix.resize(9, 7);
+        matrix.resize((9, 7));
         assert_eq!(matrix, new!(9, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
     }

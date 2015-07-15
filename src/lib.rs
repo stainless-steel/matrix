@@ -32,22 +32,13 @@ pub enum Major {
     Row,
 }
 
-/// A matrix part.
+/// A part of a matrix.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Part {
     /// The lower triangular part.
     Lower,
     /// The upper triangular part.
     Upper,
-}
-
-/// A matrix shape.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Shape {
-    /// A square shape.
-    Square(usize),
-    /// A rectangular shape.
-    Rectangular(usize, usize),
 }
 
 macro_rules! matrix(
@@ -83,6 +74,7 @@ mod compressed;
 mod dense;
 mod diagonal;
 mod element;
+mod size;
 mod triangular;
 
 pub use band::Band;
@@ -90,4 +82,5 @@ pub use compressed::Compressed;
 pub use dense::Dense;
 pub use diagonal::Diagonal;
 pub use element::Element;
+pub use size::Size;
 pub use triangular::Triangular;
