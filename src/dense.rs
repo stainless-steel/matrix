@@ -1,7 +1,7 @@
 use std::convert::Into;
 use std::ops::{Deref, DerefMut};
 
-use {Element, Make, Shape};
+use {Element, Shape};
 
 /// A dense matrix.
 ///
@@ -16,10 +16,9 @@ pub struct Dense<T: Element> {
     pub values: Vec<T>,
 }
 
-matrix!(Dense);
-
-impl<'l, T: Element> Make<&'l [T]> for Dense<T> {
-    fn make(values: &'l [T], shape: Shape) -> Self {
+impl<T: Element> Dense<T> {
+    /// Create a matrix from a slice.
+    pub fn from_slice(values: &[T], shape: Shape) -> Dense<T> {
         let (rows, columns) = match shape {
             Shape::Square(size) => (size, size),
             Shape::Rectangular(rows, columns) => (rows, columns),
@@ -27,10 +26,9 @@ impl<'l, T: Element> Make<&'l [T]> for Dense<T> {
         debug_assert_eq!(values.len(), rows * columns);
         Dense { rows: rows, columns: columns, values: values.to_vec() }
     }
-}
 
-impl<T: Element> Make<Vec<T>> for Dense<T> {
-    fn make(values: Vec<T>, shape: Shape) -> Self {
+    /// Create a matrix from a vector.
+    pub fn from_vec(values: Vec<T>, shape: Shape) -> Dense<T> {
         let (rows, columns) = match shape {
             Shape::Square(size) => (size, size),
             Shape::Rectangular(rows, columns) => (rows, columns),
@@ -39,6 +37,8 @@ impl<T: Element> Make<Vec<T>> for Dense<T> {
         Dense { rows: rows, columns: columns, values: values }
     }
 }
+
+matrix!(Dense);
 
 impl<T: Element> Into<Vec<T>> for Dense<T> {
     #[inline]

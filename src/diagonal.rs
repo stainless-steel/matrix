@@ -1,6 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
-use {Band, Compressed, Dense, Element, Major, Make, Shape, Sparse};
+use {Band, Compressed, Dense, Element, Major, Shape, Sparse};
 
 /// A diagonal matrix.
 ///
@@ -21,10 +21,9 @@ macro_rules! debug_valid(
     ));
 );
 
-matrix!(Diagonal);
-
-impl<'l, T: Element> Make<&'l [T]> for Diagonal<T> {
-    fn make(values: &'l [T], shape: Shape) -> Self {
+impl<T: Element> Diagonal<T> {
+    /// Create a matrix from a slice.
+    pub fn from_slice(values: &[T], shape: Shape) -> Diagonal<T> {
         let (rows, columns) = match shape {
             Shape::Square(size) => (size, size),
             Shape::Rectangular(rows, columns) => (rows, columns),
@@ -32,10 +31,9 @@ impl<'l, T: Element> Make<&'l [T]> for Diagonal<T> {
         debug_assert_eq!(values.len(), min!(rows, columns));
         Diagonal { rows: rows, columns: columns, values: values.to_vec() }
     }
-}
 
-impl<T: Element> Make<Vec<T>> for Diagonal<T> {
-    fn make(values: Vec<T>, shape: Shape) -> Self {
+    /// Create a matrix from a vector.
+    pub fn from_vec(values: Vec<T>, shape: Shape) -> Diagonal<T> {
         let (rows, columns) = match shape {
             Shape::Square(size) => (size, size),
             Shape::Rectangular(rows, columns) => (rows, columns),
@@ -44,6 +42,8 @@ impl<T: Element> Make<Vec<T>> for Diagonal<T> {
         Diagonal { rows: rows, columns: columns, values: values }
     }
 }
+
+matrix!(Diagonal);
 
 impl<T: Element> Sparse for Diagonal<T> {
     #[inline]

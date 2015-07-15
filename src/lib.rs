@@ -23,11 +23,6 @@ pub trait Sparse: Matrix + Into<Dense<<Self as Matrix>::Element>> {
     fn nonzeros(&self) -> usize;
 }
 
-/// A means of constructing matrices.
-pub trait Make<T>: Matrix {
-    fn make(T, Shape) -> Self;
-}
-
 /// A major dimension.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Major {

@@ -190,7 +190,7 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
 
 #[cfg(test)]
 mod tests {
-    use {Compressed, Dense, Major, Make, Shape};
+    use {Compressed, Dense, Major, Shape};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,
@@ -202,11 +202,11 @@ mod tests {
 
     #[test]
     fn from_dense() {
-        let matrix = Dense::make(&[
+        let matrix = Dense::from_vec(vec![
             0.0, 1.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 2.0, 3.0,
             0.0, 0.0, 0.0, 0.0, 4.0,
-        ][..], Shape::Rectangular(5, 3));
+        ], Shape::Rectangular(5, 3));
 
         let matrix: Compressed<_> = matrix.into();
 
