@@ -25,6 +25,13 @@ pub struct Band<T: Element> {
     pub values: Vec<T>,
 }
 
+macro_rules! debug_valid(
+    ($matrix:ident) => (debug_assert!(
+        $matrix.values.len() == ($matrix.superdiagonals + 1 + $matrix.subdiagonals) *
+                                $matrix.columns
+    ));
+);
+
 matrix!(Band);
 
 impl<T: Element> Sparse for Band<T> {
@@ -43,10 +50,10 @@ impl<T: Element> Sparse for Band<T> {
 
 impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
     fn from(band: &'l Band<T>) -> Dense<T> {
-        let &Band { rows, columns, superdiagonals, subdiagonals, ref values } = band;
+        debug_valid!(band);
 
+        let &Band { rows, columns, superdiagonals, subdiagonals, ref values } = band;
         let diagonals = superdiagonals + 1 + subdiagonals;
-        debug_assert_eq!(values.len(), diagonals * columns);
 
         let mut dense = Dense {
             rows: rows,

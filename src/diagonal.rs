@@ -1,6 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
-use {Band, Dense, Element, Make, Shape, Sparse};
+use {Band, Compressed, Dense, Element, Major, Make, Shape, Sparse};
 
 /// A diagonal matrix.
 ///
@@ -14,6 +14,12 @@ pub struct Diagonal<T: Element> {
     /// The values of the diagonal elements.
     pub values: Vec<T>,
 }
+
+macro_rules! debug_valid(
+    ($matrix:ident) => (debug_assert!(
+        $matrix.values.len() == min!($matrix.rows, $matrix.columns)
+    ));
+);
 
 matrix!(Diagonal);
 
@@ -55,6 +61,7 @@ impl<'l, T: Element> From<&'l Diagonal<T>> for Band<T> {
 
 impl<T: Element> From<Diagonal<T>> for Band<T> {
     fn from(diagonal: Diagonal<T>) -> Band<T> {
+        debug_valid!(diagonal);
         Band {
             rows: diagonal.rows,
             columns: diagonal.columns,
@@ -71,9 +78,36 @@ impl<T: Element> From<Diagonal<T>> for Band<T> {
     }
 }
 
+impl<'l, T: Element> From<&'l Diagonal<T>> for Compressed<T> {
+    #[inline]
+    fn from(diagonal: &'l Diagonal<T>) -> Compressed<T> {
+        diagonal.clone().into()
+    }
+}
+
+impl<T: Element> From<Diagonal<T>> for Compressed<T> {
+    #[inline]
+    fn from(diagonal: Diagonal<T>) -> Compressed<T> {
+        debug_valid!(diagonal);
+        let Diagonal { rows, columns, values } = diagonal;
+        let nonzeros = values.len();
+        Compressed {
+            rows: rows,
+            columns: columns,
+            nonzeros: nonzeros,
+            values: values,
+            format: Major::Column,
+            indices: (0..nonzeros).collect(),
+            offsets: (0..(nonzeros + 1)).collect(),
+        }
+    }
+}
+
 impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
     #[inline]
     fn from(diagonal: &Diagonal<T>) -> Dense<T> {
+        debug_valid!(diagonal);
+
         let &Diagonal { rows, columns, ref values } = diagonal;
 
         let mut dense = Dense {
@@ -82,7 +116,6 @@ impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
             values: vec![T::zero(); rows * columns],
         };
 
-        debug_assert_eq!(values.len(), min!(rows, columns));
         for i in 0..min!(rows, columns) {
             dense.values[i * rows + i] = values[i];
         }
@@ -123,7 +156,7 @@ impl<T: Element> DerefMut for Diagonal<T> {
 
 #[cfg(test)]
 mod tests {
-    use {Band, Dense, Diagonal};
+    use {Band, Compressed, Dense, Diagonal, Major};
 
     #[test]
     fn into_band_tall() {
@@ -137,6 +170,18 @@ mod tests {
         let diagonal = Diagonal { rows: 3, columns: 5, values: vec![1.0, 2.0, 3.0] };
         let band: Band<_> = diagonal.into();
         assert_eq!(&band.values, &[1.0, 2.0, 3.0, 0.0, 0.0]);
+    }
+
+    #[test]
+    fn into_compressed() {
+        let diagonal = Diagonal { rows: 5, columns: 3, values: vec![1.0, 2.0, 0.0] };
+
+        let compressed: Compressed<_> = diagonal.into();
+
+        assert_eq!(compressed, Compressed {
+            rows: 5, columns: 3, nonzeros: 3, format: Major::Column, values: vec![1.0, 2.0, 0.0],
+            indices: vec![0, 1, 2], offsets: vec![0, 1, 2, 3]
+        });
     }
 
     #[test]

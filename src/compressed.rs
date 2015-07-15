@@ -1,4 +1,4 @@
-use {Dense, Diagonal, Element, Major, Sparse};
+use {Dense, Element, Major, Sparse};
 
 /// A compressed matrix.
 ///
@@ -32,6 +32,17 @@ pub struct Compressed<T: Element> {
     /// additional element, which is always equal to `nonzeros`.
     pub offsets: Vec<usize>,
 }
+
+macro_rules! debug_valid(
+    ($matrix:ident) => (debug_assert!(
+        $matrix.nonzeros == $matrix.values.len() &&
+        $matrix.nonzeros == $matrix.indices.len() &&
+        match $matrix.format {
+            Major::Column => $matrix.columns + 1 == $matrix.offsets.len(),
+            Major::Row => $matrix.rows + 1 == $matrix.offsets.len(),
+        }
+    ));
+);
 
 impl<T: Element> Compressed<T> {
     /// Resize the matrix.
@@ -138,12 +149,11 @@ impl<T: Element> From<Dense<T>> for Compressed<T> {
 
 impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
     fn from(compressed: &'l Compressed<T>) -> Dense<T> {
-        let &Compressed {
-            rows, columns, nonzeros, format, ref values, ref indices, ref offsets
-        } = compressed;
+        debug_valid!(compressed);
 
-        debug_assert_eq!(values.len(), nonzeros);
-        debug_assert_eq!(indices.len(), nonzeros);
+        let &Compressed {
+            rows, columns, format, ref values, ref indices, ref offsets, ..
+        } = compressed;
 
         let mut dense = Dense {
             rows: rows,
@@ -153,7 +163,6 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
 
         match format {
             Major::Row => {
-                debug_assert_eq!(offsets.len(), rows + 1);
                 for i in 0..rows {
                     for k in offsets[i]..offsets[i + 1] {
                         dense.values[indices[k] * rows + i] = values[k];
@@ -161,7 +170,6 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
                 }
             },
             Major::Column => {
-                debug_assert_eq!(offsets.len(), columns + 1);
                 for j in 0..columns {
                     for k in offsets[j]..offsets[j + 1] {
                         dense.values[j * rows + indices[k]] = values[k];
@@ -180,34 +188,9 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
     }
 }
 
-impl<'l, T: Element> From<&'l Diagonal<T>> for Compressed<T> {
-    #[inline]
-    fn from(diagonal: &'l Diagonal<T>) -> Compressed<T> {
-        diagonal.clone().into()
-    }
-}
-
-impl<T: Element> From<Diagonal<T>> for Compressed<T> {
-    #[inline]
-    fn from(diagonal: Diagonal<T>) -> Compressed<T> {
-        let Diagonal { rows, columns, values } = diagonal;
-        let nonzeros = values.len();
-        debug_assert_eq!(nonzeros, min!(rows, columns));
-        Compressed {
-            rows: rows,
-            columns: columns,
-            nonzeros: nonzeros,
-            values: values,
-            format: Major::Column,
-            indices: (0..nonzeros).collect(),
-            offsets: (0..(nonzeros + 1)).collect(),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use {Compressed, Dense, Diagonal, Major, Make, Shape};
+    use {Compressed, Dense, Major, Make, Shape};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,
@@ -245,16 +228,6 @@ mod tests {
             0.0, 2.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 3.0, 0.0, 0.0,
         ]);
-    }
-
-    #[test]
-    fn from_diagonal() {
-        let diagonal = Diagonal { rows: 5, columns: 3, values: vec![1.0, 2.0, 0.0] };
-
-        let compressed: Compressed<_> = diagonal.into();
-
-        assert_eq!(compressed, new!(5, 3, 3, Major::Column, vec![1.0, 2.0, 0.0],
-                                    vec![0, 1, 2], vec![0, 1, 2, 3]));
     }
 
     #[test]

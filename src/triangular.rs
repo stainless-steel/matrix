@@ -18,6 +18,12 @@ pub struct Triangular<T: Element> {
     pub values: Vec<T>,
 }
 
+macro_rules! debug_valid(
+    ($matrix:ident) => (debug_assert!(
+        $matrix.values.len() == $matrix.size * ($matrix.size + 1) / 2
+    ));
+);
+
 matrix!(Triangular, size, size);
 
 impl<T: Element> Sparse for Triangular<T> {
@@ -29,9 +35,9 @@ impl<T: Element> Sparse for Triangular<T> {
 
 impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
     fn from(triangular: &'l Triangular<T>) -> Dense<T> {
-        let &Triangular { size, format, ref values } = triangular;
+        debug_valid!(triangular);
 
-        debug_assert_eq!(values.len(), size * (size + 1) / 2);
+        let &Triangular { size, format, ref values } = triangular;
 
         let mut dense = Dense {
             rows: size,
