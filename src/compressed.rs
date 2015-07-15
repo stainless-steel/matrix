@@ -116,35 +116,27 @@ impl<T: Element> Compressed<T> {
 
     /// Retain the elements that satisfy a condition and discard the rest.
     pub fn retain<F>(&mut self, mut condition: F) where F: FnMut(usize, usize, &T) -> bool {
+        let major = match self.format {
+            Major::Column => self.columns,
+            Major::Row => self.rows,
+        };
         let (mut i, mut k) = (0, 0);
         while k < self.indices.len() {
-            match self.format {
-                Major::Column => {
-                    while i < self.columns && self.offsets[i + 1] <= k {
-                        i += 1;
-                    }
-                    if condition(self.indices[k], i, &self.values[k]) {
-                        k += 1;
-                        continue;
-                    }
-                },
-                Major::Row => {
-                    while i < self.rows && self.offsets[i + 1] <= k {
-                        i += 1;
-                    }
-                    if condition(i, self.indices[k], &self.values[k]) {
-                        k += 1;
-                        continue;
-                    }
-                },
+            while i < major && self.offsets[i + 1] <= k {
+                i += 1;
+            }
+            let condition = match self.format {
+                Major::Column => condition(self.indices[k], i, &self.values[k]),
+                Major::Row => condition(i, self.indices[k], &self.values[k]),
+            };
+            if condition {
+                k += 1;
+                continue;
             }
             self.nonzeros -= 1;
             self.values.remove(k);
             self.indices.remove(k);
-            for offset in self.offsets.iter_mut().rev() {
-                if k >= *offset {
-                    break;
-                }
+            for offset in &mut self.offsets[(i + 1)..] {
                 *offset -= 1;
             }
         }
