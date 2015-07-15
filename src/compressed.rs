@@ -36,41 +36,55 @@ pub struct Compressed<T: Element> {
 impl<T: Element> Compressed<T> {
     /// Resize the matrix.
     pub fn resize(&mut self, rows: usize, columns: usize) {
-        match self.format {
-            Major::Column => {
-                if self.columns > columns {
-                    let i = self.offsets[columns];
-                    self.nonzeros = i;
-                    self.data.truncate(i);
-                    self.indices.truncate(i);
-                    self.offsets.truncate(columns + 1);
-                    self.offsets[columns] = i;
-                } else if self.columns < columns {
-                    self.offsets.extend(vec![self.nonzeros; columns - self.columns]);
-                }
-                if self.rows > rows {
-                    let mut i = 0;
-                    while i < self.indices.len() {
-                        if self.indices[i] >= rows {
-                            self.nonzeros -= 1;
-                            self.data.remove(i);
-                            self.indices.remove(i);
-                            for j in (0..(columns + 1)).rev() {
-                                if i >= self.offsets[j] {
-                                    break;
-                                }
-                                self.offsets[j] -= 1;
-                            }
-                        } else {
-                            i += 1;
-                        }
-                    }
-                }
-            },
-            _ => unimplemented!(),
+        self.retain(|i, j, _| i < rows && j < columns);
+        let (from, into) = match self.format {
+            Major::Column => (self.columns, columns),
+            Major::Row => (self.rows, rows),
+        };
+        if from > into {
+            self.offsets.truncate(into + 1);
+        } else if from < into {
+            self.offsets.extend(vec![self.nonzeros; into - from]);
         }
-        self.rows = rows;
         self.columns = columns;
+        self.rows = rows;
+    }
+
+    /// Retain only those elements that satisfy a condition.
+    pub fn retain<F>(&mut self, mut condition: F) where F: FnMut(usize, usize, &T) -> bool {
+        let mut i = 0;
+        let mut k = 0;
+        while k < self.indices.len() {
+            match self.format {
+                Major::Column => {
+                    while i < self.columns && self.offsets[i + 1] <= k {
+                        i += 1;
+                    }
+                    if condition(self.indices[k], i, &self.data[k]) {
+                        k += 1;
+                        continue;
+                    }
+                },
+                Major::Row => {
+                    while i < self.rows && self.offsets[i + 1] <= k {
+                        i += 1;
+                    }
+                    if condition(i, self.indices[k], &self.data[k]) {
+                        k += 1;
+                        continue;
+                    }
+                },
+            }
+            self.nonzeros -= 1;
+            self.data.remove(k);
+            self.indices.remove(k);
+            for offset in self.offsets.iter_mut().rev() {
+                if k >= *offset {
+                    break;
+                }
+                *offset -= 1;
+            }
+        }
     }
 }
 

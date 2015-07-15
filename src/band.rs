@@ -83,13 +83,8 @@ mod tests {
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr, $data:expr) => (
-            Band {
-                rows: $rows,
-                columns: $columns,
-                superdiagonals: $superdiagonals,
-                subdiagonals: $subdiagonals,
-                data: $data,
-            }
+            Band { rows: $rows, columns: $columns, superdiagonals: $superdiagonals,
+                   subdiagonals: $subdiagonals, data: $data }
         );
         ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr) => (
             new!($rows, $columns, $superdiagonals, $subdiagonals,
