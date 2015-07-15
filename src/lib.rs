@@ -75,7 +75,7 @@ mod size;
 mod triangular;
 
 pub use band::Band;
-pub use compressed::Compressed;
+pub use compressed::{Compressed, CompressedIterator};
 pub use dense::Dense;
 pub use diagonal::Diagonal;
 pub use element::Element;

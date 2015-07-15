@@ -36,6 +36,13 @@ pub struct Compressed<T: Element> {
     pub offsets: Vec<usize>,
 }
 
+/// A sparse iterator of a compressed matrix.
+pub struct CompressedIterator<'l, T: 'l + Element> {
+    matrix: &'l Compressed<T>,
+    taken: usize,
+    major: usize,
+}
+
 macro_rules! debug_valid(
     ($matrix:ident) => (debug_assert!(
         $matrix.nonzeros == $matrix.values.len() &&
@@ -94,6 +101,12 @@ impl<T: Element> Compressed<T> {
         for offset in &mut self.offsets[(j + 1)..] {
             *offset += 1;
         }
+    }
+
+    /// Return an iterator over the stored elements.
+    #[inline]
+    pub fn iter<'l>(&'l self) -> CompressedIterator<'l, T> {
+        CompressedIterator { matrix: self, taken: 0, major: 0 }
     }
 
     /// Resize the matrix.
@@ -231,6 +244,26 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
     }
 }
 
+impl<'l, T: Element> Iterator for CompressedIterator<'l, T> {
+    type Item = (usize, usize, &'l T);
+
+    fn next(&mut self) -> Option<(usize, usize, &'l T)> {
+        let &mut CompressedIterator { matrix, taken, mut major } = self;
+        if taken == matrix.nonzeros {
+            return None;
+        }
+        while matrix.offsets[major + 1] <= taken {
+            major += 1;
+        }
+        self.taken += 1;
+        self.major = major;
+        Some(match matrix.format {
+            Major::Column => (matrix.indices[taken], major, &matrix.values[taken]),
+            Major::Row => (major, matrix.indices[taken], &matrix.values[taken]),
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use {Compressed, Dense, Major};
@@ -291,6 +324,21 @@ mod tests {
 
         assert_eq!(matrix.nonzeros, 5 * 3);
         assert_eq!(dense, (&matrix).into());
+    }
+
+    #[test]
+    fn iter() {
+        let matrix = new!(5, 7, 5, Major::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+                          vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+
+        let result = matrix.iter().map(|(i, _, _)| i).collect::<Vec<_>>();
+        assert_eq!(&result, &vec![1, 0, 3, 1, 4]);
+
+        let result = matrix.iter().map(|(_, j, _)| j).collect::<Vec<_>>();
+        assert_eq!(&result, &vec![2, 3, 5, 6, 6]);
+
+        let result = matrix.iter().map(|(_, _, &value)| value).collect::<Vec<_>>();
+        assert_eq!(&result, &vec![1.0, 2.0, 3.0, 4.0, 5.0]);
     }
 
     #[test]
