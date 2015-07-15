@@ -1,13 +1,15 @@
+//! Band matrices.
+//!
+//! The storage is suitable for matrices with a small number of superdiagonals
+//! and/or subdiagonals relative to the smallest dimension. Data are stored in
+//! the [format][1] adopted by [LAPACK][2].
+//!
+//! [1]: http://www.netlib.org/lapack/lug/node124.html
+//! [2]: http://www.netlib.org/lapack
+
 use {Dense, Element, Sparse};
 
 /// A band matrix.
-///
-/// The storage is suitable for matrices with a small number of superdiagonals
-/// and/or subdiagonals relative to the smallest dimension. Data are stored in
-/// the [format][1] adopted by [LAPACK][2].
-///
-/// [1]: http://www.netlib.org/lapack/lug/node124.html
-/// [2]: http://www.netlib.org/lapack
 #[derive(Clone, Debug, PartialEq)]
 pub struct Band<T: Element> {
     /// The number of rows.

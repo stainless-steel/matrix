@@ -47,14 +47,14 @@ macro_rules! min(
     });
 );
 
-mod band;
-mod dense;
-mod diagonal;
 mod element;
 mod position;
 mod size;
 
+pub mod band;
 pub mod compressed;
+pub mod dense;
+pub mod diagonal;
 pub mod triangular;
 
 pub use band::Band;

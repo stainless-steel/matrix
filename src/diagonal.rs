@@ -1,11 +1,13 @@
+//! Diagonal matrices.
+//!
+//! The storage is suitable for generic diagonal matrices.
+
 use std::ops::{Deref, DerefMut};
 
 use compressed::Format;
 use {Band, Compressed, Dense, Element, Size, Sparse};
 
 /// A diagonal matrix.
-///
-/// The storage is suitable for generic diagonal matrices.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Diagonal<T: Element> {
     /// The number of rows.

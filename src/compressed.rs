@@ -1,17 +1,19 @@
+//! Compressed matrices.
+//!
+//! The storage is suitable for generic sparse matrices. Data are stored in one
+//! of the following formats:
+//!
+//! * the [compressed-column][1] format or
+//! * the [compressed-row][2] format.
+//!
+//! [1]: http://netlib.org/linalg/html_templates/node92.html
+//! [2]: http://netlib.org/linalg/html_templates/node91.html
+
 use std::mem;
 
 use {Dense, Element, Position, Size, Sparse};
 
 /// A compressed matrix.
-///
-/// The storage is suitable for generic sparse matrices. Data are stored in one
-/// of the following formats:
-///
-/// * the [compressed-column][1] format or
-/// * the [compressed-row][2] format.
-///
-/// [1]: http://netlib.org/linalg/html_templates/node92.html
-/// [2]: http://netlib.org/linalg/html_templates/node91.html
 #[derive(Clone, Debug, PartialEq)]
 pub struct Compressed<T: Element> {
     /// The number of rows.

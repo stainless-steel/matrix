@@ -1,3 +1,7 @@
+//! Dense matrices.
+//!
+//! The storage is suitable for generic matrices.
+
 use std::convert::Into;
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 

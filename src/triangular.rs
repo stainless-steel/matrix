@@ -1,13 +1,15 @@
+//! Triangular matrices.
+//!
+//! Apart from triangular matrices, the storage is suitable for symmetric and
+//! Hermitian matrices. Data are stored in the [format][1] adopted by
+//! [LAPACK][2].
+//!
+//! [1]: http://www.netlib.org/lapack/lug/node123.html
+//! [2]: http://www.netlib.org/lapack
+
 use {Dense, Element, Sparse};
 
 /// A triangular matrix.
-///
-/// Apart from triangular matrices, the storage is suitable for symmetric and
-/// Hermitian matrices. Data are stored in the [format][1] adopted by
-/// [LAPACK][2].
-///
-/// [1]: http://www.netlib.org/lapack/lug/node123.html
-/// [2]: http://www.netlib.org/lapack
 #[derive(Clone, Debug, PartialEq)]
 pub struct Triangular<T: Element> {
     /// The number of rows or columns.
