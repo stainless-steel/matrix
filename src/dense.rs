@@ -1,7 +1,7 @@
 use std::convert::Into;
-use std::ops::{Deref, DerefMut};
+use std::ops::{Deref, DerefMut, Index, IndexMut};
 
-use {Element, Size};
+use {Element, Position, Size};
 
 /// A dense matrix.
 ///
@@ -31,6 +31,24 @@ impl<T: Element> Dense<T> {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), rows * columns);
         Dense { rows: rows, columns: columns, values: values }
+    }
+}
+
+impl<T: Element, P: Position> Index<P> for Dense<T> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, index: P) -> &T {
+        let (i, j) = index.coordinates();
+        &self.values[j * self.rows + i]
+    }
+}
+
+impl<T: Element, P: Position> IndexMut<P> for Dense<T> {
+    #[inline]
+    fn index_mut(&mut self, index: P) -> &mut T {
+        let (i, j) = index.coordinates();
+        &mut self.values[j * self.rows + i]
     }
 }
 

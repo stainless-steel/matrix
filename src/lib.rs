@@ -70,6 +70,7 @@ mod compressed;
 mod dense;
 mod diagonal;
 mod element;
+mod position;
 mod size;
 mod triangular;
 
@@ -78,5 +79,6 @@ pub use compressed::Compressed;
 pub use dense::Dense;
 pub use diagonal::Diagonal;
 pub use element::Element;
+pub use position::Position;
 pub use size::Size;
 pub use triangular::Triangular;

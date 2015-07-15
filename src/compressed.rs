@@ -1,4 +1,6 @@
-use {Dense, Element, Major, Size, Sparse};
+use std::mem;
+
+use {Dense, Element, Major, Position, Size, Sparse};
 
 /// A compressed matrix.
 ///
@@ -47,6 +49,21 @@ macro_rules! debug_valid(
 matrix!(Compressed);
 
 impl<T: Element> Compressed<T> {
+    /// Return an element.
+    pub fn get<P: Position>(&self, position: P) -> T {
+        let (mut i, mut j) = position.coordinates();
+        debug_assert!(i < self.rows && j < self.columns);
+        if let Major::Row = self.format {
+            mem::swap(&mut i, &mut j);
+        }
+        for k in self.offsets[j]..self.offsets[j + 1] {
+            if self.indices[k] == i {
+                return self.values[k];
+            }
+        }
+        T::zero()
+    }
+
     /// Resize the matrix.
     pub fn resize<S: Size>(&mut self, size: S) {
         let (rows, columns) = size.dimensions();
@@ -66,8 +83,7 @@ impl<T: Element> Compressed<T> {
 
     /// Retain only those elements that satisfy a condition.
     pub fn retain<F>(&mut self, mut condition: F) where F: FnMut(usize, usize, &T) -> bool {
-        let mut i = 0;
-        let mut k = 0;
+        let (mut i, mut k) = (0, 0);
         while k < self.indices.len() {
             match self.format {
                 Major::Column => {
@@ -202,31 +218,20 @@ mod tests {
     );
 
     #[test]
-    fn from_dense() {
-        let matrix = Dense::from_vec(vec![
+    fn get() {
+        let origin = Dense::from_vec(vec![
             0.0, 1.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 2.0, 3.0,
             0.0, 0.0, 0.0, 0.0, 4.0,
         ], (5, 3));
 
-        let matrix: Compressed<_> = matrix.into();
+        let matrix: Compressed<_> = (&origin).into();
 
-        assert_eq!(matrix, new!(5, 3, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
-                                vec![1, 3, 4, 4], vec![0, 1, 3, 4]));
-    }
-
-    #[test]
-    fn into_dense() {
-        let matrix = new!(5, 3, 3, Major::Column, vec![1.0, 2.0, 3.0],
-                          vec![0, 1, 2], vec![0, 1, 2, 3]);
-
-        let matrix: Dense<_> = matrix.into();
-
-        assert_eq!(&matrix[..], &[
-            1.0, 0.0, 0.0, 0.0, 0.0,
-            0.0, 2.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 3.0, 0.0, 0.0,
-        ]);
+        for i in 0..5 {
+            for j in 0..3 {
+                assert_eq!(origin[(i, j)], matrix.get((i, j)));
+            }
+        }
     }
 
     #[test]
@@ -287,5 +292,33 @@ mod tests {
         matrix.resize((9, 7));
         assert_eq!(matrix, new!(9, 7, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
+    }
+
+    #[test]
+    fn from_dense() {
+        let matrix = Dense::from_vec(vec![
+            0.0, 1.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 2.0, 3.0,
+            0.0, 0.0, 0.0, 0.0, 4.0,
+        ], (5, 3));
+
+        let matrix: Compressed<_> = matrix.into();
+
+        assert_eq!(matrix, new!(5, 3, 4, Major::Column, vec![1.0, 2.0, 3.0, 4.0],
+                                vec![1, 3, 4, 4], vec![0, 1, 3, 4]));
+    }
+
+    #[test]
+    fn into_dense() {
+        let matrix = new!(5, 3, 3, Major::Column, vec![1.0, 2.0, 3.0],
+                          vec![0, 1, 2], vec![0, 1, 2, 3]);
+
+        let matrix: Dense<_> = matrix.into();
+
+        assert_eq!(&*matrix, &[
+            1.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 2.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 3.0, 0.0, 0.0,
+        ]);
     }
 }
