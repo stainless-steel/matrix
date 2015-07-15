@@ -12,30 +12,30 @@ pub struct Diagonal<T: Element> {
     /// The number of columns.
     pub columns: usize,
     /// The values of the diagonal elements.
-    pub data: Vec<T>,
+    pub values: Vec<T>,
 }
 
 matrix!(Diagonal);
 
 impl<'l, T: Element> Make<&'l [T]> for Diagonal<T> {
-    fn make(data: &'l [T], shape: Shape) -> Self {
+    fn make(values: &'l [T], shape: Shape) -> Self {
         let (rows, columns) = match shape {
             Shape::Square(size) => (size, size),
             Shape::Rectangular(rows, columns) => (rows, columns),
         };
-        debug_assert_eq!(data.len(), min!(rows, columns));
-        Diagonal { rows: rows, columns: columns, data: data.to_vec() }
+        debug_assert_eq!(values.len(), min!(rows, columns));
+        Diagonal { rows: rows, columns: columns, values: values.to_vec() }
     }
 }
 
 impl<T: Element> Make<Vec<T>> for Diagonal<T> {
-    fn make(data: Vec<T>, shape: Shape) -> Self {
+    fn make(values: Vec<T>, shape: Shape) -> Self {
         let (rows, columns) = match shape {
             Shape::Square(size) => (size, size),
             Shape::Rectangular(rows, columns) => (rows, columns),
         };
-        debug_assert_eq!(data.len(), min!(rows, columns));
-        Diagonal { rows: rows, columns: columns, data: data }
+        debug_assert_eq!(values.len(), min!(rows, columns));
+        Diagonal { rows: rows, columns: columns, values: values }
     }
 }
 
@@ -60,12 +60,12 @@ impl<T: Element> From<Diagonal<T>> for Band<T> {
             columns: diagonal.columns,
             superdiagonals: 0,
             subdiagonals: 0,
-            data: {
-                let mut data = diagonal.data;
+            values: {
+                let mut values = diagonal.values;
                 for _ in diagonal.rows..diagonal.columns {
-                    data.push(T::zero());
+                    values.push(T::zero());
                 }
-                data
+                values
             },
         }
     }
@@ -74,17 +74,17 @@ impl<T: Element> From<Diagonal<T>> for Band<T> {
 impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
     #[inline]
     fn from(diagonal: &Diagonal<T>) -> Dense<T> {
-        let &Diagonal { rows, columns, ref data } = diagonal;
+        let &Diagonal { rows, columns, ref values } = diagonal;
 
         let mut dense = Dense {
             rows: rows,
             columns: columns,
-            data: vec![T::zero(); rows * columns],
+            values: vec![T::zero(); rows * columns],
         };
 
-        debug_assert_eq!(data.len(), min!(rows, columns));
+        debug_assert_eq!(values.len(), min!(rows, columns));
         for i in 0..min!(rows, columns) {
-            dense.data[i * rows + i] = data[i];
+            dense.values[i * rows + i] = values[i];
         }
 
         dense
@@ -101,7 +101,7 @@ impl<T: Element> From<Diagonal<T>> for Dense<T> {
 impl<T: Element> Into<Vec<T>> for Diagonal<T> {
     #[inline]
     fn into(self) -> Vec<T> {
-        self.data
+        self.values
     }
 }
 
@@ -110,14 +110,14 @@ impl<T: Element> Deref for Diagonal<T> {
 
     #[inline]
     fn deref(&self) -> &[T] {
-        self.data.deref()
+        self.values.deref()
     }
 }
 
 impl<T: Element> DerefMut for Diagonal<T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut [T] {
-        self.data.deref_mut()
+        self.values.deref_mut()
     }
 }
 
@@ -130,12 +130,12 @@ mod tests {
         let diagonal = Diagonal {
             rows: 5,
             columns: 3,
-            data: vec![1.0, 2.0, 3.0],
+            values: vec![1.0, 2.0, 3.0],
         };
 
         let band: Band<_> = diagonal.into();
 
-        assert_eq!(&band.data, &[1.0, 2.0, 3.0]);
+        assert_eq!(&band.values, &[1.0, 2.0, 3.0]);
     }
 
     #[test]
@@ -143,12 +143,12 @@ mod tests {
         let diagonal = Diagonal {
             rows: 3,
             columns: 5,
-            data: vec![1.0, 2.0, 3.0],
+            values: vec![1.0, 2.0, 3.0],
         };
 
         let band: Band<_> = diagonal.into();
 
-        assert_eq!(&band.data, &[1.0, 2.0, 3.0, 0.0, 0.0]);
+        assert_eq!(&band.values, &[1.0, 2.0, 3.0, 0.0, 0.0]);
     }
 
     #[test]
@@ -156,14 +156,14 @@ mod tests {
         let diagonal = Diagonal {
             rows: 3,
             columns: 5,
-            data: vec![1.0, 2.0, 3.0],
+            values: vec![1.0, 2.0, 3.0],
         };
 
         let dense: Dense<_> = diagonal.into();
 
         assert_eq!(dense.rows, 3);
         assert_eq!(dense.columns, 5);
-        assert_eq!(&dense.data, &[
+        assert_eq!(&dense.values, &[
             1.0, 0.0, 0.0,
             0.0, 2.0, 0.0,
             0.0, 0.0, 3.0,

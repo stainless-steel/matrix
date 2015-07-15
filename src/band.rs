@@ -22,7 +22,7 @@ pub struct Band<T: Element> {
     /// subdiagonals) × columns` matrix such that the first row corresponds to
     /// the uppermost superdiagonal whereas the last row corresponds to the
     /// lowest supdiagonal.
-    pub data: Vec<T>,
+    pub values: Vec<T>,
 }
 
 matrix!(Band);
@@ -43,27 +43,27 @@ impl<T: Element> Sparse for Band<T> {
 
 impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
     fn from(band: &'l Band<T>) -> Dense<T> {
-        let &Band { rows, columns, superdiagonals, subdiagonals, ref data } = band;
+        let &Band { rows, columns, superdiagonals, subdiagonals, ref values } = band;
 
         let diagonals = superdiagonals + 1 + subdiagonals;
-        debug_assert_eq!(data.len(), diagonals * columns);
+        debug_assert_eq!(values.len(), diagonals * columns);
 
         let mut dense = Dense {
             rows: rows,
             columns: columns,
-            data: vec![T::zero(); rows * columns],
+            values: vec![T::zero(); rows * columns],
         };
 
         for k in 0..(superdiagonals + 1) {
             for i in 0..min!(columns - k, rows) {
                 let j = i + k;
-                dense.data[j * rows + i] = data[j * diagonals + superdiagonals - k];
+                dense.values[j * rows + i] = values[j * diagonals + superdiagonals - k];
             }
         }
         for k in 1..(subdiagonals + 1) {
             for i in k..min!(columns + k, rows) {
                 let j = i - k;
-                dense.data[j * rows + i] = data[j * diagonals + superdiagonals + k];
+                dense.values[j * rows + i] = values[j * diagonals + superdiagonals + k];
             }
         }
 
@@ -82,9 +82,9 @@ mod tests {
     use {Band, Dense, Sparse};
 
     macro_rules! new(
-        ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr, $data:expr) => (
+        ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr, $values:expr) => (
             Band { rows: $rows, columns: $columns, superdiagonals: $superdiagonals,
-                   subdiagonals: $subdiagonals, data: $data }
+                   subdiagonals: $subdiagonals, values: $values }
         );
         ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr) => (
             new!($rows, $columns, $superdiagonals, $subdiagonals,

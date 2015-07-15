@@ -21,13 +21,13 @@ pub struct Compressed<T: Element> {
     /// The storage format.
     pub format: Major,
     /// The values of the nonzero elements.
-    pub data: Vec<T>,
+    pub values: Vec<T>,
     /// The indices of rows for `Major::Column` or columns for `Major::Row` of
     /// the nonzero elements.
     pub indices: Vec<usize>,
     /// The offsets of columns for `Major::Column` or rows for `Major::Row` such
     /// that the values and indices of the `i`th column for `Major::Column` or
-    /// the `i`th row for `Major::Row` are stored starting from `data[j]` and
+    /// the `i`th row for `Major::Row` are stored starting from `values[j]` and
     /// `indices[j]`, respectively, where `j = offsets[i]`. The vector has one
     /// additional element, which is always equal to `nonzeros`.
     pub offsets: Vec<usize>,
@@ -60,7 +60,7 @@ impl<T: Element> Compressed<T> {
                     while i < self.columns && self.offsets[i + 1] <= k {
                         i += 1;
                     }
-                    if condition(self.indices[k], i, &self.data[k]) {
+                    if condition(self.indices[k], i, &self.values[k]) {
                         k += 1;
                         continue;
                     }
@@ -69,14 +69,14 @@ impl<T: Element> Compressed<T> {
                     while i < self.rows && self.offsets[i + 1] <= k {
                         i += 1;
                     }
-                    if condition(i, self.indices[k], &self.data[k]) {
+                    if condition(i, self.indices[k], &self.values[k]) {
                         k += 1;
                         continue;
                     }
                 },
             }
             self.nonzeros -= 1;
-            self.data.remove(k);
+            self.values.remove(k);
             self.indices.remove(k);
             for offset in self.offsets.iter_mut().rev() {
                 if k >= *offset {
@@ -99,30 +99,30 @@ impl<T: Element> Sparse for Compressed<T> {
 
 impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
     fn from(dense: &'l Dense<T>) -> Compressed<T> {
-        let mut data = vec![];
+        let mut values = vec![];
         let mut indices = vec![];
         let mut offsets = vec![];
 
         let mut k = 0;
         let zero = T::zero();
         for _ in 0..dense.columns {
-            offsets.push(data.len());
+            offsets.push(values.len());
             for i in 0..dense.rows {
-                if dense.data[k] != zero {
-                    data.push(dense.data[k]);
+                if dense.values[k] != zero {
+                    values.push(dense.values[k]);
                     indices.push(i);
                 }
                 k += 1;
             }
         }
-        offsets.push(data.len());
+        offsets.push(values.len());
 
         Compressed {
             rows: dense.rows,
             columns: dense.columns,
-            nonzeros: data.len(),
+            nonzeros: values.len(),
             format: Major::Column,
-            data: data,
+            values: values,
             indices: indices,
             offsets: offsets,
         }
@@ -139,16 +139,16 @@ impl<T: Element> From<Dense<T>> for Compressed<T> {
 impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
     fn from(compressed: &'l Compressed<T>) -> Dense<T> {
         let &Compressed {
-            rows, columns, nonzeros, format, ref data, ref indices, ref offsets
+            rows, columns, nonzeros, format, ref values, ref indices, ref offsets
         } = compressed;
 
-        debug_assert_eq!(data.len(), nonzeros);
+        debug_assert_eq!(values.len(), nonzeros);
         debug_assert_eq!(indices.len(), nonzeros);
 
         let mut dense = Dense {
             rows: rows,
             columns: columns,
-            data: vec![T::zero(); rows * columns],
+            values: vec![T::zero(); rows * columns],
         };
 
         match format {
@@ -157,7 +157,7 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
                 for i in 0..rows {
                     for k in offsets[i]..offsets[i + 1] {
                         let j = indices[k];
-                        dense.data[j * rows + i] = data[k];
+                        dense.values[j * rows + i] = values[k];
                     }
                 }
             },
@@ -166,7 +166,7 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
                 for j in 0..columns {
                     for k in offsets[j]..offsets[j + 1] {
                         let i = indices[k];
-                        dense.data[j * rows + i] = data[k];
+                        dense.values[j * rows + i] = values[k];
                     }
                 }
             },
@@ -192,14 +192,14 @@ impl<'l, T: Element> From<&'l Diagonal<T>> for Compressed<T> {
 impl<T: Element> From<Diagonal<T>> for Compressed<T> {
     #[inline]
     fn from(diagonal: Diagonal<T>) -> Compressed<T> {
-        let Diagonal { rows, columns, data } = diagonal;
-        let nonzeros = data.len();
+        let Diagonal { rows, columns, values } = diagonal;
+        let nonzeros = values.len();
         debug_assert_eq!(nonzeros, min!(rows, columns));
         Compressed {
             rows: rows,
             columns: columns,
             nonzeros: nonzeros,
-            data: data,
+            values: values,
             format: Major::Column,
             indices: (0..nonzeros).collect(),
             offsets: (0..(nonzeros + 1)).collect(),
@@ -213,9 +213,9 @@ mod tests {
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,
-         $data:expr, $indices:expr, $offsets:expr) => (
+         $values:expr, $indices:expr, $offsets:expr) => (
             Compressed { rows: $rows, columns: $columns, nonzeros: $nonzeros, format: $format,
-                         data: $data, indices: $indices, offsets: $offsets }
+                         values: $values, indices: $indices, offsets: $offsets }
         );
     );
 
@@ -251,7 +251,7 @@ mod tests {
 
     #[test]
     fn from_diagonal() {
-        let diagonal = Diagonal { rows: 5, columns: 3, data: vec![1.0, 2.0, 0.0] };
+        let diagonal = Diagonal { rows: 5, columns: 3, values: vec![1.0, 2.0, 0.0] };
 
         let compressed: Compressed<_> = diagonal.into();
 

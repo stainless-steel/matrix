@@ -14,8 +14,8 @@ pub struct Triangular<T: Element> {
     pub size: usize,
     /// The storage format.
     pub format: Part,
-    /// The data stored in the column-major order.
-    pub data: Vec<T>,
+    /// The values stored in the column-major order.
+    pub values: Vec<T>,
 }
 
 matrix!(Triangular, size, size);
@@ -29,14 +29,14 @@ impl<T: Element> Sparse for Triangular<T> {
 
 impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
     fn from(triangular: &'l Triangular<T>) -> Dense<T> {
-        let &Triangular { size, format, ref data } = triangular;
+        let &Triangular { size, format, ref values } = triangular;
 
-        debug_assert_eq!(data.len(), size * (size + 1) / 2);
+        debug_assert_eq!(values.len(), size * (size + 1) / 2);
 
         let mut dense = Dense {
             rows: size,
             columns: size,
-            data: vec![T::zero(); size * size],
+            values: vec![T::zero(); size * size],
         };
 
         match format {
@@ -44,7 +44,7 @@ impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
                 let mut k = 0;
                 for j in 0..size {
                     for i in j..size {
-                        dense.data[j * size + i] = data[k];
+                        dense.values[j * size + i] = values[k];
                         k += 1;
                     }
                 }
@@ -53,7 +53,7 @@ impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
                 let mut k = 0;
                 for j in 0..size {
                     for i in 0..(j + 1) {
-                        dense.data[j * size + i] = data[k];
+                        dense.values[j * size + i] = values[k];
                         k += 1;
                     }
                 }
@@ -79,7 +79,7 @@ mod tests {
         let triangular = Triangular {
             size: 4,
             format: Part::Lower,
-            data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
+            values: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
         let dense: Dense<_> = triangular.into();
@@ -97,7 +97,7 @@ mod tests {
         let triangular = Triangular {
             size: 4,
             format: Part::Upper,
-            data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
+            values: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
         let dense: Dense<_> = triangular.into();
