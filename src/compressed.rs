@@ -156,8 +156,7 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
                 debug_assert_eq!(offsets.len(), rows + 1);
                 for i in 0..rows {
                     for k in offsets[i]..offsets[i + 1] {
-                        let j = indices[k];
-                        dense.values[j * rows + i] = values[k];
+                        dense.values[indices[k] * rows + i] = values[k];
                     }
                 }
             },
@@ -165,8 +164,7 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
                 debug_assert_eq!(offsets.len(), columns + 1);
                 for j in 0..columns {
                     for k in offsets[j]..offsets[j + 1] {
-                        let i = indices[k];
-                        dense.values[j * rows + i] = values[k];
+                        dense.values[j * rows + indices[k]] = values[k];
                     }
                 }
             },
