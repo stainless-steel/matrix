@@ -1,4 +1,4 @@
-use {Dense, Element, Part, Sparse};
+use {Dense, Element, Sparse};
 
 /// A triangular matrix.
 ///
@@ -13,9 +13,18 @@ pub struct Triangular<T: Element> {
     /// The number of rows or columns.
     pub size: usize,
     /// The storage format.
-    pub format: Part,
+    pub format: Format,
     /// The values stored in the column-major order.
     pub values: Vec<T>,
+}
+
+/// A format of a triangular matrix.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Format {
+    /// The lower-triangular format.
+    Lower,
+    /// The upper-triangular format.
+    Upper,
 }
 
 macro_rules! debug_valid(
@@ -46,7 +55,7 @@ impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
         };
 
         match format {
-            Part::Lower => {
+            Format::Lower => {
                 let mut k = 0;
                 for j in 0..size {
                     for i in j..size {
@@ -55,7 +64,7 @@ impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
                     }
                 }
             },
-            Part::Upper => {
+            Format::Upper => {
                 let mut k = 0;
                 for j in 0..size {
                     for i in 0..(j + 1) {
@@ -78,13 +87,14 @@ impl<T: Element> From<Triangular<T>> for Dense<T> {
 
 #[cfg(test)]
 mod tests {
-    use {Dense, Part, Triangular};
+    use triangular::Format;
+    use {Dense, Triangular};
 
     #[test]
     fn into_dense_lower() {
         let matrix = Triangular {
             size: 4,
-            format: Part::Lower,
+            format: Format::Lower,
             values: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 
@@ -102,7 +112,7 @@ mod tests {
     fn into_dense_upper() {
         let matrix = Triangular {
             size: 4,
-            format: Part::Upper,
+            format: Format::Upper,
             values: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
         };
 

@@ -17,15 +17,6 @@ pub trait Sparse: Matrix + Into<Dense<<Self as Matrix>::Element>> {
     fn nonzeros(&self) -> usize;
 }
 
-/// A part of a matrix.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Part {
-    /// The lower triangular part.
-    Lower,
-    /// The upper triangular part.
-    Upper,
-}
-
 macro_rules! matrix(
     ($kind:ident, $rows:ident, $columns:ident) => (
         impl<T: ::Element> ::Matrix for $kind<T> {
@@ -57,13 +48,14 @@ macro_rules! min(
 );
 
 mod band;
-pub mod compressed;
 mod dense;
 mod diagonal;
 mod element;
 mod position;
 mod size;
-mod triangular;
+
+pub mod compressed;
+pub mod triangular;
 
 pub use band::Band;
 pub use compressed::Compressed;
