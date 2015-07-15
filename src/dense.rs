@@ -16,6 +16,8 @@ pub struct Dense<T: Element> {
     pub values: Vec<T>,
 }
 
+matrix!(Dense);
+
 impl<T: Element> Dense<T> {
     /// Create a matrix from a slice.
     pub fn from_slice<S: Size>(values: &[T], size: S) -> Dense<T> {
@@ -31,8 +33,6 @@ impl<T: Element> Dense<T> {
         Dense { rows: rows, columns: columns, values: values }
     }
 }
-
-matrix!(Dense);
 
 impl<T: Element> Into<Vec<T>> for Dense<T> {
     #[inline]

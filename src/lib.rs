@@ -6,15 +6,9 @@ extern crate complex;
 use std::convert::Into;
 
 /// A matrix.
-pub trait Matrix {
+pub trait Matrix: Size {
     /// The element type.
     type Element: Element;
-
-    /// Return the number of rows.
-    fn rows(&self) -> usize;
-
-    /// Return the number of columns.
-    fn columns(&self) -> usize;
 }
 
 /// A sparse matrix.
@@ -45,13 +39,15 @@ macro_rules! matrix(
     ($kind:ident, $rows:ident, $columns:ident) => (
         impl<T: ::Element> ::Matrix for $kind<T> {
             type Element = T;
+        }
 
-            #[inline]
+        impl<T: ::Element> ::Size for $kind<T> {
+            #[inline(always)]
             fn rows(&self) -> usize {
                 self.$rows
             }
 
-            #[inline]
+            #[inline(always)]
             fn columns(&self) -> usize {
                 self.$columns
             }

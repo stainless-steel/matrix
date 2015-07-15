@@ -21,6 +21,8 @@ macro_rules! debug_valid(
     ));
 );
 
+matrix!(Diagonal);
+
 impl<T: Element> Diagonal<T> {
     /// Create a matrix from a slice.
     pub fn from_slice<S: Size>(values: &[T], size: S) -> Diagonal<T> {
@@ -36,8 +38,6 @@ impl<T: Element> Diagonal<T> {
         Diagonal { rows: rows, columns: columns, values: values }
     }
 }
-
-matrix!(Diagonal);
 
 impl<T: Element> Sparse for Diagonal<T> {
     #[inline]

@@ -44,6 +44,8 @@ macro_rules! debug_valid(
     ));
 );
 
+matrix!(Compressed);
+
 impl<T: Element> Compressed<T> {
     /// Resize the matrix.
     pub fn resize<S: Size>(&mut self, size: S) {
@@ -99,8 +101,6 @@ impl<T: Element> Compressed<T> {
         }
     }
 }
-
-matrix!(Compressed);
 
 impl<T: Element> Sparse for Compressed<T> {
     #[inline]
