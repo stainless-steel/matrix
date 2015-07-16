@@ -168,7 +168,8 @@ impl<T: Element> Matrix for Compressed<T> {
 
     #[inline]
     fn nonzeros(&self) -> usize {
-        self.nonzeros
+        let zero = T::zero();
+        self.iter().fold(0, |sum, (_, _, &value)| if value != zero { sum + 1 } else { sum })
     }
 
     fn zero<S: Size>(size: S) -> Self {
@@ -282,7 +283,7 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
 #[cfg(test)]
 mod tests {
     use compressed::Format;
-    use {Compressed, Dense};
+    use {Compressed, Dense, Matrix};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,
@@ -340,6 +341,15 @@ mod tests {
 
         assert_eq!(matrix.nonzeros, 5 * 3);
         assert_eq!(dense, (&matrix).into());
+    }
+
+    #[test]
+    fn nonzeros() {
+        let matrix = new!(5, 7, 5, Format::Column, vec![1.0, 0.0, 3.0, 0.0, 5.0],
+                          vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+
+        assert_eq!(matrix.nonzeros, 5);
+        assert_eq!(matrix.nonzeros(), 3);
     }
 
     #[test]

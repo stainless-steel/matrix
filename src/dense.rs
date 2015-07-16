@@ -92,3 +92,14 @@ impl<T: Element> DerefMut for Dense<T> {
         self.values.deref_mut()
     }
 }
+
+#[cfg(tests)]
+mod tests {
+    use {Dense, Matrix};
+
+    #[test]
+    fn nonzeros() {
+        let matrix = Dense::from_vec(vec![1.0, 2.0, 3.0, 0.0], 2);
+        assert_eq!(matrix.nonzeros(), 3);
+    }
+}

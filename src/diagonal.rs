@@ -47,7 +47,8 @@ impl<T: Element> Matrix for Diagonal<T> {
 
     #[inline]
     fn nonzeros(&self) -> usize {
-        if self.rows < self.columns { self.rows } else { self.columns }
+        let zero = T::zero();
+        self.values.iter().fold(0, |sum, &value| if value != zero { sum + 1 } else { sum })
     }
 
     fn zero<S: Size>(size: S) -> Self {
@@ -161,7 +162,13 @@ impl<T: Element> DerefMut for Diagonal<T> {
 #[cfg(test)]
 mod tests {
     use compressed::Format;
-    use {Band, Compressed, Dense, Diagonal};
+    use {Band, Compressed, Dense, Diagonal, Matrix};
+
+    #[test]
+    fn nonzeros() {
+        let matrix = Diagonal::from_vec(vec![1.0, 2.0, 0.0, 3.0], 4);
+        assert_eq!(matrix.nonzeros(), 3);
+    }
 
     #[test]
     fn into_band_tall() {

@@ -42,7 +42,8 @@ impl<T: Element> Matrix for Triangular<T> {
 
     #[inline]
     fn nonzeros(&self) -> usize {
-        self.size * (self.size + 1) / 2
+        let zero = T::zero();
+        self.values.iter().fold(0, |sum, &value| if value != zero { sum + 1 } else { sum })
     }
 
     fn zero<S: Size>(size: S) -> Self {
@@ -102,7 +103,17 @@ impl<T: Element> From<Triangular<T>> for Dense<T> {
 #[cfg(test)]
 mod tests {
     use triangular::Format;
-    use {Dense, Triangular};
+    use {Dense, Matrix, Triangular};
+
+    #[test]
+    fn nonzeros() {
+        let matrix = Triangular {
+            size: 4,
+            format: Format::Lower,
+            values: vec![1.0, 0.0, 3.0, 0.0, 5.0, 0.0, 7.0, 8.0, 9.0, 10.0],
+        };
+        assert_eq!(matrix.nonzeros(), 7);
+    }
 
     #[test]
     fn into_dense_lower() {

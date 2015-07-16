@@ -61,15 +61,8 @@ impl<T: Element> Matrix for Band<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
-        let &Band { rows, columns, superdiagonals, subdiagonals, .. } = self;
-        let mut count = 0;
-        for k in 0..(superdiagonals + 1) {
-            count += min!(columns - k, rows);
-        }
-        for k in 1..(subdiagonals + 1) {
-            count += min!(columns, rows - k);
-        }
-        count
+        let zero = T::zero();
+        self.iter().fold(0, |sum, (_, _, &value)| if value != zero { sum + 1 } else { sum })
     }
 
     fn zero<S: Size>(size: S) -> Self {
@@ -153,6 +146,17 @@ mod tests {
                  vec![0.0; ($superdiagonals + 1 + $subdiagonals) * $columns])
         );
     );
+
+    #[test]
+    fn nonzeros() {
+        let matrix = new!(7, 4, 2, 2, vec![
+            7.0,  7.0,  1.0,  4.0,  8.0,
+            7.0,  2.0,  5.0,  9.0, 12.0,
+            3.0,  6.0, 10.0,  0.0, 15.0,
+            7.0, 11.0,  0.0, 16.0, 17.0,
+        ]);
+        assert_eq!(matrix.nonzeros(), 17 - 2);
+    }
 
     #[test]
     fn iter_tall() {
@@ -249,26 +253,5 @@ mod tests {
             0.0, 0.0,  0.0, 17.0,
             0.0, 0.0,  0.0,  0.0,
         ]);
-    }
-
-    #[test]
-    fn nonzeros() {
-        assert_eq!(new!(4, 4, 0, 0).nonzeros(), 4);
-        assert_eq!(new!(4, 4, 1, 0).nonzeros(), 7);
-        assert_eq!(new!(4, 4, 2, 0).nonzeros(), 9);
-        assert_eq!(new!(4, 4, 0, 1).nonzeros(), 7);
-        assert_eq!(new!(4, 4, 0, 2).nonzeros(), 9);
-
-        assert_eq!(new!(4, 5, 0, 0).nonzeros(), 4);
-        assert_eq!(new!(4, 5, 1, 0).nonzeros(), 8);
-        assert_eq!(new!(4, 5, 2, 0).nonzeros(), 11);
-        assert_eq!(new!(4, 5, 0, 1).nonzeros(), 7);
-        assert_eq!(new!(4, 5, 0, 2).nonzeros(), 9);
-
-        assert_eq!(new!(5, 4, 0, 0).nonzeros(), 4);
-        assert_eq!(new!(5, 4, 1, 0).nonzeros(), 7);
-        assert_eq!(new!(5, 4, 2, 0).nonzeros(), 9);
-        assert_eq!(new!(5, 4, 0, 1).nonzeros(), 8);
-        assert_eq!(new!(5, 4, 0, 2).nonzeros(), 11);
     }
 }
