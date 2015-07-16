@@ -11,7 +11,7 @@
 
 use std::{iter, mem};
 
-use {Dense, Element, Matrix, Position, Size, Sparse};
+use {Dense, Element, Matrix, Position, Size};
 
 /// A compressed matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -65,23 +65,6 @@ macro_rules! debug_valid(
 );
 
 size!(Compressed);
-
-impl<T: Element> Matrix for Compressed<T> {
-    type Element = T;
-
-    fn zero<S: Size>(size: S) -> Self {
-        let (rows, columns) = size.dimensions();
-        Compressed {
-            rows: rows,
-            columns: columns,
-            nonzeros: 0,
-            format: Format::Column,
-            values: vec![],
-            indices: vec![],
-            offsets: vec![0],
-        }
-    }
-}
 
 impl<T: Element> Compressed<T> {
     /// Read an element.
@@ -180,10 +163,25 @@ impl<T: Element> Compressed<T> {
     }
 }
 
-impl<T: Element> Sparse for Compressed<T> {
+impl<T: Element> Matrix for Compressed<T> {
+    type Element = T;
+
     #[inline]
     fn nonzeros(&self) -> usize {
         self.nonzeros
+    }
+
+    fn zero<S: Size>(size: S) -> Self {
+        let (rows, columns) = size.dimensions();
+        Compressed {
+            rows: rows,
+            columns: columns,
+            nonzeros: 0,
+            format: Format::Column,
+            values: vec![],
+            indices: vec![],
+            offsets: vec![0],
+        }
     }
 }
 

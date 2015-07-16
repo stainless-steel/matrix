@@ -6,18 +6,15 @@ extern crate complex;
 use std::convert::Into;
 
 /// A matrix.
-pub trait Matrix: Size {
+pub trait Matrix: Into<Dense<<Self as Matrix>::Element>> + Size {
     /// The element type.
     type Element: Element;
 
+    /// Count the number of nonzero elements.
+    fn nonzeros(&self) -> usize;
+
     /// Construct a zero matrix.
     fn zero<S: Size>(S) -> Self;
-}
-
-/// A sparse matrix.
-pub trait Sparse: Matrix + Into<Dense<<Self as Matrix>::Element>> {
-    /// Return the number of nonzero elements.
-    fn nonzeros(&self) -> usize;
 }
 
 macro_rules! size(

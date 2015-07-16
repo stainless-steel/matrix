@@ -25,6 +25,11 @@ size!(Dense);
 impl<T: Element> Matrix for Dense<T> {
     type Element = T;
 
+    fn nonzeros(&self) -> usize {
+        let zero = T::zero();
+        self.values.iter().fold(0, |sum, &value| if value != zero { sum + 1 } else { sum })
+    }
+
     fn zero<S: Size>(size: S) -> Self {
         let (rows, columns) = size.dimensions();
         Dense { rows: rows, columns: columns, values: vec![T::zero(); rows * columns] }

@@ -9,7 +9,7 @@
 
 use std::iter;
 
-use {Dense, Element, Matrix, Size, Sparse};
+use {Dense, Element, Matrix, Size};
 
 /// A band matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -60,19 +60,6 @@ impl<T: Element> Band<T> {
 impl<T: Element> Matrix for Band<T> {
     type Element = T;
 
-    fn zero<S: Size>(size: S) -> Self {
-        let (rows, columns) = size.dimensions();
-        Band {
-            rows: rows,
-            columns: columns,
-            superdiagonals: 0,
-            subdiagonals: 0,
-            values: vec![T::zero(); min!(rows, columns)],
-        }
-    }
-}
-
-impl<T: Element> Sparse for Band<T> {
     fn nonzeros(&self) -> usize {
         let &Band { rows, columns, superdiagonals, subdiagonals, .. } = self;
         let mut count = 0;
@@ -83,6 +70,17 @@ impl<T: Element> Sparse for Band<T> {
             count += min!(columns, rows - k);
         }
         count
+    }
+
+    fn zero<S: Size>(size: S) -> Self {
+        let (rows, columns) = size.dimensions();
+        Band {
+            rows: rows,
+            columns: columns,
+            superdiagonals: 0,
+            subdiagonals: 0,
+            values: vec![T::zero(); min!(rows, columns)],
+        }
     }
 }
 
@@ -143,7 +141,7 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
 
 #[cfg(test)]
 mod tests {
-    use {Band, Dense, Sparse};
+    use {Band, Dense, Matrix};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr, $values:expr) => (
