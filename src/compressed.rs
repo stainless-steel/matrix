@@ -9,7 +9,7 @@
 //! [1]: http://netlib.org/linalg/html_templates/node92.html
 //! [2]: http://netlib.org/linalg/html_templates/node91.html
 
-use std::mem;
+use std::{iter, mem};
 
 use {Dense, Element, Matrix, Position, Size, Sparse};
 
@@ -130,7 +130,7 @@ impl<T: Element> Compressed<T> {
         }
     }
 
-    /// Return an iterator over the stored elements.
+    /// Return a sparse iterator.
     #[inline]
     pub fn iter<'l>(&'l self) -> Iterator<'l, T> {
         Iterator { matrix: self, taken: 0, major: 0 }
@@ -261,7 +261,7 @@ impl<T: Element> From<Compressed<T>> for Dense<T> {
     }
 }
 
-impl<'l, T: Element> ::std::iter::Iterator for Iterator<'l, T> {
+impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
     type Item = (usize, usize, &'l T);
 
     fn next(&mut self) -> Option<Self::Item> {

@@ -7,6 +7,8 @@
 //! [1]: http://www.netlib.org/lapack/lug/node124.html
 //! [2]: http://www.netlib.org/lapack
 
+use std::iter;
+
 use {Dense, Element, Matrix, Size, Sparse};
 
 /// A band matrix.
@@ -27,14 +29,33 @@ pub struct Band<T: Element> {
     pub values: Vec<T>,
 }
 
+/// A sparse iterator of a band matrix.
+pub struct Iterator<'l, T: 'l + Element> {
+    matrix: &'l Band<T>,
+    taken: usize,
+}
+
 macro_rules! debug_valid(
     ($matrix:ident) => (debug_assert!(
-        $matrix.values.len() == ($matrix.superdiagonals + 1 + $matrix.subdiagonals) *
-                                $matrix.columns
+        $matrix.values.len() == $matrix.diagonals() * $matrix.columns
     ));
 );
 
 size!(Band);
+
+impl<T: Element> Band<T> {
+    /// Return the number of diagonals.
+    #[inline]
+    pub fn diagonals(&self) -> usize {
+        self.superdiagonals + 1 + self.subdiagonals
+    }
+
+    /// Return a sparse iterator.
+    #[inline]
+    pub fn iter<'l>(&'l self) -> Iterator<'l, T> {
+        Iterator { matrix: self, taken: 0 }
+    }
+}
 
 impl<T: Element> Matrix for Band<T> {
     type Element = T;
@@ -70,7 +91,7 @@ impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
         debug_valid!(matrix);
 
         let &Band { rows, columns, superdiagonals, subdiagonals, ref values } = matrix;
-        let diagonals = superdiagonals + 1 + subdiagonals;
+        let diagonals = matrix.diagonals();
 
         let mut matrix = Dense {
             rows: rows,
@@ -101,6 +122,25 @@ impl<T: Element> From<Band<T>> for Dense<T> {
     }
 }
 
+impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
+    type Item = (usize, usize, &'l T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let &mut Iterator { matrix, ref mut taken } = self;
+        let (diagonals, storage) = (matrix.diagonals(), matrix.values.len());
+        while *taken < storage {
+            let k = *taken;
+            let j = k / diagonals;
+            let i = (j + k % diagonals) as isize - matrix.superdiagonals as isize;
+            *taken += 1;
+            if i >= 0 && i < matrix.rows as isize {
+                return Some((i as usize, j, &matrix.values[k]));
+            }
+        }
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use {Band, Dense, Sparse};
@@ -115,6 +155,59 @@ mod tests {
                  vec![0.0; ($superdiagonals + 1 + $subdiagonals) * $columns])
         );
     );
+
+    #[test]
+    fn iter_tall() {
+        let matrix = new!(7, 4, 2, 2, vec![
+            0.0,  0.0,  1.0,  4.0,  8.0,
+            0.0,  2.0,  5.0,  9.0, 12.0,
+            3.0,  6.0, 10.0, 13.0, 15.0,
+            7.0, 11.0, 14.0, 16.0, 17.0,
+        ]);
+
+        let result = matrix.iter().map(|(i, _, _)| i).collect::<Vec<_>>();
+        assert_eq!(&result, &vec![0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 4, 1, 2, 3, 4, 5]);
+
+        let result = matrix.iter().map(|(_, j, _)| j).collect::<Vec<_>>();
+        assert_eq!(&result, &vec![0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]);
+
+        let result = matrix.iter().map(|(_, _, &value)| value).collect::<Vec<_>>();
+        assert_eq!(&result, &vec![
+            1.0, 4.0, 8.0,
+            2.0, 5.0, 9.0, 12.0,
+            3.0, 6.0, 10.0, 13.0, 15.0,
+            7.0, 11.0, 14.0, 16.0, 17.0,
+        ]);
+    }
+
+    #[test]
+    fn iter_wide() {
+        let matrix = new!(4, 7, 2, 2, vec![
+             0.0,  0.0,  1.0,  4.0,  8.0,
+             0.0,  2.0,  5.0,  9.0, 13.0,
+             3.0,  6.0, 10.0, 14.0,  0.0,
+             7.0, 11.0, 15.0,  0.0,  0.0,
+            12.0, 16.0,  0.0,  0.0,  0.0,
+            17.0,  0.0,  0.0,  0.0,  0.0,
+             0.0,  0.0,  0.0,  0.0,  0.0,
+        ]);
+
+        let result = matrix.iter().map(|(i, _, _)| i).collect::<Vec<_>>();
+        assert_eq!(&result, &vec![0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 2, 3, 3]);
+
+        let result = matrix.iter().map(|(_, j, _)| j).collect::<Vec<_>>();
+        assert_eq!(&result, &vec![0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5]);
+
+        let result = matrix.iter().map(|(_, _, &value)| value).collect::<Vec<_>>();
+        assert_eq!(&result, &vec![
+            1.0, 4.0, 8.0,
+            2.0, 5.0, 9.0, 13.0,
+            3.0, 6.0, 10.0, 14.0,
+            7.0, 11.0, 15.0,
+            12.0, 16.0,
+            17.0,
+        ]);
+    }
 
     #[test]
     fn into_dense_tall() {
