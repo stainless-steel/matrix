@@ -263,18 +263,18 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
     type Item = (usize, usize, &'l T);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let &mut Iterator { matrix, taken, mut major } = self;
-        if taken == matrix.nonzeros {
+        let &mut Iterator { matrix, ref mut taken, ref mut major } = self;
+        let k = *taken;
+        if k == matrix.nonzeros {
             return None;
         }
-        while matrix.offsets[major + 1] <= taken {
-            major += 1;
+        *taken += 1;
+        while matrix.offsets[*major + 1] <= k {
+            *major += 1;
         }
-        self.taken += 1;
-        self.major = major;
         Some(match matrix.format {
-            Format::Column => (matrix.indices[taken], major, &matrix.values[taken]),
-            Format::Row => (major, matrix.indices[taken], &matrix.values[taken]),
+            Format::Column => (matrix.indices[k], *major, &matrix.values[k]),
+            Format::Row => (*major, matrix.indices[k], &matrix.values[k]),
         })
     }
 }
