@@ -45,7 +45,6 @@ impl<T: Element> Diagonal<T> {
 impl<T: Element> Matrix for Diagonal<T> {
     type Element = T;
 
-    #[inline]
     fn nonzeros(&self) -> usize {
         let zero = T::zero();
         self.values.iter().fold(0, |sum, &value| if value != zero { sum + 1 } else { sum })

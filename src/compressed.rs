@@ -166,7 +166,6 @@ impl<T: Element> Compressed<T> {
 impl<T: Element> Matrix for Compressed<T> {
     type Element = T;
 
-    #[inline]
     fn nonzeros(&self) -> usize {
         let zero = T::zero();
         self.values.iter().fold(0, |sum, &value| if value != zero { sum + 1 } else { sum })
