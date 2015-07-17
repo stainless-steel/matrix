@@ -50,13 +50,13 @@ mod element;
 mod position;
 mod size;
 
-pub mod band;
+pub mod banded;
 pub mod compressed;
 pub mod dense;
 pub mod diagonal;
 pub mod packed;
 
-pub use band::Band;
+pub use banded::Banded;
 pub use compressed::Compressed;
 pub use dense::Dense;
 pub use diagonal::Diagonal;

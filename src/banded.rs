@@ -1,4 +1,4 @@
-//! Band matrices.
+//! Banded matrices.
 //!
 //! The storage is suitable for matrices with a small number of superdiagonals
 //! and/or subdiagonals relative to the smallest dimension. Data are stored in
@@ -11,9 +11,9 @@ use std::iter;
 
 use {Dense, Element, Matrix, Size};
 
-/// A band matrix.
+/// A banded matrix.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Band<T: Element> {
+pub struct Banded<T: Element> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -29,9 +29,9 @@ pub struct Band<T: Element> {
     pub values: Vec<T>,
 }
 
-/// A sparse iterator of a band matrix.
+/// A sparse iterator of a banded matrix.
 pub struct Iterator<'l, T: 'l + Element> {
-    matrix: &'l Band<T>,
+    matrix: &'l Banded<T>,
     taken: usize,
 }
 
@@ -41,13 +41,13 @@ macro_rules! debug_validate(
     ));
 );
 
-size!(Band);
+size!(Banded);
 
-impl<T: Element> Band<T> {
+impl<T: Element> Banded<T> {
     /// Create a zero matrix.
     pub fn new<S: Size>(size: S, superdiagonals: usize, subdiagonals: usize) -> Self {
         let (rows, columns) = size.dimensions();
-        Band {
+        Banded {
             rows: rows,
             columns: columns,
             superdiagonals: superdiagonals,
@@ -69,7 +69,7 @@ impl<T: Element> Band<T> {
     }
 }
 
-impl<T: Element> Matrix for Band<T> {
+impl<T: Element> Matrix for Banded<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
@@ -77,10 +77,10 @@ impl<T: Element> Matrix for Band<T> {
     }
 
     fn transpose(&self) -> Self {
-        let &Band { rows, columns, superdiagonals, subdiagonals, .. } = self;
+        let &Banded { rows, columns, superdiagonals, subdiagonals, .. } = self;
         let diagonals = self.diagonals();
 
-        let mut matrix = Band::new((columns, rows), subdiagonals, superdiagonals);
+        let mut matrix = Banded::new((columns, rows), subdiagonals, superdiagonals);
         for k in 0..(superdiagonals + 1) {
             for i in 0..min!(columns - k, rows) {
                 let j = i + k;
@@ -101,15 +101,15 @@ impl<T: Element> Matrix for Band<T> {
 
     #[inline]
     fn zero<S: Size>(size: S) -> Self {
-        Band::new(size, 0, 0)
+        Banded::new(size, 0, 0)
     }
 }
 
-impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
-    fn from(matrix: &'l Band<T>) -> Self {
+impl<'l, T: Element> From<&'l Banded<T>> for Dense<T> {
+    fn from(matrix: &'l Banded<T>) -> Self {
         debug_validate!(matrix);
 
-        let &Band { rows, columns, superdiagonals, subdiagonals, ref values } = matrix;
+        let &Banded { rows, columns, superdiagonals, subdiagonals, ref values } = matrix;
         let diagonals = matrix.diagonals();
 
         let mut matrix = Dense::new((rows, columns));
@@ -130,9 +130,9 @@ impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
     }
 }
 
-impl<T: Element> From<Band<T>> for Dense<T> {
+impl<T: Element> From<Banded<T>> for Dense<T> {
     #[inline]
-    fn from(matrix: Band<T>) -> Self {
+    fn from(matrix: Banded<T>) -> Self {
         (&matrix).into()
     }
 }
@@ -158,12 +158,12 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
 
 #[cfg(test)]
 mod tests {
-    use {Band, Dense, Matrix};
+    use {Banded, Dense, Matrix};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr, $values:expr) => (
-            Band { rows: $rows, columns: $columns, superdiagonals: $superdiagonals,
-                   subdiagonals: $subdiagonals, values: $values }
+            Banded { rows: $rows, columns: $columns, superdiagonals: $superdiagonals,
+                     subdiagonals: $subdiagonals, values: $values }
         );
     );
 

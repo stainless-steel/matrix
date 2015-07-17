@@ -5,7 +5,7 @@
 use std::ops::{Deref, DerefMut};
 
 use compressed::Format;
-use {Band, Compressed, Dense, Element, Matrix, Size};
+use {Banded, Compressed, Dense, Element, Matrix, Size};
 
 /// A diagonal matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -60,17 +60,17 @@ impl<T: Element> Matrix for Diagonal<T> {
     }
 }
 
-impl<'l, T: Element> From<&'l Diagonal<T>> for Band<T> {
+impl<'l, T: Element> From<&'l Diagonal<T>> for Banded<T> {
     #[inline]
     fn from(matrix: &'l Diagonal<T>) -> Self {
         matrix.clone().into()
     }
 }
 
-impl<T: Element> From<Diagonal<T>> for Band<T> {
+impl<T: Element> From<Diagonal<T>> for Banded<T> {
     fn from(matrix: Diagonal<T>) -> Self {
         debug_validate!(matrix);
-        Band {
+        Banded {
             rows: matrix.rows,
             columns: matrix.columns,
             superdiagonals: 0,
@@ -159,7 +159,7 @@ impl<T: Element> DerefMut for Diagonal<T> {
 #[cfg(test)]
 mod tests {
     use compressed::Format;
-    use {Band, Compressed, Dense, Diagonal, Matrix};
+    use {Banded, Compressed, Dense, Diagonal, Matrix};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $values:expr) => (
@@ -174,16 +174,16 @@ mod tests {
     }
 
     #[test]
-    fn into_band_tall() {
+    fn into_banded_tall() {
         let matrix = new!(5, 3, vec![1.0, 2.0, 3.0]);
-        let matrix: Band<_> = matrix.into();
+        let matrix: Banded<_> = matrix.into();
         assert_eq!(&matrix.values, &[1.0, 2.0, 3.0]);
     }
 
     #[test]
-    fn into_band_wide() {
+    fn into_banded_wide() {
         let matrix = new!(3, 5, vec![1.0, 2.0, 3.0]);
-        let matrix: Band<_> = matrix.into();
+        let matrix: Banded<_> = matrix.into();
         assert_eq!(&matrix.values, &[1.0, 2.0, 3.0, 0.0, 0.0]);
     }
 
