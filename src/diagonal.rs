@@ -106,7 +106,7 @@ impl<T: Element> From<Diagonal<T>> for Compressed<T> {
             values: values,
             format: Format::Column,
             indices: (0..nonzeros).collect(),
-            offsets: (0..(nonzeros + 1)).collect(),
+            offsets: (0..(columns + 1)).map(|i| if i < nonzeros { i } else { nonzeros }).collect(),
         }
     }
 }
@@ -188,7 +188,7 @@ mod tests {
     }
 
     #[test]
-    fn into_compressed() {
+    fn into_compressed_tall() {
         let matrix = new!(5, 3, vec![1.0, 2.0, 0.0]);
 
         let matrix: Compressed<_> = matrix.into();
@@ -196,6 +196,18 @@ mod tests {
         assert_eq!(matrix, Compressed {
             rows: 5, columns: 3, nonzeros: 3, format: Format::Column, values: vec![1.0, 2.0, 0.0],
             indices: vec![0, 1, 2], offsets: vec![0, 1, 2, 3]
+        });
+    }
+
+    #[test]
+    fn into_compressed_wide() {
+        let matrix = new!(3, 5, vec![1.0, 0.0, 3.0]);
+
+        let matrix: Compressed<_> = matrix.into();
+
+        assert_eq!(matrix, Compressed {
+            rows: 3, columns: 5, nonzeros: 3, format: Format::Column, values: vec![1.0, 0.0, 3.0],
+            indices: vec![0, 1, 2], offsets: vec![0, 1, 2, 3, 3, 3]
         });
     }
 
