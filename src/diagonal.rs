@@ -111,7 +111,6 @@ impl<T: Element> From<Diagonal<T>> for Compressed<T> {
 }
 
 impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
-    #[inline]
     fn from(matrix: &Diagonal<T>) -> Self {
         debug_valid!(matrix);
 

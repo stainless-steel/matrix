@@ -131,6 +131,7 @@ impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
 }
 
 impl<T: Element> From<Band<T>> for Dense<T> {
+    #[inline]
     fn from(matrix: Band<T>) -> Self {
         (&matrix).into()
     }

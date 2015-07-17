@@ -255,6 +255,7 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
 }
 
 impl<T: Element> From<Compressed<T>> for Dense<T> {
+    #[inline]
     fn from(matrix: Compressed<T>) -> Self {
         (&matrix).into()
     }

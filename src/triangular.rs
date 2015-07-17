@@ -120,6 +120,7 @@ impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
 }
 
 impl<T: Element> From<Triangular<T>> for Dense<T> {
+    #[inline]
     fn from(matrix: Triangular<T>) -> Self {
         (&matrix).into()
     }
