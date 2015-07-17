@@ -6,7 +6,7 @@ extern crate complex;
 use std::convert::Into;
 
 /// A matrix.
-pub trait Matrix: Into<Dense<<Self as Matrix>::Element>> + Size {
+pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
     /// The element type.
     type Element: Element;
 
@@ -52,15 +52,16 @@ mod size;
 
 pub mod banded;
 pub mod compressed;
-pub mod dense;
+pub mod conventional;
 pub mod diagonal;
 pub mod packed;
 
-pub use banded::Banded;
-pub use compressed::Compressed;
-pub use dense::Dense;
-pub use diagonal::Diagonal;
 pub use element::Element;
-pub use packed::Packed;
 pub use position::Position;
 pub use size::Size;
+
+pub use banded::Banded;
+pub use compressed::Compressed;
+pub use conventional::Conventional;
+pub use diagonal::Diagonal;
+pub use packed::Packed;

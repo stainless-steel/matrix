@@ -7,11 +7,11 @@ use std::ops::{Deref, DerefMut, Index, IndexMut};
 
 use {Element, Matrix, Position, Size};
 
-/// A dense matrix.
+/// A conventional matrix.
 ///
 /// The storage is suitable for generic matrices.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Dense<T: Element> {
+pub struct Conventional<T: Element> {
     /// The number of rows.
     pub rows: usize,
     /// The number of columns.
@@ -20,31 +20,31 @@ pub struct Dense<T: Element> {
     pub values: Vec<T>,
 }
 
-size!(Dense);
+size!(Conventional);
 
-impl<T: Element> Dense<T> {
+impl<T: Element> Conventional<T> {
     /// Create a zero matrix.
     pub fn new<S: Size>(size: S) -> Self {
         let (rows, columns) = size.dimensions();
-        Dense { rows: rows, columns: columns, values: vec![T::zero(); rows * columns] }
+        Conventional { rows: rows, columns: columns, values: vec![T::zero(); rows * columns] }
     }
 
     /// Create a matrix from a slice.
     pub fn from_slice<S: Size>(values: &[T], size: S) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), rows * columns);
-        Dense { rows: rows, columns: columns, values: values.to_vec() }
+        Conventional { rows: rows, columns: columns, values: values.to_vec() }
     }
 
     /// Create a matrix from a vector.
     pub fn from_vec<S: Size>(values: Vec<T>, size: S) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), rows * columns);
-        Dense { rows: rows, columns: columns, values: values }
+        Conventional { rows: rows, columns: columns, values: values }
     }
 }
 
-impl<T: Element> Matrix for Dense<T> {
+impl<T: Element> Matrix for Conventional<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
@@ -53,7 +53,7 @@ impl<T: Element> Matrix for Dense<T> {
 
     fn transpose(&self) -> Self {
         let (rows, columns) = (self.rows, self.columns);
-        let mut matrix = Dense::from_slice(&self.values, (columns, rows));
+        let mut matrix = Conventional::from_slice(&self.values, (columns, rows));
         for i in 0..rows {
             for j in i..columns {
                 matrix.values.swap(j * rows + i, i * rows + j);
@@ -64,11 +64,11 @@ impl<T: Element> Matrix for Dense<T> {
 
     #[inline]
     fn zero<S: Size>(size: S) -> Self {
-        Dense::new(size)
+        Conventional::new(size)
     }
 }
 
-impl<T: Element, P: Position> Index<P> for Dense<T> {
+impl<T: Element, P: Position> Index<P> for Conventional<T> {
     type Output = T;
 
     #[inline]
@@ -78,7 +78,7 @@ impl<T: Element, P: Position> Index<P> for Dense<T> {
     }
 }
 
-impl<T: Element, P: Position> IndexMut<P> for Dense<T> {
+impl<T: Element, P: Position> IndexMut<P> for Conventional<T> {
     #[inline]
     fn index_mut(&mut self, index: P) -> &mut Self::Output {
         let (i, j) = index.coordinates();
@@ -86,14 +86,14 @@ impl<T: Element, P: Position> IndexMut<P> for Dense<T> {
     }
 }
 
-impl<T: Element> Into<Vec<T>> for Dense<T> {
+impl<T: Element> Into<Vec<T>> for Conventional<T> {
     #[inline]
     fn into(self) -> Vec<T> {
         self.values
     }
 }
 
-impl<T: Element> Deref for Dense<T> {
+impl<T: Element> Deref for Conventional<T> {
     type Target = [T];
 
     #[inline]
@@ -102,7 +102,7 @@ impl<T: Element> Deref for Dense<T> {
     }
 }
 
-impl<T: Element> DerefMut for Dense<T> {
+impl<T: Element> DerefMut for Conventional<T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.values.deref_mut()
@@ -111,18 +111,18 @@ impl<T: Element> DerefMut for Dense<T> {
 
 #[cfg(tests)]
 mod tests {
-    use {Dense, Matrix};
+    use {Conventional, Matrix};
 
     #[test]
     fn nonzeros() {
-        let matrix = Dense::from_vec(vec![1.0, 2.0, 3.0, 0.0], 2);
+        let matrix = Conventional::from_vec(vec![1.0, 2.0, 3.0, 0.0], 2);
         assert_eq!(matrix.nonzeros(), 3);
     }
 
     #[test]
     fn transpose() {
-        let mut matrix = Dense::from_vec(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], (3, 2));
+        let mut matrix = Conventional::from_vec(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], (3, 2));
         matrix = matrix.transpose();
-        assert_eq!(matrix, Dense::from_vec(vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0], (2, 3)));
+        assert_eq!(matrix, Conventional::from_vec(vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0], (2, 3)));
     }
 }

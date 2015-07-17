@@ -9,7 +9,7 @@
 
 use std::iter;
 
-use {Dense, Element, Matrix, Size};
+use {Conventional, Element, Matrix, Size};
 
 /// A banded matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -105,14 +105,14 @@ impl<T: Element> Matrix for Banded<T> {
     }
 }
 
-impl<'l, T: Element> From<&'l Banded<T>> for Dense<T> {
+impl<'l, T: Element> From<&'l Banded<T>> for Conventional<T> {
     fn from(matrix: &'l Banded<T>) -> Self {
         debug_validate!(matrix);
 
         let &Banded { rows, columns, superdiagonals, subdiagonals, ref values } = matrix;
         let diagonals = matrix.diagonals();
 
-        let mut matrix = Dense::new((rows, columns));
+        let mut matrix = Conventional::new((rows, columns));
         for k in 0..(superdiagonals + 1) {
             for i in 0..min!(columns - k, rows) {
                 let j = i + k;
@@ -130,7 +130,7 @@ impl<'l, T: Element> From<&'l Banded<T>> for Dense<T> {
     }
 }
 
-impl<T: Element> From<Banded<T>> for Dense<T> {
+impl<T: Element> From<Banded<T>> for Conventional<T> {
     #[inline]
     fn from(matrix: Banded<T>) -> Self {
         (&matrix).into()
@@ -158,7 +158,7 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
 
 #[cfg(test)]
 mod tests {
-    use {Banded, Dense, Matrix};
+    use {Banded, Conventional, Matrix};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr, $values:expr) => (
@@ -255,7 +255,7 @@ mod tests {
     }
 
     #[test]
-    fn into_dense_tall() {
+    fn into_conventional_tall() {
         let matrix = new!(7, 4, 2, 2, vec![
             0.0,  0.0,  1.0,  4.0,  8.0,
             0.0,  2.0,  5.0,  9.0, 12.0,
@@ -263,7 +263,7 @@ mod tests {
             7.0, 11.0, 14.0, 16.0, 17.0,
         ]);
 
-        let matrix: Dense<_> = matrix.into();
+        let matrix: Conventional<_> = matrix.into();
 
         assert_eq!(&*matrix, &[
             1.0, 4.0,  8.0,  0.0,  0.0,  0.0, 0.0,
@@ -274,7 +274,7 @@ mod tests {
     }
 
     #[test]
-    fn into_dense_wide() {
+    fn into_conventional_wide() {
         let matrix = new!(4, 7, 2, 2, vec![
              0.0,  0.0,  1.0,  4.0,  8.0,
              0.0,  2.0,  5.0,  9.0, 13.0,
@@ -285,7 +285,7 @@ mod tests {
              0.0,  0.0,  0.0,  0.0,  0.0,
         ]);
 
-        let matrix: Dense<_> = matrix.into();
+        let matrix: Conventional<_> = matrix.into();
 
         assert_eq!(&*matrix, &[
             1.0, 4.0,  8.0,  0.0,

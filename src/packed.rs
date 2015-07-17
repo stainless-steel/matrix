@@ -6,7 +6,7 @@
 //! [1]: http://www.netlib.org/lapack/lug/node123.html
 //! [2]: http://www.netlib.org/lapack
 
-use {Dense, Element, Matrix, Size};
+use {Conventional, Element, Matrix, Size};
 
 /// A packed matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -87,13 +87,13 @@ impl<T: Element> Matrix for Packed<T> {
     }
 }
 
-impl<'l, T: Element> From<&'l Packed<T>> for Dense<T> {
+impl<'l, T: Element> From<&'l Packed<T>> for Conventional<T> {
     fn from(matrix: &'l Packed<T>) -> Self {
         debug_validate!(matrix);
 
         let &Packed { size, format, ref values } = matrix;
 
-        let mut matrix = Dense::new(size);
+        let mut matrix = Conventional::new(size);
         match format {
             Format::Lower => {
                 let mut k = 0;
@@ -119,7 +119,7 @@ impl<'l, T: Element> From<&'l Packed<T>> for Dense<T> {
     }
 }
 
-impl<T: Element> From<Packed<T>> for Dense<T> {
+impl<T: Element> From<Packed<T>> for Conventional<T> {
     #[inline]
     fn from(matrix: Packed<T>) -> Self {
         (&matrix).into()
@@ -140,7 +140,7 @@ impl Format {
 #[cfg(test)]
 mod tests {
     use packed::Format;
-    use {Dense, Matrix, Packed};
+    use {Conventional, Matrix, Packed};
 
     macro_rules! new(
         ($size:expr, $format:expr, $values:expr) => (
@@ -183,12 +183,12 @@ mod tests {
     }
 
     #[test]
-    fn into_dense_lower() {
+    fn into_conventional_lower() {
         let matrix = new!(4, Format::Lower, vec![
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
         ]);
 
-        let matrix: Dense<_> = matrix.into();
+        let matrix: Conventional<_> = matrix.into();
 
         assert_eq!(&*matrix, &[
             1.0, 2.0, 3.0,  4.0,
@@ -199,12 +199,12 @@ mod tests {
     }
 
     #[test]
-    fn into_dense_upper() {
+    fn into_conventional_upper() {
         let matrix = new!(4, Format::Upper, vec![
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
         ]);
 
-        let matrix: Dense<_> = matrix.into();
+        let matrix: Conventional<_> = matrix.into();
 
         assert_eq!(&*matrix, &[
             1.0, 0.0, 0.0,  0.0,

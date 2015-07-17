@@ -5,7 +5,7 @@
 use std::ops::{Deref, DerefMut};
 
 use compressed::Format;
-use {Banded, Compressed, Dense, Element, Matrix, Size};
+use {Banded, Compressed, Conventional, Element, Matrix, Size};
 
 /// A diagonal matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -111,22 +111,22 @@ impl<T: Element> From<Diagonal<T>> for Compressed<T> {
     }
 }
 
-impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
+impl<'l, T: Element> From<&'l Diagonal<T>> for Conventional<T> {
     fn from(matrix: &Diagonal<T>) -> Self {
         debug_validate!(matrix);
 
         let &Diagonal { rows, columns, ref values } = matrix;
 
-        let mut dense = Dense::new((rows, columns));
+        let mut conventional = Conventional::new((rows, columns));
         for i in 0..min!(rows, columns) {
-            dense.values[i * rows + i] = values[i];
+            conventional.values[i * rows + i] = values[i];
         }
 
-        dense
+        conventional
     }
 }
 
-impl<T: Element> From<Diagonal<T>> for Dense<T> {
+impl<T: Element> From<Diagonal<T>> for Conventional<T> {
     #[inline]
     fn from(matrix: Diagonal<T>) -> Self {
         (&matrix).into()
@@ -159,7 +159,7 @@ impl<T: Element> DerefMut for Diagonal<T> {
 #[cfg(test)]
 mod tests {
     use compressed::Format;
-    use {Banded, Compressed, Dense, Diagonal, Matrix};
+    use {Banded, Compressed, Conventional, Diagonal, Matrix};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $values:expr) => (
@@ -200,12 +200,12 @@ mod tests {
     }
 
     #[test]
-    fn into_dense() {
+    fn into_conventional() {
         let matrix = new!(3, 5, vec![1.0, 2.0, 3.0]);
 
-        let matrix: Dense<_> = matrix.into();
+        let matrix: Conventional<_> = matrix.into();
 
-        assert_eq!(matrix, Dense::from_vec(vec![
+        assert_eq!(matrix, Conventional::from_vec(vec![
             1.0, 0.0, 0.0,
             0.0, 2.0, 0.0,
             0.0, 0.0, 3.0,

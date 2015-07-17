@@ -11,7 +11,7 @@
 
 use std::{iter, mem};
 
-use {Dense, Element, Matrix, Position, Size};
+use {Conventional, Element, Matrix, Position, Size};
 
 /// A compressed matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -208,11 +208,11 @@ impl<T: Element> Matrix for Compressed<T> {
     }
 }
 
-impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
-    fn from(dense: &'l Dense<T>) -> Self {
-        let (rows, columns) = dense.dimensions();
+impl<'l, T: Element> From<&'l Conventional<T>> for Compressed<T> {
+    fn from(conventional: &'l Conventional<T>) -> Self {
+        let (rows, columns) = conventional.dimensions();
         let mut matrix = Compressed::new((rows, columns), Format::Column);
-        for (k, &value) in dense.values.iter().enumerate() {
+        for (k, &value) in conventional.values.iter().enumerate() {
             if !value.is_zero() {
                 matrix.set((k % rows, k / rows), value);
             }
@@ -221,14 +221,14 @@ impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
     }
 }
 
-impl<T: Element> From<Dense<T>> for Compressed<T> {
+impl<T: Element> From<Conventional<T>> for Compressed<T> {
     #[inline]
-    fn from(matrix: Dense<T>) -> Self {
+    fn from(matrix: Conventional<T>) -> Self {
         (&matrix).into()
     }
 }
 
-impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
+impl<'l, T: Element> From<&'l Compressed<T>> for Conventional<T> {
     fn from(matrix: &'l Compressed<T>) -> Self {
         debug_validate!(matrix);
 
@@ -236,7 +236,7 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
             rows, columns, format, ref values, ref indices, ref offsets, ..
         } = matrix;
 
-        let mut matrix = Dense::new((rows, columns));
+        let mut matrix = Conventional::new((rows, columns));
         match format {
             Format::Row => for i in 0..rows {
                 for k in offsets[i]..offsets[i + 1] {
@@ -254,7 +254,7 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
     }
 }
 
-impl<T: Element> From<Compressed<T>> for Dense<T> {
+impl<T: Element> From<Compressed<T>> for Conventional<T> {
     #[inline]
     fn from(matrix: Compressed<T>) -> Self {
         (&matrix).into()
@@ -295,7 +295,7 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
 #[cfg(test)]
 mod tests {
     use compressed::Format;
-    use {Compressed, Dense, Matrix};
+    use {Compressed, Conventional, Matrix};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,
@@ -307,52 +307,52 @@ mod tests {
 
     #[test]
     fn get() {
-        let dense = Dense::from_vec(vec![
+        let conventional = Conventional::from_vec(vec![
             0.0, 1.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 2.0, 3.0,
             0.0, 0.0, 0.0, 0.0, 4.0,
         ], (5, 3));
 
-        let matrix: Compressed<_> = (&dense).into();
+        let matrix: Compressed<_> = (&conventional).into();
         assert_eq!(matrix.nonzeros, 4);
 
         for i in 0..5 {
             for j in 0..3 {
-                assert_eq!(dense[(i, j)], matrix.get((i, j)));
+                assert_eq!(conventional[(i, j)], matrix.get((i, j)));
             }
         }
     }
 
     #[test]
     fn set() {
-        let mut dense = Dense::from_vec(vec![
+        let mut conventional = Conventional::from_vec(vec![
             0.0, 1.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 2.0, 3.0,
             0.0, 0.0, 0.0, 0.0, 4.0,
         ], (5, 3));
 
-        let mut matrix: Compressed<_> = (&dense).into();
+        let mut matrix: Compressed<_> = (&conventional).into();
         assert_eq!(matrix.nonzeros, 4);
 
-        dense[(0, 0)] = 42.0;
-        dense[(3, 1)] = 69.0;
+        conventional[(0, 0)] = 42.0;
+        conventional[(3, 1)] = 69.0;
 
         matrix.set((0, 0), 42.0);
         matrix.set((3, 1), 69.0);
         matrix.set((4, 0), 0.0);
 
         assert_eq!(matrix.nonzeros, 4 + 1 + (1 - 1) + 1);
-        assert_eq!(dense, (&matrix).into());
+        assert_eq!(conventional, (&matrix).into());
 
         for i in 0..5 {
             for j in 0..3 {
-                dense[(i, j)] = (j * 5 + i) as f64;
+                conventional[(i, j)] = (j * 5 + i) as f64;
                 matrix.set((i, j), (j * 5 + i) as f64);
             }
         }
 
         assert_eq!(matrix.nonzeros, 5 * 3);
-        assert_eq!(dense, (&matrix).into());
+        assert_eq!(conventional, (&matrix).into());
     }
 
     #[test]
@@ -451,8 +451,8 @@ mod tests {
     }
 
     #[test]
-    fn from_dense() {
-        let matrix = Dense::from_vec(vec![
+    fn from_conventional() {
+        let matrix = Conventional::from_vec(vec![
             0.0, 1.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 2.0, 3.0,
             0.0, 0.0, 0.0, 0.0, 4.0,
@@ -465,11 +465,11 @@ mod tests {
     }
 
     #[test]
-    fn into_dense() {
+    fn into_conventional() {
         let matrix = new!(5, 3, 3, Format::Column, vec![1.0, 2.0, 3.0],
                           vec![0, 1, 2], vec![0, 1, 2, 3]);
 
-        let matrix: Dense<_> = matrix.into();
+        let matrix: Conventional<_> = matrix.into();
 
         assert_eq!(&*matrix, &[
             1.0, 0.0, 0.0, 0.0, 0.0,
