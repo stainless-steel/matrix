@@ -1,4 +1,4 @@
-//! Compressed matrices.
+//! The compressed storage.
 //!
 //! The storage is suitable for generic sparse matrices. Data are stored in one
 //! of the following formats:

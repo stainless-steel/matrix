@@ -1,4 +1,4 @@
-//! Packed matrices.
+//! The packed storage.
 //!
 //! The storage is suitable for symmetric, Hermitian, and triangular matrices.
 //! Data are stored in the [format][1] adopted by [LAPACK][2].
@@ -16,7 +16,7 @@ pub struct Packed<T: Element> {
     /// The storage format.
     pub format: Format,
     /// The values of the lower triangle when `format = Lower` or upper triangle
-    /// when `format = Upper` are stored by columns.
+    /// when `format = Upper` stored by columns.
     pub values: Vec<T>,
 }
 

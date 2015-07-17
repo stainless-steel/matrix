@@ -1,4 +1,4 @@
-//! Dense matrices.
+//! The conventional storage.
 //!
 //! The storage is suitable for generic matrices.
 

@@ -1,4 +1,4 @@
-//! Diagonal matrices.
+//! The diagonal storage.
 //!
 //! The storage is suitable for generic diagonal matrices.
 

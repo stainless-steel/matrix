@@ -1,4 +1,4 @@
-//! Banded matrices.
+//! The banded storage.
 //!
 //! The storage is suitable for matrices with a small number of superdiagonals
 //! and/or subdiagonals relative to the smallest dimension. Data are stored in
