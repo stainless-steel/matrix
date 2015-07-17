@@ -13,7 +13,10 @@ pub trait Matrix: Into<Dense<<Self as Matrix>::Element>> + Size {
     /// Count the number of nonzero elements.
     fn nonzeros(&self) -> usize;
 
-    /// Construct a zero matrix.
+    /// Transpose the matrix in place.
+    fn transpose(&mut self);
+
+    /// Create a zero matrix.
     fn zero<S: Size>(S) -> Self;
 }
 

@@ -44,6 +44,18 @@ macro_rules! debug_valid(
 size!(Band);
 
 impl<T: Element> Band<T> {
+    /// Create a zero matrix.
+    pub fn new<S: Size>(size: S, superdiagonals: usize, subdiagonals: usize) -> Self {
+        let (rows, columns) = size.dimensions();
+        Band {
+            rows: rows,
+            columns: columns,
+            superdiagonals: superdiagonals,
+            subdiagonals: subdiagonals,
+            values: vec![T::zero(); (superdiagonals + 1 + subdiagonals) * columns],
+        }
+    }
+
     /// Return the number of diagonals.
     #[inline]
     pub fn diagonals(&self) -> usize {
@@ -61,19 +73,35 @@ impl<T: Element> Matrix for Band<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
-        let zero = T::zero();
-        self.iter().fold(0, |sum, (_, _, &value)| if value != zero { sum + 1 } else { sum })
+        self.iter().fold(0, |sum, (_, _, &value)| if value.is_zero() { sum } else { sum + 1 })
     }
 
-    fn zero<S: Size>(size: S) -> Self {
-        let (rows, columns) = size.dimensions();
-        Band {
-            rows: rows,
-            columns: columns,
-            superdiagonals: 0,
-            subdiagonals: 0,
-            values: vec![T::zero(); min!(rows, columns)],
+    fn transpose(&mut self) {
+        let &mut Band { rows, columns, superdiagonals, subdiagonals, .. } = self;
+        let diagonals = self.diagonals();
+
+        let mut matrix = Band::new((columns, rows), subdiagonals, superdiagonals);
+        for k in 0..(superdiagonals + 1) {
+            for i in 0..min!(columns - k, rows) {
+                let j = i + k;
+                matrix.values[i * diagonals + subdiagonals + k] =
+                    self.values[j * diagonals + superdiagonals - k];
+            }
         }
+        for k in 1..(subdiagonals + 1) {
+            for i in k..min!(columns + k, rows) {
+                let j = i - k;
+                matrix.values[i * diagonals + subdiagonals - k] =
+                    self.values[j * diagonals + superdiagonals + k];
+            }
+        }
+
+        *self = matrix;
+    }
+
+    #[inline]
+    fn zero<S: Size>(size: S) -> Self {
+        Band::new(size, 0, 0)
     }
 }
 
@@ -84,12 +112,7 @@ impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
         let &Band { rows, columns, superdiagonals, subdiagonals, ref values } = matrix;
         let diagonals = matrix.diagonals();
 
-        let mut matrix = Dense {
-            rows: rows,
-            columns: columns,
-            values: vec![T::zero(); rows * columns],
-        };
-
+        let mut matrix = Dense::new((rows, columns));
         for k in 0..(superdiagonals + 1) {
             for i in 0..min!(columns - k, rows) {
                 let j = i + k;
@@ -156,6 +179,27 @@ mod tests {
             7.0, 11.0,  0.0, 16.0, 17.0,
         ]);
         assert_eq!(matrix.nonzeros(), 17 - 2);
+    }
+
+    #[test]
+    fn transpose() {
+        let mut matrix = new!(4, 8, 3, 1, vec![
+             0.0,  0.0,  0.0,  1.0,  5.0,
+             0.0,  0.0,  2.0,  6.0, 10.0,
+             0.0,  3.0,  7.0, 11.0, 15.0,
+             4.0,  8.0, 12.0, 16.0,  0.0,
+             9.0, 13.0, 17.0,  0.0,  0.0,
+            14.0, 18.0,  0.0,  0.0,  0.0,
+            19.0,  0.0,  0.0,  0.0,  0.0,
+             0.0,  0.0,  0.0,  0.0,  0.0,
+        ]);
+        matrix.transpose();
+        assert_eq!(matrix, new!(8, 4, 1, 3, vec![
+             0.0,  1.0,  2.0,  3.0,  4.0,
+             5.0,  6.0,  7.0,  8.0,  9.0,
+            10.0, 11.0, 12.0, 13.0, 14.0,
+            15.0, 16.0, 17.0, 18.0, 19.0,
+        ]));
     }
 
     #[test]

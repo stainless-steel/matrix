@@ -67,6 +67,29 @@ macro_rules! debug_valid(
 size!(Compressed);
 
 impl<T: Element> Compressed<T> {
+    /// Create a zero matrix.
+    #[inline]
+    pub fn new<S: Size>(size: S, format: Format) -> Self {
+        Compressed::with_capacity(size, format, 0)
+    }
+
+    /// Create a zero matrix with a specific capacity.
+    pub fn with_capacity<S: Size>(size: S, format: Format, capacity: usize) -> Self {
+        let (rows, columns) = size.dimensions();
+        Compressed {
+            rows: rows,
+            columns: columns,
+            nonzeros: 0,
+            format: format,
+            values: Vec::with_capacity(capacity),
+            indices: Vec::with_capacity(capacity),
+            offsets: match format {
+                Format::Column => vec![0; columns + 1],
+                Format::Row => vec![0; rows + 1],
+            },
+        }
+    }
+
     /// Read an element.
     pub fn get<P: Position>(&self, position: P) -> T {
         let (mut i, mut j) = position.coordinates();
@@ -167,51 +190,34 @@ impl<T: Element> Matrix for Compressed<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
-        let zero = T::zero();
-        self.values.iter().fold(0, |sum, &value| if value != zero { sum + 1 } else { sum })
+        self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
     }
 
-    fn zero<S: Size>(size: S) -> Self {
-        let (rows, columns) = size.dimensions();
-        Compressed {
-            rows: rows,
-            columns: columns,
-            nonzeros: 0,
-            format: Format::Column,
-            values: vec![],
-            indices: vec![],
-            offsets: vec![0],
+    fn transpose(&mut self) {
+        let &mut Compressed { rows, columns, nonzeros, format, .. } = self;
+        let mut matrix = Compressed::with_capacity((columns, rows), format, nonzeros);
+        for (i, j, &value) in self.iter() {
+            matrix.set((j, i), value);
         }
+        *self = matrix;
+    }
+
+    #[inline]
+    fn zero<S: Size>(size: S) -> Self {
+        Compressed::new(size, Format::Column)
     }
 }
 
 impl<'l, T: Element> From<&'l Dense<T>> for Compressed<T> {
-    fn from(matrix: &'l Dense<T>) -> Self {
-        let (mut values, mut indices, mut offsets) = (vec![], vec![], vec![]);
-
-        let mut k = 0;
-        let zero = T::zero();
-        for _ in 0..matrix.columns {
-            offsets.push(values.len());
-            for i in 0..matrix.rows {
-                if matrix.values[k] != zero {
-                    values.push(matrix.values[k]);
-                    indices.push(i);
-                }
-                k += 1;
+    fn from(dense: &'l Dense<T>) -> Self {
+        let (rows, columns) = dense.dimensions();
+        let mut matrix = Compressed::new((rows, columns), Format::Column);
+        for (k, &value) in dense.values.iter().enumerate() {
+            if !value.is_zero() {
+                matrix.set((k % rows, k / rows), value);
             }
         }
-        offsets.push(values.len());
-
-        Compressed {
-            rows: matrix.rows,
-            columns: matrix.columns,
-            nonzeros: values.len(),
-            format: Format::Column,
-            values: values,
-            indices: indices,
-            offsets: offsets,
-        }
+        matrix
     }
 }
 
@@ -230,12 +236,7 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
             rows, columns, format, ref values, ref indices, ref offsets, ..
         } = matrix;
 
-        let mut matrix = Dense {
-            rows: rows,
-            columns: columns,
-            values: vec![T::zero(); rows * columns],
-        };
-
+        let mut matrix = Dense::new((rows, columns));
         match format {
             Format::Row => for i in 0..rows {
                 for k in offsets[i]..offsets[i + 1] {
@@ -256,6 +257,17 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
 impl<T: Element> From<Compressed<T>> for Dense<T> {
     fn from(matrix: Compressed<T>) -> Self {
         (&matrix).into()
+    }
+}
+
+impl Format {
+    /// Return the other format.
+    #[inline]
+    pub fn flip(&self) -> Self {
+        match *self {
+            Format::Column => Format::Row,
+            Format::Row => Format::Column,
+        }
     }
 }
 
@@ -349,6 +361,16 @@ mod tests {
 
         assert_eq!(matrix.nonzeros, 5);
         assert_eq!(matrix.nonzeros(), 3);
+    }
+
+    #[test]
+    fn transpose() {
+        let mut matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+                              vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+
+        matrix.transpose();
+        assert_eq!(matrix, new!(7, 5, 5, Format::Column, vec![2.0, 1.0, 4.0, 3.0, 5.0],
+                                vec![3, 2, 6, 5, 6], vec![0, 1, 3, 3, 4, 5]));
     }
 
     #[test]

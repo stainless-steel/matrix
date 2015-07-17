@@ -46,8 +46,11 @@ impl<T: Element> Matrix for Diagonal<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
-        let zero = T::zero();
-        self.values.iter().fold(0, |sum, &value| if value != zero { sum + 1 } else { sum })
+        self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
+    }
+
+    #[inline(always)]
+    fn transpose(&mut self) {
     }
 
     fn zero<S: Size>(size: S) -> Self {
@@ -114,12 +117,7 @@ impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
 
         let &Diagonal { rows, columns, ref values } = matrix;
 
-        let mut dense = Dense {
-            rows: rows,
-            columns: columns,
-            values: vec![T::zero(); rows * columns],
-        };
-
+        let mut dense = Dense::new((rows, columns));
         for i in 0..min!(rows, columns) {
             dense.values[i * rows + i] = values[i];
         }

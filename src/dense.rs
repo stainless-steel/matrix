@@ -22,21 +22,13 @@ pub struct Dense<T: Element> {
 
 size!(Dense);
 
-impl<T: Element> Matrix for Dense<T> {
-    type Element = T;
-
-    fn nonzeros(&self) -> usize {
-        let zero = T::zero();
-        self.values.iter().fold(0, |sum, &value| if value != zero { sum + 1 } else { sum })
-    }
-
-    fn zero<S: Size>(size: S) -> Self {
+impl<T: Element> Dense<T> {
+    /// Create a zero matrix.
+    pub fn new<S: Size>(size: S) -> Self {
         let (rows, columns) = size.dimensions();
         Dense { rows: rows, columns: columns, values: vec![T::zero(); rows * columns] }
     }
-}
 
-impl<T: Element> Dense<T> {
     /// Create a matrix from a slice.
     pub fn from_slice<S: Size>(values: &[T], size: S) -> Self {
         let (rows, columns) = size.dimensions();
@@ -49,6 +41,30 @@ impl<T: Element> Dense<T> {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), rows * columns);
         Dense { rows: rows, columns: columns, values: values }
+    }
+}
+
+impl<T: Element> Matrix for Dense<T> {
+    type Element = T;
+
+    fn nonzeros(&self) -> usize {
+        self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
+    }
+
+    fn transpose(&mut self) {
+        let (rows, columns) = (self.rows, self.columns);
+        for i in 0..rows {
+            for j in i..columns {
+                self.values.swap(j * rows + i, i * rows + j);
+            }
+        }
+        self.rows = columns;
+        self.columns = rows;
+    }
+
+    #[inline]
+    fn zero<S: Size>(size: S) -> Self {
+        Dense::new(size)
     }
 }
 
@@ -101,5 +117,12 @@ mod tests {
     fn nonzeros() {
         let matrix = Dense::from_vec(vec![1.0, 2.0, 3.0, 0.0], 2);
         assert_eq!(matrix.nonzeros(), 3);
+    }
+
+    #[test]
+    fn transpose() {
+        let mut matrix = Dense::from_vec(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], (3, 2));
+        matrix.transpose();
+        assert_eq!(matrix, Dense::from_vec(vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0], (2, 3)));
     }
 }

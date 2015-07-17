@@ -3,6 +3,9 @@ use complex::{c32, c64};
 
 /// An element.
 pub trait Element: Copy + PartialEq {
+    /// Check if the element is zero.
+    fn is_zero(&self) -> bool;
+
     /// Return the zero element.
     fn zero() -> Self;
 }
@@ -10,6 +13,11 @@ pub trait Element: Copy + PartialEq {
 macro_rules! element(
     ($kind:ty, $zero:expr) => (
         impl Element for $kind {
+            #[inline(always)]
+            fn is_zero(&self) -> bool {
+                *self == $zero
+            }
+
             #[inline(always)]
             fn zero() -> Self {
                 $zero
