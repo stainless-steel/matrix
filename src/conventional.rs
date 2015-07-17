@@ -119,8 +119,8 @@ mod tests {
 
     #[test]
     fn transpose() {
-        let mut matrix = Conventional::from_vec(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], (3, 2));
-        matrix = matrix.transpose();
+        let matrix = Conventional::from_vec(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], (3, 2));
+        let matrix = matrix.transpose();
         assert_eq!(matrix, Conventional::from_vec(vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0], (2, 3)));
     }
 }

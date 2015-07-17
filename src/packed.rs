@@ -158,11 +158,11 @@ mod tests {
 
     #[test]
     fn transpose_lower() {
-        let mut matrix = new!(4, Format::Lower, vec![
+        let matrix = new!(4, Format::Lower, vec![
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
         ]);
 
-        matrix = matrix.transpose();
+        let matrix = matrix.transpose();
 
         assert_eq!(matrix, new!(4, Format::Upper, vec![
             1.0, 2.0, 5.0, 3.0, 6.0, 8.0, 4.0, 7.0, 9.0, 10.0,
@@ -171,11 +171,11 @@ mod tests {
 
     #[test]
     fn transpose_upper() {
-        let mut matrix = new!(4, Format::Upper, vec![
+        let matrix = new!(4, Format::Upper, vec![
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
         ]);
 
-        matrix = matrix.transpose();
+        let matrix = matrix.transpose();
 
         assert_eq!(matrix, new!(4, Format::Lower, vec![
             1.0, 2.0, 4.0, 7.0, 3.0, 5.0, 8.0, 6.0, 9.0, 10.0,
@@ -188,7 +188,7 @@ mod tests {
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
         ]);
 
-        let matrix: Conventional<_> = matrix.into();
+        let matrix = Conventional::from(matrix);
 
         assert_eq!(&*matrix, &[
             1.0, 2.0, 3.0,  4.0,
@@ -204,7 +204,7 @@ mod tests {
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
         ]);
 
-        let matrix: Conventional<_> = matrix.into();
+        let matrix = Conventional::from(matrix);
 
         assert_eq!(&*matrix, &[
             1.0, 0.0, 0.0,  0.0,

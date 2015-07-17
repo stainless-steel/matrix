@@ -9,7 +9,7 @@
 
 use std::iter;
 
-use {Conventional, Element, Matrix, Size};
+use {Conventional, Diagonal, Element, Matrix, Size};
 
 /// A banded matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -157,6 +157,31 @@ impl<T: Element> From<Banded<T>> for Conventional<T> {
     }
 }
 
+impl<'l, T: Element> From<&'l Diagonal<T>> for Banded<T> {
+    #[inline]
+    fn from(matrix: &'l Diagonal<T>) -> Self {
+        matrix.clone().into()
+    }
+}
+
+impl<T: Element> From<Diagonal<T>> for Banded<T> {
+    fn from(matrix: Diagonal<T>) -> Self {
+        Banded {
+            rows: matrix.rows,
+            columns: matrix.columns,
+            superdiagonals: 0,
+            subdiagonals: 0,
+            values: {
+                let mut values = matrix.values;
+                for _ in matrix.rows..matrix.columns {
+                    values.push(T::zero());
+                }
+                values
+            },
+        }
+    }
+}
+
 impl<'l, T: Element> Iterator<'l, T> {
     fn new(matrix: &'l Banded<T>) -> Iterator<'l, T> {
         Iterator {
@@ -191,7 +216,7 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
 
 #[cfg(test)]
 mod tests {
-    use {Banded, Conventional, Matrix};
+    use {Banded, Conventional, Diagonal, Matrix};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr, $values:expr) => (
@@ -213,7 +238,7 @@ mod tests {
 
     #[test]
     fn transpose() {
-        let mut matrix = new!(4, 8, 3, 1, vec![
+        let matrix = new!(4, 8, 3, 1, vec![
              0.0,  0.0,  0.0,  1.0,  5.0,
              0.0,  0.0,  2.0,  6.0, 10.0,
              0.0,  3.0,  7.0, 11.0, 15.0,
@@ -224,7 +249,7 @@ mod tests {
              0.0,  0.0,  0.0,  0.0,  0.0,
         ]);
 
-        matrix = matrix.transpose();
+        let matrix = matrix.transpose();
 
         assert_eq!(matrix, new!(8, 4, 1, 3, vec![
              0.0,  1.0,  2.0,  3.0,  4.0,
@@ -288,6 +313,18 @@ mod tests {
     }
 
     #[test]
+    fn from_diagonal_tall() {
+        let matrix = Banded::from(Diagonal::from_vec(vec![1.0, 2.0, 3.0], (5, 3)));
+        assert_eq!(&matrix.values, &[1.0, 2.0, 3.0]);
+    }
+
+    #[test]
+    fn from_diagonal_wide() {
+        let matrix = Banded::from(Diagonal::from_vec(vec![1.0, 2.0, 3.0], (3, 5)));
+        assert_eq!(&matrix.values, &[1.0, 2.0, 3.0, 0.0, 0.0]);
+    }
+
+    #[test]
     fn into_conventional_tall() {
         let matrix = new!(7, 4, 2, 2, vec![
             0.0,  0.0,  1.0,  4.0,  8.0,
@@ -296,7 +333,7 @@ mod tests {
             7.0, 11.0, 14.0, 16.0, 17.0,
         ]);
 
-        let matrix: Conventional<_> = matrix.into();
+        let matrix = Conventional::from(matrix);
 
         assert_eq!(&*matrix, &[
             1.0, 4.0,  8.0,  0.0,  0.0,  0.0, 0.0,
@@ -318,7 +355,7 @@ mod tests {
              0.0,  0.0,  0.0,  0.0,  0.0,
         ]);
 
-        let matrix: Conventional<_> = matrix.into();
+        let matrix = Conventional::from(matrix);
 
         assert_eq!(&*matrix, &[
             1.0, 4.0,  8.0,  0.0,

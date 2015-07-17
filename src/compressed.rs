@@ -11,7 +11,7 @@
 
 use std::{iter, mem};
 
-use {Conventional, Element, Matrix, Position, Size};
+use {Conventional, Diagonal, Element, Matrix, Position, Size};
 
 /// A compressed matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -274,6 +274,29 @@ impl<T: Element> From<Compressed<T>> for Conventional<T> {
     }
 }
 
+impl<'l, T: Element> From<&'l Diagonal<T>> for Compressed<T> {
+    #[inline]
+    fn from(matrix: &'l Diagonal<T>) -> Self {
+        matrix.clone().into()
+    }
+}
+
+impl<T: Element> From<Diagonal<T>> for Compressed<T> {
+    fn from(matrix: Diagonal<T>) -> Self {
+        let Diagonal { rows, columns, values } = matrix;
+        let nonzeros = values.len();
+        Compressed {
+            rows: rows,
+            columns: columns,
+            nonzeros: nonzeros,
+            values: values,
+            format: Format::Column,
+            indices: (0..nonzeros).collect(),
+            offsets: (0..(columns + 1)).map(|i| if i < nonzeros { i } else { nonzeros }).collect(),
+        }
+    }
+}
+
 impl Format {
     /// Return the other format.
     #[inline]
@@ -317,7 +340,7 @@ iterator!(struct IteratorMut -> (usize, usize, &'l mut T));
 #[cfg(test)]
 mod tests {
     use compressed::Format;
-    use {Compressed, Conventional, Matrix};
+    use {Compressed, Conventional, Diagonal, Matrix};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,
@@ -388,10 +411,10 @@ mod tests {
 
     #[test]
     fn transpose() {
-        let mut matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
-                              vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+        let matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+                          vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
-        matrix = matrix.transpose();
+        let matrix = matrix.transpose();
 
         assert_eq!(matrix, new!(7, 5, 5, Format::Column, vec![2.0, 1.0, 4.0, 3.0, 5.0],
                                 vec![3, 2, 6, 5, 6], vec![0, 1, 3, 3, 4, 5]));
@@ -492,10 +515,26 @@ mod tests {
             0.0, 0.0, 0.0, 0.0, 4.0,
         ], (5, 3));
 
-        let matrix: Compressed<_> = matrix.into();
+        let matrix = Compressed::from(matrix);
 
         assert_eq!(matrix, new!(5, 3, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 3, 4, 4], vec![0, 1, 3, 4]));
+    }
+
+    #[test]
+    fn from_diagonal_tall() {
+        let matrix = Compressed::from(Diagonal::from_vec(vec![1.0, 2.0, 0.0], (5, 3)));
+
+        assert_eq!(matrix, new!(5, 3, 3, Format::Column, vec![1.0, 2.0, 0.0],
+                                vec![0, 1, 2], vec![0, 1, 2, 3]));
+    }
+
+    #[test]
+    fn from_diagonal_wide() {
+        let matrix = Compressed::from(Diagonal::from_vec(vec![1.0, 0.0, 3.0], (3, 5)));
+
+        assert_eq!(matrix, new!(3, 5, 3, Format::Column, vec![1.0, 0.0, 3.0],
+                                vec![0, 1, 2], vec![0, 1, 2, 3, 3, 3]));
     }
 
     #[test]
@@ -503,7 +542,7 @@ mod tests {
         let matrix = new!(5, 3, 3, Format::Column, vec![1.0, 2.0, 3.0],
                           vec![0, 1, 2], vec![0, 1, 2, 3]);
 
-        let matrix: Conventional<_> = matrix.into();
+        let matrix = Conventional::from(matrix);
 
         assert_eq!(&*matrix, &[
             1.0, 0.0, 0.0, 0.0, 0.0,
