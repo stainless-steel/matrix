@@ -51,15 +51,15 @@ impl<T: Element> Matrix for Dense<T> {
         self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
     }
 
-    fn transpose(&mut self) {
+    fn transpose(&self) -> Self {
         let (rows, columns) = (self.rows, self.columns);
+        let mut matrix = Dense::from_slice(&self.values, (columns, rows));
         for i in 0..rows {
             for j in i..columns {
-                self.values.swap(j * rows + i, i * rows + j);
+                matrix.values.swap(j * rows + i, i * rows + j);
             }
         }
-        self.rows = columns;
-        self.columns = rows;
+        matrix
     }
 
     #[inline]
@@ -122,7 +122,7 @@ mod tests {
     #[test]
     fn transpose() {
         let mut matrix = Dense::from_vec(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], (3, 2));
-        matrix.transpose();
+        matrix = matrix.transpose();
         assert_eq!(matrix, Dense::from_vec(vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0], (2, 3)));
     }
 }

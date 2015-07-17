@@ -14,7 +14,7 @@ pub trait Matrix: Into<Dense<<Self as Matrix>::Element>> + Size {
     fn nonzeros(&self) -> usize;
 
     /// Transpose the matrix.
-    fn transpose(&mut self);
+    fn transpose(&self) -> Self;
 
     /// Create a zero matrix.
     fn zero<S: Size>(S) -> Self;

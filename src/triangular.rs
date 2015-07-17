@@ -63,8 +63,8 @@ impl<T: Element> Matrix for Triangular<T> {
         self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
     }
 
-    fn transpose(&mut self) {
-        let &mut Triangular { size, format, .. } = self;
+    fn transpose(&self) -> Self {
+        let &Triangular { size, format, .. } = self;
         let lower = format == Format::Lower;
         let mut matrix = Triangular::new(size, format.flip());
         let mut k = 0;
@@ -78,7 +78,7 @@ impl<T: Element> Matrix for Triangular<T> {
                 k += 1;
             }
         }
-        *self = matrix;
+        matrix
     }
 
     #[inline]
@@ -162,7 +162,7 @@ mod tests {
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
         ]);
 
-        matrix.transpose();
+        matrix = matrix.transpose();
 
         assert_eq!(matrix, new!(4, Format::Upper, vec![
             1.0, 2.0, 5.0, 3.0, 6.0, 8.0, 4.0, 7.0, 9.0, 10.0,
@@ -175,7 +175,7 @@ mod tests {
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
         ]);
 
-        matrix.transpose();
+        matrix = matrix.transpose();
 
         assert_eq!(matrix, new!(4, Format::Lower, vec![
             1.0, 2.0, 4.0, 7.0, 3.0, 5.0, 8.0, 6.0, 9.0, 10.0,

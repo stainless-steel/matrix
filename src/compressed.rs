@@ -193,13 +193,13 @@ impl<T: Element> Matrix for Compressed<T> {
         self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
     }
 
-    fn transpose(&mut self) {
-        let &mut Compressed { rows, columns, nonzeros, format, .. } = self;
+    fn transpose(&self) -> Self {
+        let &Compressed { rows, columns, nonzeros, format, .. } = self;
         let mut matrix = Compressed::with_capacity((columns, rows), format, nonzeros);
         for (i, j, &value) in self.iter() {
             matrix.set((j, i), value);
         }
-        *self = matrix;
+        matrix
     }
 
     #[inline]
@@ -369,7 +369,7 @@ mod tests {
         let mut matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
                               vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
-        matrix.transpose();
+        matrix = matrix.transpose();
 
         assert_eq!(matrix, new!(7, 5, 5, Format::Column, vec![2.0, 1.0, 4.0, 3.0, 5.0],
                                 vec![3, 2, 6, 5, 6], vec![0, 1, 3, 3, 4, 5]));

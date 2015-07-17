@@ -50,7 +50,8 @@ impl<T: Element> Matrix for Diagonal<T> {
     }
 
     #[inline(always)]
-    fn transpose(&mut self) {
+    fn transpose(&self) -> Self {
+        self.clone()
     }
 
     fn zero<S: Size>(size: S) -> Self {

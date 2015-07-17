@@ -76,8 +76,8 @@ impl<T: Element> Matrix for Band<T> {
         self.iter().fold(0, |sum, (_, _, &value)| if value.is_zero() { sum } else { sum + 1 })
     }
 
-    fn transpose(&mut self) {
-        let &mut Band { rows, columns, superdiagonals, subdiagonals, .. } = self;
+    fn transpose(&self) -> Self {
+        let &Band { rows, columns, superdiagonals, subdiagonals, .. } = self;
         let diagonals = self.diagonals();
 
         let mut matrix = Band::new((columns, rows), subdiagonals, superdiagonals);
@@ -96,7 +96,7 @@ impl<T: Element> Matrix for Band<T> {
             }
         }
 
-        *self = matrix;
+        matrix
     }
 
     #[inline]
@@ -191,7 +191,7 @@ mod tests {
              0.0,  0.0,  0.0,  0.0,  0.0,
         ]);
 
-        matrix.transpose();
+        matrix = matrix.transpose();
 
         assert_eq!(matrix, new!(8, 4, 1, 3, vec![
              0.0,  1.0,  2.0,  3.0,  4.0,
