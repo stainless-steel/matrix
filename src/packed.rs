@@ -1,26 +1,26 @@
-//! Triangular matrices.
+//! Packed matrices.
 //!
-//! Apart from triangular matrices, the storage is suitable for symmetric and
-//! Hermitian matrices. Data are stored in the [format][1] adopted by
-//! [LAPACK][2].
+//! The storage is suitable for symmetric, Hermitian, and triangular matrices.
+//! Data are stored in the [format][1] adopted by [LAPACK][2].
 //!
 //! [1]: http://www.netlib.org/lapack/lug/node123.html
 //! [2]: http://www.netlib.org/lapack
 
 use {Dense, Element, Matrix, Size};
 
-/// A triangular matrix.
+/// A packed matrix.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Triangular<T: Element> {
+pub struct Packed<T: Element> {
     /// The number of rows or columns.
     pub size: usize,
     /// The storage format.
     pub format: Format,
-    /// The values stored in the column-major order.
+    /// The values of the lower triangle when `format = Lower` or upper triangle
+    /// when `format = Upper` are stored by columns.
     pub values: Vec<T>,
 }
 
-/// A format of a triangular matrix.
+/// A format of a packed matrix.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Format {
     /// The lower-triangular format.
@@ -45,18 +45,18 @@ macro_rules! debug_validate(
     ));
 );
 
-size!(Triangular, size, size);
+size!(Packed, size, size);
 
-impl<T: Element> Triangular<T> {
+impl<T: Element> Packed<T> {
     /// Create a zero matrix.
     pub fn new<S: Size>(size: S, format: Format) -> Self {
         let (rows, _columns) = size.dimensions();
         debug_assert!(rows == _columns);
-        Triangular { size: rows, format: format, values: vec![T::zero(); storage!(rows)] }
+        Packed { size: rows, format: format, values: vec![T::zero(); storage!(rows)] }
     }
 }
 
-impl<T: Element> Matrix for Triangular<T> {
+impl<T: Element> Matrix for Packed<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
@@ -64,9 +64,9 @@ impl<T: Element> Matrix for Triangular<T> {
     }
 
     fn transpose(&self) -> Self {
-        let &Triangular { size, format, .. } = self;
+        let &Packed { size, format, .. } = self;
         let lower = format == Format::Lower;
-        let mut matrix = Triangular::new(size, format.flip());
+        let mut matrix = Packed::new(size, format.flip());
         let mut k = 0;
         for j in 0..size {
             for i in j..size {
@@ -83,15 +83,15 @@ impl<T: Element> Matrix for Triangular<T> {
 
     #[inline]
     fn zero<S: Size>(size: S) -> Self {
-        Triangular::new(size, Format::Lower)
+        Packed::new(size, Format::Lower)
     }
 }
 
-impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
-    fn from(matrix: &'l Triangular<T>) -> Self {
+impl<'l, T: Element> From<&'l Packed<T>> for Dense<T> {
+    fn from(matrix: &'l Packed<T>) -> Self {
         debug_validate!(matrix);
 
-        let &Triangular { size, format, ref values } = matrix;
+        let &Packed { size, format, ref values } = matrix;
 
         let mut matrix = Dense::new(size);
         match format {
@@ -119,9 +119,9 @@ impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
     }
 }
 
-impl<T: Element> From<Triangular<T>> for Dense<T> {
+impl<T: Element> From<Packed<T>> for Dense<T> {
     #[inline]
-    fn from(matrix: Triangular<T>) -> Self {
+    fn from(matrix: Packed<T>) -> Self {
         (&matrix).into()
     }
 }
@@ -139,12 +139,12 @@ impl Format {
 
 #[cfg(test)]
 mod tests {
-    use triangular::Format;
-    use {Dense, Matrix, Triangular};
+    use packed::Format;
+    use {Dense, Matrix, Packed};
 
     macro_rules! new(
         ($size:expr, $format:expr, $values:expr) => (
-            Triangular { size: $size, format: $format, values: $values }
+            Packed { size: $size, format: $format, values: $values }
         );
     );
 

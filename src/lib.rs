@@ -54,13 +54,13 @@ pub mod band;
 pub mod compressed;
 pub mod dense;
 pub mod diagonal;
-pub mod triangular;
+pub mod packed;
 
 pub use band::Band;
 pub use compressed::Compressed;
 pub use dense::Dense;
 pub use diagonal::Diagonal;
 pub use element::Element;
+pub use packed::Packed;
 pub use position::Position;
 pub use size::Size;
-pub use triangular::Triangular;
