@@ -1,6 +1,6 @@
 //! The conventional storage.
 //!
-//! The storage is suitable for generic matrices.
+//! The storage is suitable for dense matrices.
 
 use std::convert::Into;
 use std::ops::{Deref, DerefMut, Index, IndexMut};
@@ -8,8 +8,6 @@ use std::ops::{Deref, DerefMut, Index, IndexMut};
 use {Element, Matrix, Position, Size};
 
 /// A conventional matrix.
-///
-/// The storage is suitable for generic matrices.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Conventional<T: Element> {
     /// The number of rows.
