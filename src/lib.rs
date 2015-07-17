@@ -42,7 +42,7 @@ macro_rules! size(
 macro_rules! min(
     ($left:expr, $right:expr) => ({
         let (left, right) = ($left, $right);
-        if left < right { left } else { right }
+        if left > right { right } else { left }
     });
 );
 

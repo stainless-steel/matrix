@@ -41,6 +41,19 @@ macro_rules! debug_validate(
     ));
 );
 
+macro_rules! max_difference(
+    ($limit:expr, $left:expr, $right:expr) => ({
+        let (limit, left, right) = ($limit, $left, $right);
+        if left < limit + right { limit } else { left - right }
+    });
+);
+
+macro_rules! row_range(
+    ($rows:expr, $superdiagonals:expr, $subdiagonals:expr, $column:expr) => (
+        max_difference!(0, $column, $superdiagonals)..min!($rows, $column + $subdiagonals + 1)
+    );
+);
+
 size!(Banded);
 
 impl<T: Element> Banded<T> {
@@ -81,18 +94,11 @@ impl<T: Element> Matrix for Banded<T> {
         let diagonals = self.diagonals();
 
         let mut matrix = Banded::new((columns, rows), subdiagonals, superdiagonals);
-        for k in 0..(superdiagonals + 1) {
-            for i in 0..min!(columns - k, rows) {
-                let j = i + k;
-                matrix.values[i * diagonals + subdiagonals + k] =
-                    self.values[j * diagonals + superdiagonals - k];
-            }
-        }
-        for k in 1..(subdiagonals + 1) {
-            for i in k..min!(columns + k, rows) {
-                let j = i - k;
-                matrix.values[i * diagonals + subdiagonals - k] =
-                    self.values[j * diagonals + superdiagonals + k];
+        for j in 0..columns {
+            for i in row_range!(rows, superdiagonals, subdiagonals, j) {
+                let k = superdiagonals + i - j;
+                let l = subdiagonals + j - i;
+                matrix.values[i * diagonals + l] = self.values[j * diagonals + k];
             }
         }
 
@@ -113,16 +119,10 @@ impl<'l, T: Element> From<&'l Banded<T>> for Conventional<T> {
         let diagonals = matrix.diagonals();
 
         let mut matrix = Conventional::new((rows, columns));
-        for k in 0..(superdiagonals + 1) {
-            for i in 0..min!(columns - k, rows) {
-                let j = i + k;
-                matrix.values[j * rows + i] = values[j * diagonals + superdiagonals - k];
-            }
-        }
-        for k in 1..(subdiagonals + 1) {
-            for i in k..min!(columns + k, rows) {
-                let j = i - k;
-                matrix.values[j * rows + i] = values[j * diagonals + superdiagonals + k];
+        for j in 0..columns {
+            for i in row_range!(rows, superdiagonals, subdiagonals, j) {
+                let k = superdiagonals + i - j;
+                matrix.values[j * rows + i] = values[j * diagonals + k];
             }
         }
 
