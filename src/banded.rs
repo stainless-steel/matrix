@@ -29,7 +29,7 @@ pub struct Banded<T: Element> {
     pub values: Vec<T>,
 }
 
-/// A sparse iterator of a banded matrix.
+/// A sparse iterator.
 pub struct Iterator<'l, T: 'l + Element> {
     matrix: &'l Banded<T>,
     column: usize,

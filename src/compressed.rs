@@ -46,9 +46,16 @@ pub enum Format {
     Row,
 }
 
-/// A sparse iterator of a compressed matrix.
+/// A sparse iterator.
 pub struct Iterator<'l, T: 'l + Element> {
     matrix: &'l Compressed<T>,
+    taken: usize,
+    major: usize,
+}
+
+/// A sparse iterator allowing mutation.
+pub struct IteratorMut<'l, T: 'l + Element> {
+    matrix: &'l mut Compressed<T>,
     taken: usize,
     major: usize,
 }
@@ -140,6 +147,12 @@ impl<T: Element> Compressed<T> {
     #[inline]
     pub fn iter<'l>(&'l self) -> Iterator<'l, T> {
         Iterator { matrix: self, taken: 0, major: 0 }
+    }
+
+    /// Return a sparse iterator allowing mutation.
+    #[inline]
+    pub fn iter_mut<'l>(&'l mut self) -> IteratorMut<'l, T> {
+        IteratorMut { matrix: self, taken: 0, major: 0 }
     }
 
     /// Resize the matrix.
@@ -272,25 +285,34 @@ impl Format {
     }
 }
 
-impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
-    type Item = (usize, usize, &'l T);
+macro_rules! iterator(
+    (struct $name:ident -> $item:ty) => (
+        impl<'l, T: Element> iter::Iterator for $name<'l, T> {
+            type Item = $item;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        let &mut Iterator { matrix, ref mut taken, ref mut major } = self;
-        let k = *taken;
-        if k == matrix.nonzeros {
-            return None;
+            #[allow(mutable_transmutes)]
+            fn next(&mut self) -> Option<Self::Item> {
+                let &mut $name { ref matrix, ref mut taken, ref mut major } = self;
+                let k = *taken;
+                if k == matrix.nonzeros {
+                    return None;
+                }
+                *taken += 1;
+                while matrix.offsets[*major + 1] <= k {
+                    *major += 1;
+                }
+                let item = unsafe { mem::transmute(&matrix.values[k]) };
+                Some(match matrix.format {
+                    Format::Column => (matrix.indices[k], *major, item),
+                    Format::Row => (*major, matrix.indices[k], item),
+                })
+            }
         }
-        *taken += 1;
-        while matrix.offsets[*major + 1] <= k {
-            *major += 1;
-        }
-        Some(match matrix.format {
-            Format::Column => (matrix.indices[k], *major, &matrix.values[k]),
-            Format::Row => (*major, matrix.indices[k], &matrix.values[k]),
-        })
-    }
-}
+    );
+);
+
+iterator!(struct Iterator -> (usize, usize, &'l T));
+iterator!(struct IteratorMut -> (usize, usize, &'l mut T));
 
 #[cfg(test)]
 mod tests {
@@ -388,6 +410,18 @@ mod tests {
 
         let result = matrix.iter().map(|(_, _, &value)| value).collect::<Vec<_>>();
         assert_eq!(&result, &vec![1.0, 2.0, 3.0, 4.0, 5.0]);
+    }
+
+    #[test]
+    fn iter_mut() {
+        let mut matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+                              vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+
+        for (i, _, value) in matrix.iter_mut() {
+            *value = if i % 2 == 0 { 42.0 } else { 69.0 };
+        }
+
+        assert_eq!(&matrix.values, &vec![69.0, 42.0, 69.0, 69.0, 42.0]);
     }
 
     #[test]
