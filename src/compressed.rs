@@ -369,6 +369,7 @@ mod tests {
                               vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
         matrix.transpose();
+
         assert_eq!(matrix, new!(7, 5, 5, Format::Column, vec![2.0, 1.0, 4.0, 3.0, 5.0],
                                 vec![3, 2, 6, 5, 6], vec![0, 1, 3, 3, 4, 5]));
     }
