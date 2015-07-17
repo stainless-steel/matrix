@@ -1,8 +1,10 @@
 #[cfg(feature = "complex")]
 use complex::{c32, c64};
 
+use std::fmt::Debug;
+
 /// An element.
-pub trait Element: Copy + PartialEq {
+pub trait Element: Copy + Debug + PartialEq {
     /// Check if the element is zero.
     fn is_zero(&self) -> bool;
 
