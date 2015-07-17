@@ -17,11 +17,12 @@ pub struct Diagonal<T: Element> {
     pub values: Vec<T>,
 }
 
-macro_rules! debug_validate(
-    ($matrix:ident) => (debug_assert!(
-        $matrix.values.len() == min!($matrix.rows, $matrix.columns)
-    ));
-);
+#[cfg(debug_assertions)]
+impl<T: Element> ::Validate for Diagonal<T> {
+    fn validate(&self) {
+        assert_eq!(self.values.len(), min!(self.rows, self.columns))
+    }
+}
 
 size!(Diagonal);
 
@@ -61,9 +62,7 @@ impl<T: Element> Matrix for Diagonal<T> {
 
 impl<'l, T: Element> From<&'l Diagonal<T>> for Conventional<T> {
     fn from(matrix: &Diagonal<T>) -> Self {
-        debug_validate!(matrix);
-
-        let &Diagonal { rows, columns, ref values } = matrix;
+        let &Diagonal { rows, columns, ref values } = validate!(matrix);
 
         let mut conventional = Conventional::new((rows, columns));
         for i in 0..min!(rows, columns) {

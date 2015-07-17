@@ -37,11 +37,12 @@ pub struct Iterator<'l, T: 'l + Element> {
     finish: usize,
 }
 
-macro_rules! debug_validate(
-    ($matrix:ident) => (debug_assert!(
-        $matrix.values.len() == $matrix.diagonals() * $matrix.columns
-    ));
-);
+#[cfg(debug_assertions)]
+impl<T: Element> ::Validate for Banded<T> {
+    fn validate(&self) {
+        assert_eq!(self.values.len(), self.diagonals() * self.columns);
+    }
+}
 
 macro_rules! max_difference(
     ($limit:expr, $left:expr, $right:expr) => ({
@@ -133,11 +134,11 @@ impl<T: Element> Matrix for Banded<T> {
 
 impl<'l, T: Element> From<&'l Banded<T>> for Conventional<T> {
     fn from(matrix: &'l Banded<T>) -> Self {
-        debug_validate!(matrix);
+        let &Banded {
+            rows, columns, superdiagonals, subdiagonals, ref values
+        } = validate!(matrix);
 
-        let &Banded { rows, columns, superdiagonals, subdiagonals, ref values } = matrix;
         let diagonals = matrix.diagonals();
-
         let mut matrix = Conventional::new((rows, columns));
         for j in 0..columns {
             for i in row_range!(rows, superdiagonals, subdiagonals, j) {
@@ -166,18 +167,16 @@ impl<'l, T: Element> From<&'l Diagonal<T>> for Banded<T> {
 
 impl<T: Element> From<Diagonal<T>> for Banded<T> {
     fn from(matrix: Diagonal<T>) -> Self {
+        let Diagonal { rows, columns, mut values } = validate!(matrix);
+        for _ in rows..columns {
+            values.push(T::zero());
+        }
         Banded {
-            rows: matrix.rows,
-            columns: matrix.columns,
+            rows: rows,
+            columns: columns,
             superdiagonals: 0,
             subdiagonals: 0,
-            values: {
-                let mut values = matrix.values;
-                for _ in matrix.rows..matrix.columns {
-                    values.push(T::zero());
-                }
-                values
-            },
+            values: values,
         }
     }
 }

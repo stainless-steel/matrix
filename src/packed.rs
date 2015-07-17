@@ -39,11 +39,12 @@ macro_rules! storage(
     ($size:expr) => (arithmetic!($size, 1, $size))
 );
 
-macro_rules! debug_validate(
-    ($matrix:ident) => (debug_assert!(
-        $matrix.values.len() == storage!($matrix.size)
-    ));
-);
+#[cfg(debug_assertions)]
+impl<T: Element> ::Validate for Packed<T> {
+    fn validate(&self) {
+        assert_eq!(self.values.len(), storage!(self.size));
+    }
+}
 
 size!(Packed, size, size);
 
@@ -89,9 +90,7 @@ impl<T: Element> Matrix for Packed<T> {
 
 impl<'l, T: Element> From<&'l Packed<T>> for Conventional<T> {
     fn from(matrix: &'l Packed<T>) -> Self {
-        debug_validate!(matrix);
-
-        let &Packed { size, format, ref values } = matrix;
+        let &Packed { size, format, ref values } = validate!(matrix);
 
         let mut matrix = Conventional::new(size);
         match format {

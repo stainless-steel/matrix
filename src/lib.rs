@@ -20,6 +20,26 @@ pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
     fn zero<S: Size>(S) -> Self;
 }
 
+#[cfg(debug_assertions)]
+trait Validate {
+    fn validate(&self);
+}
+
+#[cfg(debug_assertions)]
+macro_rules! validate(
+    ($matrix:expr) => ({
+        use ::Validate;
+        let matrix = $matrix;
+        matrix.validate();
+        matrix
+    });
+);
+
+#[cfg(not(debug_assertions))]
+macro_rules! validate(
+    ($matrix:expr) => ($matrix);
+);
+
 macro_rules! size(
     ($kind:ident, $rows:ident, $columns:ident) => (
         impl<T: ::Element> ::Size for $kind<T> {

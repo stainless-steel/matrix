@@ -37,6 +37,18 @@ pub struct Compressed<T: Element> {
     pub offsets: Vec<usize>,
 }
 
+#[cfg(debug_assertions)]
+impl<T: Element> ::Validate for Compressed<T> {
+    fn validate(&self) {
+        assert_eq!(self.nonzeros, self.values.len());
+        assert_eq!(self.nonzeros, self.indices.len());
+        match self.format {
+            Format::Column => assert_eq!(self.columns + 1, self.offsets.len()),
+            Format::Row => assert_eq!(self.rows + 1, self.offsets.len()),
+        }
+    }
+}
+
 /// A format of a compressed matrix.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Format {
@@ -59,17 +71,6 @@ pub struct IteratorMut<'l, T: 'l + Element> {
     taken: usize,
     major: usize,
 }
-
-macro_rules! debug_validate(
-    ($matrix:ident) => (debug_assert!(
-        $matrix.nonzeros == $matrix.values.len() &&
-        $matrix.nonzeros == $matrix.indices.len() &&
-        match $matrix.format {
-            Format::Column => $matrix.columns + 1 == $matrix.offsets.len(),
-            Format::Row => $matrix.rows + 1 == $matrix.offsets.len(),
-        }
-    ));
-);
 
 size!(Compressed);
 
@@ -243,11 +244,9 @@ impl<T: Element> From<Conventional<T>> for Compressed<T> {
 
 impl<'l, T: Element> From<&'l Compressed<T>> for Conventional<T> {
     fn from(matrix: &'l Compressed<T>) -> Self {
-        debug_validate!(matrix);
-
         let &Compressed {
             rows, columns, format, ref values, ref indices, ref offsets, ..
-        } = matrix;
+        } = validate!(matrix);
 
         let mut matrix = Conventional::new((rows, columns));
         match format {
@@ -283,7 +282,7 @@ impl<'l, T: Element> From<&'l Diagonal<T>> for Compressed<T> {
 
 impl<T: Element> From<Diagonal<T>> for Compressed<T> {
     fn from(matrix: Diagonal<T>) -> Self {
-        let Diagonal { rows, columns, values } = matrix;
+        let Diagonal { rows, columns, values } = validate!(matrix);
         let nonzeros = values.len();
         Compressed {
             rows: rows,
