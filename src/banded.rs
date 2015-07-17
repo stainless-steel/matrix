@@ -32,7 +32,9 @@ pub struct Banded<T: Element> {
 /// A sparse iterator of a banded matrix.
 pub struct Iterator<'l, T: 'l + Element> {
     matrix: &'l Banded<T>,
-    taken: usize,
+    column: usize,
+    start: usize,
+    finish: usize,
 }
 
 macro_rules! debug_validate(
@@ -48,9 +50,27 @@ macro_rules! max_difference(
     });
 );
 
+macro_rules! row_start(
+    ($rows:expr, $superdiagonals:expr, $column:expr) => (
+        max_difference!(0, $column, $superdiagonals)
+    );
+    ($matrix:ident, $column:expr) => (
+        row_start!($matrix.rows, $matrix.superdiagonals, $column)
+    );
+);
+
+macro_rules! row_finish(
+    ($rows:expr, $subdiagonals:expr, $column:expr) => (
+        min!($rows, $column + $subdiagonals + 1)
+    );
+    ($matrix:ident, $column:expr) => (
+        row_finish!($matrix.rows, $matrix.subdiagonals, $column)
+    );
+);
+
 macro_rules! row_range(
     ($rows:expr, $superdiagonals:expr, $subdiagonals:expr, $column:expr) => (
-        max_difference!(0, $column, $superdiagonals)..min!($rows, $column + $subdiagonals + 1)
+        row_start!($rows, $superdiagonals, $column)..row_finish!($rows, $subdiagonals, $column)
     );
 );
 
@@ -78,7 +98,7 @@ impl<T: Element> Banded<T> {
     /// Return a sparse iterator.
     #[inline]
     pub fn iter<'l>(&'l self) -> Iterator<'l, T> {
-        Iterator { matrix: self, taken: 0 }
+        Iterator::new(self)
     }
 }
 
@@ -137,20 +157,33 @@ impl<T: Element> From<Banded<T>> for Conventional<T> {
     }
 }
 
+impl<'l, T: Element> Iterator<'l, T> {
+    fn new(matrix: &'l Banded<T>) -> Iterator<'l, T> {
+        Iterator {
+            matrix: matrix,
+            column: 0,
+            start: row_start!(matrix, 0),
+            finish: row_finish!(matrix, 0),
+        }
+    }
+}
+
 impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
     type Item = (usize, usize, &'l T);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let &mut Iterator { matrix, ref mut taken } = self;
-        let (diagonals, storage) = (matrix.diagonals(), matrix.values.len());
-        while *taken < storage {
-            let k = *taken;
-            let j = k / diagonals;
-            let i = (j + k % diagonals) as isize - matrix.superdiagonals as isize;
-            *taken += 1;
-            if i >= 0 && i < matrix.rows as isize {
-                return Some((i as usize, j, &matrix.values[k]));
+        let &mut Iterator { matrix, ref mut column, ref mut start, ref mut finish } = self;
+        while *column < matrix.columns {
+            if *start >= *finish {
+                *column += 1;
+                *start = row_start!(matrix, *column);
+                *finish = row_finish!(matrix, *column);
+                continue;
             }
+            let i = *start;
+            let k = matrix.superdiagonals + i - *column;
+            *start += 1;
+            return Some((i, *column, &matrix.values[*column * matrix.diagonals() + k]));
         }
         None
     }
