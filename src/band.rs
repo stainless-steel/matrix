@@ -165,10 +165,6 @@ mod tests {
             Band { rows: $rows, columns: $columns, superdiagonals: $superdiagonals,
                    subdiagonals: $subdiagonals, values: $values }
         );
-        ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr) => (
-            new!($rows, $columns, $superdiagonals, $subdiagonals,
-                 vec![0.0; ($superdiagonals + 1 + $subdiagonals) * $columns])
-        );
     );
 
     #[test]

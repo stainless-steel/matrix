@@ -160,6 +160,12 @@ mod tests {
     use compressed::Format;
     use {Band, Compressed, Dense, Diagonal, Matrix};
 
+    macro_rules! new(
+        ($rows:expr, $columns:expr, $values:expr) => (
+            Diagonal { rows: $rows, columns: $columns, values: $values }
+        );
+    );
+
     #[test]
     fn nonzeros() {
         let matrix = Diagonal::from_vec(vec![1.0, 2.0, 0.0, 3.0], 4);
@@ -168,21 +174,21 @@ mod tests {
 
     #[test]
     fn into_band_tall() {
-        let matrix = Diagonal { rows: 5, columns: 3, values: vec![1.0, 2.0, 3.0] };
+        let matrix = new!(5, 3, vec![1.0, 2.0, 3.0]);
         let matrix: Band<_> = matrix.into();
         assert_eq!(&matrix.values, &[1.0, 2.0, 3.0]);
     }
 
     #[test]
     fn into_band_wide() {
-        let matrix = Diagonal { rows: 3, columns: 5, values: vec![1.0, 2.0, 3.0] };
+        let matrix = new!(3, 5, vec![1.0, 2.0, 3.0]);
         let matrix: Band<_> = matrix.into();
         assert_eq!(&matrix.values, &[1.0, 2.0, 3.0, 0.0, 0.0]);
     }
 
     #[test]
     fn into_compressed() {
-        let matrix = Diagonal { rows: 5, columns: 3, values: vec![1.0, 2.0, 0.0] };
+        let matrix = new!(5, 3, vec![1.0, 2.0, 0.0]);
 
         let matrix: Compressed<_> = matrix.into();
 
@@ -194,18 +200,16 @@ mod tests {
 
     #[test]
     fn into_dense() {
-        let matrix = Diagonal { rows: 3, columns: 5, values: vec![1.0, 2.0, 3.0] };
+        let matrix = new!(3, 5, vec![1.0, 2.0, 3.0]);
 
         let matrix: Dense<_> = matrix.into();
 
-        assert_eq!(matrix.rows, 3);
-        assert_eq!(matrix.columns, 5);
-        assert_eq!(&matrix.values, &[
+        assert_eq!(matrix, Dense::from_vec(vec![
             1.0, 0.0, 0.0,
             0.0, 2.0, 0.0,
             0.0, 0.0, 3.0,
             0.0, 0.0, 0.0,
             0.0, 0.0, 0.0,
-        ]);
+        ], (3, 5)));
     }
 }
