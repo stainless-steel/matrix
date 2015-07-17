@@ -39,7 +39,7 @@ macro_rules! storage(
     ($size:expr) => (arithmetic!($size, 1, $size))
 );
 
-macro_rules! debug_valid(
+macro_rules! debug_validate(
     ($matrix:ident) => (debug_assert!(
         $matrix.values.len() == storage!($matrix.size)
     ));
@@ -89,7 +89,7 @@ impl<T: Element> Matrix for Triangular<T> {
 
 impl<'l, T: Element> From<&'l Triangular<T>> for Dense<T> {
     fn from(matrix: &'l Triangular<T>) -> Self {
-        debug_valid!(matrix);
+        debug_validate!(matrix);
 
         let &Triangular { size, format, ref values } = matrix;
 

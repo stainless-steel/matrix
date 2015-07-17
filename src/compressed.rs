@@ -53,7 +53,7 @@ pub struct Iterator<'l, T: 'l + Element> {
     major: usize,
 }
 
-macro_rules! debug_valid(
+macro_rules! debug_validate(
     ($matrix:ident) => (debug_assert!(
         $matrix.nonzeros == $matrix.values.len() &&
         $matrix.nonzeros == $matrix.indices.len() &&
@@ -230,7 +230,7 @@ impl<T: Element> From<Dense<T>> for Compressed<T> {
 
 impl<'l, T: Element> From<&'l Compressed<T>> for Dense<T> {
     fn from(matrix: &'l Compressed<T>) -> Self {
-        debug_valid!(matrix);
+        debug_validate!(matrix);
 
         let &Compressed {
             rows, columns, format, ref values, ref indices, ref offsets, ..

@@ -35,7 +35,7 @@ pub struct Iterator<'l, T: 'l + Element> {
     taken: usize,
 }
 
-macro_rules! debug_valid(
+macro_rules! debug_validate(
     ($matrix:ident) => (debug_assert!(
         $matrix.values.len() == $matrix.diagonals() * $matrix.columns
     ));
@@ -107,7 +107,7 @@ impl<T: Element> Matrix for Band<T> {
 
 impl<'l, T: Element> From<&'l Band<T>> for Dense<T> {
     fn from(matrix: &'l Band<T>) -> Self {
-        debug_valid!(matrix);
+        debug_validate!(matrix);
 
         let &Band { rows, columns, superdiagonals, subdiagonals, ref values } = matrix;
         let diagonals = matrix.diagonals();

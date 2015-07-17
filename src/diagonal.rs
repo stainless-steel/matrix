@@ -18,7 +18,7 @@ pub struct Diagonal<T: Element> {
     pub values: Vec<T>,
 }
 
-macro_rules! debug_valid(
+macro_rules! debug_validate(
     ($matrix:ident) => (debug_assert!(
         $matrix.values.len() == min!($matrix.rows, $matrix.columns)
     ));
@@ -68,7 +68,7 @@ impl<'l, T: Element> From<&'l Diagonal<T>> for Band<T> {
 
 impl<T: Element> From<Diagonal<T>> for Band<T> {
     fn from(matrix: Diagonal<T>) -> Self {
-        debug_valid!(matrix);
+        debug_validate!(matrix);
         Band {
             rows: matrix.rows,
             columns: matrix.columns,
@@ -95,7 +95,7 @@ impl<'l, T: Element> From<&'l Diagonal<T>> for Compressed<T> {
 impl<T: Element> From<Diagonal<T>> for Compressed<T> {
     #[inline]
     fn from(matrix: Diagonal<T>) -> Self {
-        debug_valid!(matrix);
+        debug_validate!(matrix);
         let Diagonal { rows, columns, values } = matrix;
         let nonzeros = values.len();
         Compressed {
@@ -112,7 +112,7 @@ impl<T: Element> From<Diagonal<T>> for Compressed<T> {
 
 impl<'l, T: Element> From<&'l Diagonal<T>> for Dense<T> {
     fn from(matrix: &Diagonal<T>) -> Self {
-        debug_valid!(matrix);
+        debug_validate!(matrix);
 
         let &Diagonal { rows, columns, ref values } = matrix;
 
