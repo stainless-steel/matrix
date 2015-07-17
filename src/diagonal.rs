@@ -1,6 +1,6 @@
 //! The diagonal storage.
 //!
-//! The storage is suitable for generic diagonal matrices.
+//! The storage is suitable for diagonal matrices.
 
 use std::ops::{Deref, DerefMut};
 
