@@ -22,25 +22,25 @@ pub struct Compressed<T: Element> {
     pub columns: usize,
     /// The number of nonzero elements.
     pub nonzeros: usize,
-    /// The storage format.
-    pub format: Format,
+    /// The format variant.
+    pub variant: Variant,
     /// The values of the nonzero elements.
     pub values: Vec<T>,
-    /// The indices of rows when `format = Column` or columns when `format =
+    /// The indices of rows when `variant = Column` or columns when `variant =
     /// Row` of the nonzero elements.
     pub indices: Vec<usize>,
-    /// The offsets of columns when `format = Column` or rows when `format =
-    /// Row` such that the values and indices of the `i`th column when `format =
-    /// Column` or the `i`th row when `format = Row` are stored starting from
+    /// The offsets of columns when `variant = Column` or rows when `variant =
+    /// Row` such that the values and indices of the `i`th column when `variant
+    /// = Column` or the `i`th row when `variant = Row` are stored starting from
     /// `values[j]` and `indices[j]`, respectively, where `j = offsets[i]`. The
     /// vector has one additional element, which is always equal to `nonzeros`.
     pub offsets: Vec<usize>,
 }
 
 macro_rules! new(
-    ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,
+    ($rows:expr, $columns:expr, $nonzeros:expr, $variant:expr,
      $values:expr, $indices:expr, $offsets:expr) => (
-        Compressed { rows: $rows, columns: $columns, nonzeros: $nonzeros, format: $format,
+        Compressed { rows: $rows, columns: $columns, nonzeros: $nonzeros, variant: $variant,
                      values: $values, indices: $indices, offsets: $offsets }
     );
 );
@@ -52,19 +52,19 @@ impl<T: Element> ::storage::Validate for Compressed<T> {
     fn validate(&self) {
         assert_eq!(self.nonzeros, self.values.len());
         assert_eq!(self.nonzeros, self.indices.len());
-        match self.format {
-            Format::Column => assert_eq!(self.columns + 1, self.offsets.len()),
-            Format::Row => assert_eq!(self.rows + 1, self.offsets.len()),
+        match self.variant {
+            Variant::Column => assert_eq!(self.columns + 1, self.offsets.len()),
+            Variant::Row => assert_eq!(self.rows + 1, self.offsets.len()),
         }
     }
 }
 
-/// A format of a compressed matrix.
+/// A variant of a compressed matrix.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Format {
-    /// The compressed-column format.
+pub enum Variant {
+    /// The compressed-column variant.
     Column,
-    /// The compressed-row format.
+    /// The compressed-row variant.
     Row,
 }
 
@@ -87,18 +87,18 @@ size!(Compressed);
 impl<T: Element> Compressed<T> {
     /// Create a zero matrix.
     #[inline]
-    pub fn new<S: Size>(size: S, format: Format) -> Self {
-        Compressed::with_capacity(size, format, 0)
+    pub fn new<S: Size>(size: S, variant: Variant) -> Self {
+        Compressed::with_capacity(size, variant, 0)
     }
 
     /// Create a zero matrix with a specific capacity.
-    pub fn with_capacity<S: Size>(size: S, format: Format, capacity: usize) -> Self {
+    pub fn with_capacity<S: Size>(size: S, variant: Variant, capacity: usize) -> Self {
         let (rows, columns) = size.dimensions();
-        let offset = match format {
-            Format::Column => vec![0; columns + 1],
-            Format::Row => vec![0; rows + 1],
+        let offset = match variant {
+            Variant::Column => vec![0; columns + 1],
+            Variant::Row => vec![0; rows + 1],
         };
-        new!(rows, columns, 0, format, Vec::with_capacity(capacity),
+        new!(rows, columns, 0, variant, Vec::with_capacity(capacity),
              Vec::with_capacity(capacity), offset)
     }
 
@@ -106,7 +106,7 @@ impl<T: Element> Compressed<T> {
     pub fn get<P: Position>(&self, position: P) -> T {
         let (mut i, mut j) = position.coordinates();
         debug_assert!(i < self.rows && j < self.columns);
-        if let Format::Row = self.format {
+        if let Variant::Row = self.variant {
             mem::swap(&mut i, &mut j);
         }
         for k in self.offsets[j]..self.offsets[j + 1] {
@@ -126,7 +126,7 @@ impl<T: Element> Compressed<T> {
     pub fn set<P: Position>(&mut self, position: P, value: T) {
         let (mut i, mut j) = position.coordinates();
         debug_assert!(i < self.rows && j < self.columns);
-        if let Format::Row = self.format {
+        if let Variant::Row = self.variant {
             mem::swap(&mut i, &mut j);
         }
         let mut k = self.offsets[j];
@@ -166,9 +166,9 @@ impl<T: Element> Compressed<T> {
         if rows < self.rows || columns < self.columns {
             self.retain(|i, j, _| i < rows && j < columns);
         }
-        let (from, into) = match self.format {
-            Format::Column => (self.columns, columns),
-            Format::Row => (self.rows, rows),
+        let (from, into) = match self.variant {
+            Variant::Column => (self.columns, columns),
+            Variant::Row => (self.rows, rows),
         };
         if from > into {
             self.offsets.truncate(into + 1);
@@ -186,9 +186,9 @@ impl<T: Element> Compressed<T> {
             while self.offsets[major + 1] <= k {
                 major += 1;
             }
-            let condition = match self.format {
-                Format::Column => condition(self.indices[k], major, &self.values[k]),
-                Format::Row => condition(major, self.indices[k], &self.values[k]),
+            let condition = match self.variant {
+                Variant::Column => condition(self.indices[k], major, &self.values[k]),
+                Variant::Row => condition(major, self.indices[k], &self.values[k]),
             };
             if condition {
                 k += 1;
@@ -212,8 +212,8 @@ impl<T: Element> Matrix for Compressed<T> {
     }
 
     fn transpose(&self) -> Self {
-        let &Compressed { rows, columns, nonzeros, format, .. } = self;
-        let mut matrix = Compressed::with_capacity((columns, rows), format, nonzeros);
+        let &Compressed { rows, columns, nonzeros, variant, .. } = self;
+        let mut matrix = Compressed::with_capacity((columns, rows), variant, nonzeros);
         for (i, j, &value) in self.iter() {
             matrix.set((j, i), value);
         }
@@ -222,17 +222,17 @@ impl<T: Element> Matrix for Compressed<T> {
 
     #[inline]
     fn zero<S: Size>(size: S) -> Self {
-        Compressed::new(size, Format::Column)
+        Compressed::new(size, Variant::Column)
     }
 }
 
-impl Format {
-    /// Return the other format.
+impl Variant {
+    /// Return the other variant.
     #[inline]
     pub fn flip(&self) -> Self {
         match *self {
-            Format::Column => Format::Row,
-            Format::Row => Format::Column,
+            Variant::Column => Variant::Row,
+            Variant::Row => Variant::Column,
         }
     }
 }
@@ -254,9 +254,9 @@ macro_rules! iterator(
                     *major += 1;
                 }
                 let item = unsafe { mem::transmute(&matrix.values[k]) };
-                Some(match matrix.format {
-                    Format::Column => (matrix.indices[k], *major, item),
-                    Format::Row => (*major, matrix.indices[k], item),
+                Some(match matrix.variant {
+                    Variant::Column => (matrix.indices[k], *major, item),
+                    Variant::Row => (*major, matrix.indices[k], item),
                 })
             }
         }
@@ -269,7 +269,7 @@ iterator!(struct IteratorMut -> (usize, usize, &'l mut T));
 #[cfg(test)]
 mod tests {
     use prelude::*;
-    use storage::compressed::Format;
+    use storage::compressed::Variant;
 
     #[test]
     fn get() {
@@ -323,7 +323,7 @@ mod tests {
 
     #[test]
     fn nonzeros() {
-        let matrix = new!(5, 7, 5, Format::Column, vec![1.0, 0.0, 3.0, 0.0, 5.0],
+        let matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 0.0, 3.0, 0.0, 5.0],
                           vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
         assert_eq!(matrix.nonzeros, 5);
@@ -332,18 +332,18 @@ mod tests {
 
     #[test]
     fn transpose() {
-        let matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+        let matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
                           vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
         let matrix = matrix.transpose();
 
-        assert_eq!(matrix, new!(7, 5, 5, Format::Column, vec![2.0, 1.0, 4.0, 3.0, 5.0],
+        assert_eq!(matrix, new!(7, 5, 5, Variant::Column, vec![2.0, 1.0, 4.0, 3.0, 5.0],
                                 vec![3, 2, 6, 5, 6], vec![0, 1, 3, 3, 4, 5]));
     }
 
     #[test]
     fn iter() {
-        let matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+        let matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
                           vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
         let result = matrix.iter().map(|(i, _, _)| i).collect::<Vec<_>>();
@@ -358,7 +358,7 @@ mod tests {
 
     #[test]
     fn iter_mut() {
-        let mut matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+        let mut matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
                               vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
         for (i, _, value) in matrix.iter_mut() {
@@ -370,61 +370,61 @@ mod tests {
 
     #[test]
     fn resize_fewer_columns() {
-        let mut matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+        let mut matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
                               vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
         matrix.resize((5, 5));
-        assert_eq!(matrix, new!(5, 5, 2, Format::Column, vec![1.0, 2.0],
+        assert_eq!(matrix, new!(5, 5, 2, Variant::Column, vec![1.0, 2.0],
                                 vec![1, 0], vec![0, 0, 0, 1, 2, 2]));
 
         matrix.resize((5, 3));
-        assert_eq!(matrix, new!(5, 3, 1, Format::Column, vec![1.0],
+        assert_eq!(matrix, new!(5, 3, 1, Variant::Column, vec![1.0],
                                 vec![1], vec![0, 0, 0, 1]));
 
         matrix.resize((5, 1));
-        assert_eq!(matrix, new!(5, 1, 0, Format::Column, vec![],
+        assert_eq!(matrix, new!(5, 1, 0, Variant::Column, vec![],
                                 vec![], vec![0, 0]));
     }
 
     #[test]
     fn resize_fewer_rows() {
-        let mut matrix = new!(5, 7, 5, Format::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+        let mut matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
                               vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
 
         matrix.resize((3, 7));
-        assert_eq!(matrix, new!(3, 7, 3, Format::Column, vec![1.0, 2.0, 4.0],
+        assert_eq!(matrix, new!(3, 7, 3, Variant::Column, vec![1.0, 2.0, 4.0],
                                 vec![1, 0, 1], vec![0, 0, 0, 1, 2, 2, 2, 3]));
 
         matrix.resize((1, 7));
-        assert_eq!(matrix, new!(1, 7, 1, Format::Column, vec![2.0],
+        assert_eq!(matrix, new!(1, 7, 1, Variant::Column, vec![2.0],
                                 vec![0], vec![0, 0, 0, 0, 1, 1, 1, 1]));
     }
 
     #[test]
     fn resize_more_columns() {
-        let mut matrix = new!(5, 7, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
+        let mut matrix = new!(5, 7, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
                               vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
 
         matrix.resize((5, 9));
-        assert_eq!(matrix, new!(5, 9, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
+        assert_eq!(matrix, new!(5, 9, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4]));
 
         matrix.resize((5, 11));
-        assert_eq!(matrix, new!(5, 11, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
+        assert_eq!(matrix, new!(5, 11, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4, 4, 4]));
     }
 
     #[test]
     fn resize_more_rows() {
-        let mut matrix = new!(5, 7, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
+        let mut matrix = new!(5, 7, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
                               vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
 
         matrix.resize((7, 7));
-        assert_eq!(matrix, new!(7, 7, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
+        assert_eq!(matrix, new!(7, 7, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
 
         matrix.resize((9, 7));
-        assert_eq!(matrix, new!(9, 7, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
+        assert_eq!(matrix, new!(9, 7, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
     }
 }

@@ -13,16 +13,16 @@ use {Element, Matrix, Size};
 pub struct Packed<T: Element> {
     /// The number of rows or columns.
     pub size: usize,
-    /// The storage format.
-    pub format: Format,
-    /// The values of the lower triangle when `format = Lower` or upper triangle
-    /// when `format = Upper` stored by columns.
+    /// The storage variant.
+    pub variant: Variant,
+    /// The values of the lower triangle when `variant = Lower` or upper
+    /// triangle when `variant = Upper` stored by columns.
     pub values: Vec<T>,
 }
 
 macro_rules! new(
-    ($size:expr, $format:expr, $values:expr) => (
-        Packed { size: $size, format: $format, values: $values }
+    ($size:expr, $variant:expr, $values:expr) => (
+        Packed { size: $size, variant: $variant, values: $values }
     );
 );
 
@@ -38,12 +38,12 @@ macro_rules! storage(
 
 mod convert;
 
-/// A format of a packed matrix.
+/// A variant of a packed matrix.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Format {
-    /// The lower-triangular format.
+pub enum Variant {
+    /// The lower-triangular variant.
     Lower,
-    /// The upper-triangular format.
+    /// The upper-triangular variant.
     Upper,
 }
 
@@ -58,10 +58,10 @@ size!(Packed, size, size);
 
 impl<T: Element> Packed<T> {
     /// Create a zero matrix.
-    pub fn new<S: Size>(size: S, format: Format) -> Self {
+    pub fn new<S: Size>(size: S, variant: Variant) -> Self {
         let (rows, _columns) = size.dimensions();
         debug_assert!(rows == _columns);
-        new!(rows, format, vec![T::zero(); storage!(rows)])
+        new!(rows, variant, vec![T::zero(); storage!(rows)])
     }
 }
 
@@ -73,9 +73,9 @@ impl<T: Element> Matrix for Packed<T> {
     }
 
     fn transpose(&self) -> Self {
-        let &Packed { size, format, .. } = self;
-        let lower = format == Format::Lower;
-        let mut matrix = Packed::new(size, format.flip());
+        let &Packed { size, variant, .. } = self;
+        let lower = variant == Variant::Lower;
+        let mut matrix = Packed::new(size, variant.flip());
         let mut k = 0;
         for j in 0..size {
             for i in j..size {
@@ -92,17 +92,17 @@ impl<T: Element> Matrix for Packed<T> {
 
     #[inline]
     fn zero<S: Size>(size: S) -> Self {
-        Packed::new(size, Format::Lower)
+        Packed::new(size, Variant::Lower)
     }
 }
 
-impl Format {
-    /// Return the other format.
+impl Variant {
+    /// Return the other variant.
     #[inline]
     pub fn flip(&self) -> Self {
         match *self {
-            Format::Lower => Format::Upper,
-            Format::Upper => Format::Lower,
+            Variant::Lower => Variant::Upper,
+            Variant::Upper => Variant::Lower,
         }
     }
 }
@@ -110,11 +110,11 @@ impl Format {
 #[cfg(test)]
 mod tests {
     use prelude::*;
-    use storage::packed::Format;
+    use storage::packed::Variant;
 
     #[test]
     fn nonzeros() {
-        let matrix = new!(4, Format::Lower, vec![
+        let matrix = new!(4, Variant::Lower, vec![
             1.0, 0.0, 3.0, 0.0, 5.0, 0.0, 7.0, 8.0, 9.0, 10.0,
         ]);
         assert_eq!(matrix.nonzeros(), 7);
@@ -122,26 +122,26 @@ mod tests {
 
     #[test]
     fn transpose_lower() {
-        let matrix = new!(4, Format::Lower, vec![
+        let matrix = new!(4, Variant::Lower, vec![
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
         ]);
 
         let matrix = matrix.transpose();
 
-        assert_eq!(matrix, new!(4, Format::Upper, vec![
+        assert_eq!(matrix, new!(4, Variant::Upper, vec![
             1.0, 2.0, 5.0, 3.0, 6.0, 8.0, 4.0, 7.0, 9.0, 10.0,
         ]));
     }
 
     #[test]
     fn transpose_upper() {
-        let matrix = new!(4, Format::Upper, vec![
+        let matrix = new!(4, Variant::Upper, vec![
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
         ]);
 
         let matrix = matrix.transpose();
 
-        assert_eq!(matrix, new!(4, Format::Lower, vec![
+        assert_eq!(matrix, new!(4, Variant::Lower, vec![
             1.0, 2.0, 4.0, 7.0, 3.0, 5.0, 8.0, 6.0, 9.0, 10.0,
         ]));
     }
