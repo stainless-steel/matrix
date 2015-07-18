@@ -1,6 +1,6 @@
 # Matrix [![Version][version-img]][version-url] [![Status][status-img]][status-url]
 
-The package provides matrix storage schemes.
+The package provides a matrix laboratory.
 
 ## [Documentation][docs]
 
