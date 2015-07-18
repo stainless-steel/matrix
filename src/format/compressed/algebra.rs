@@ -20,21 +20,14 @@ impl<T> MultiplyInto<Conventional<T>, Conventional<T>> for Compressed<T>
 {
     fn multiply_into(&self, right: &Conventional<T>, result: &mut Conventional<T>) {
         let (m, p, n) = (self.rows, self.columns, right.columns);
-        debug_assert_eq!(m, result.rows);
-        debug_assert_eq!(p, right.rows);
-        debug_assert_eq!(n, right.columns);
         multiply_matrix(self, &right.values, &mut result.values, m, p, n)
     }
 }
 
-impl<'l, T> MultiplyInto<[T], [T]> for Compressed<T>
-    where T: Element + Number
-{
+impl<'l, T> MultiplyInto<[T], [T]> for Compressed<T> where T: Element + Number {
     fn multiply_into(&self, right: &[T], result: &mut [T]) {
         let (m, p) = (self.rows, self.columns);
-        debug_assert!(right.len() % p == 0);
         let n = right.len() / p;
-        debug_assert_eq!(result.len(), m * n);
         multiply_matrix(self, right, result, m, p, n)
     }
 }
@@ -43,6 +36,9 @@ impl<'l, T> MultiplyInto<[T], [T]> for Compressed<T>
 fn multiply_matrix<T>(a: &Compressed<T>, b: &[T], c: &mut [T], m: usize, p: usize, n: usize)
     where T: Element + Number
 {
+    debug_assert_eq!(a.rows * a.columns, m * p);
+    debug_assert_eq!(b.len(), p * n);
+    debug_assert_eq!(c.len(), m * n);
     let (mut i, mut j) = (0, 0);
     for _ in 0..n {
         multiply_vector(a, &b[i..(i + p)], &mut c[j..(j + m)], p);

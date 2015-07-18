@@ -1,5 +1,8 @@
 //! Matrix laboratory.
 
+#[cfg(feature = "acceleration")]
+extern crate blas;
+
 #[cfg(feature = "complex")]
 extern crate complex;
 

@@ -17,6 +17,9 @@ pub struct Conventional<T: Element> {
     pub values: Vec<T>,
 }
 
+#[cfg(feature = "acceleration")]
+mod algebra;
+
 mod convert;
 
 size!(Conventional);

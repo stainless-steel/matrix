@@ -8,6 +8,14 @@ homepage = "https://github.com/stainless-steel/matrix"
 documentation = "https://stainless-steel.github.io/matrix"
 description = "The package provides a matrix laboratory."
 
+[features]
+acceleration = ["blas"]
+default = ["acceleration", "complex"]
+
+[dependencies.blas]
+version = "0.5"
+optional = true
+
 [dependencies.complex]
 version = "0.7"
 optional = true
