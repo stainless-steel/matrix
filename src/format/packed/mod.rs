@@ -37,6 +37,7 @@ macro_rules! storage(
 );
 
 mod convert;
+mod operation;
 
 /// A variant of a packed matrix.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -72,24 +73,6 @@ impl<T: Element> Matrix for Packed<T> {
         self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
     }
 
-    fn transpose(&self) -> Self {
-        let &Packed { size, variant, .. } = self;
-        let lower = variant == Variant::Lower;
-        let mut matrix = Packed::new(size, variant.flip());
-        let mut k = 0;
-        for j in 0..size {
-            for i in j..size {
-                if lower {
-                    matrix.values[arithmetic!(i, 1, i) + j] = self.values[k];
-                } else {
-                    matrix.values[k] = self.values[arithmetic!(i, 1, i) + j];
-                }
-                k += 1;
-            }
-        }
-        matrix
-    }
-
     #[inline]
     fn zero<S: Size>(size: S) -> Self {
         Packed::new(size, Variant::Lower)
@@ -118,31 +101,5 @@ mod tests {
             1.0, 0.0, 3.0, 0.0, 5.0, 0.0, 7.0, 8.0, 9.0, 10.0,
         ]);
         assert_eq!(matrix.nonzeros(), 7);
-    }
-
-    #[test]
-    fn transpose_lower() {
-        let matrix = new!(4, Variant::Lower, vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
-        ]);
-
-        let matrix = matrix.transpose();
-
-        assert_eq!(matrix, new!(4, Variant::Upper, vec![
-            1.0, 2.0, 5.0, 3.0, 6.0, 8.0, 4.0, 7.0, 9.0, 10.0,
-        ]));
-    }
-
-    #[test]
-    fn transpose_upper() {
-        let matrix = new!(4, Variant::Upper, vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
-        ]);
-
-        let matrix = matrix.transpose();
-
-        assert_eq!(matrix, new!(4, Variant::Lower, vec![
-            1.0, 2.0, 4.0, 7.0, 3.0, 5.0, 8.0, 6.0, 9.0, 10.0,
-        ]));
     }
 }

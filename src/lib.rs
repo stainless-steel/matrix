@@ -25,9 +25,6 @@ pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
     /// Count nonzero elements.
     fn nonzeros(&self) -> usize;
 
-    /// Compute the matrix transpose.
-    fn transpose(&self) -> Self;
-
     /// Create a zero matrix.
     fn zero<S: Size>(S) -> Self;
 }

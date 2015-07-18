@@ -20,3 +20,4 @@ pub use format::packed::Packed;
 pub use operation::MultiplyInto;
 pub use operation::MultiplySelf;
 pub use operation::SymmetricEigen;
+pub use operation::Transpose;

@@ -24,6 +24,7 @@ macro_rules! new(
 );
 
 mod convert;
+mod operation;
 
 #[cfg(debug_assertions)]
 impl<T: Element> ::format::Validate for Diagonal<T> {
@@ -55,11 +56,6 @@ impl<T: Element> Matrix for Diagonal<T> {
 
     fn nonzeros(&self) -> usize {
         self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
-    }
-
-    #[inline(always)]
-    fn transpose(&self) -> Self {
-        self.clone()
     }
 
     fn zero<S: Size>(size: S) -> Self {

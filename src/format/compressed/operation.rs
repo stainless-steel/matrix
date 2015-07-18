@@ -1,10 +1,11 @@
 use format::{Compressed, Diagonal};
-use operation::{MultiplyInto, MultiplySelf};
+use operation::{MultiplyInto, MultiplySelf, Transpose};
 use {Element, Number};
 
 impl<T> MultiplySelf<Diagonal<T>> for Compressed<T>
     where T: Element + Number
 {
+    #[inline]
     fn multiply_self(&mut self, right: &Diagonal<T>) {
         let (m, n) = (self.rows, right.columns);
         debug_assert_eq!(self.columns, right.rows);
@@ -16,6 +17,7 @@ impl<T> MultiplySelf<Diagonal<T>> for Compressed<T>
 }
 
 impl<'l, T> MultiplyInto<[T], [T]> for Compressed<T> where T: Element + Number {
+    #[inline]
     fn multiply_into(&self, right: &[T], result: &mut [T]) {
         let (m, p) = (self.rows, self.columns);
         let n = right.len() / p;
@@ -23,7 +25,17 @@ impl<'l, T> MultiplyInto<[T], [T]> for Compressed<T> where T: Element + Number {
     }
 }
 
-#[inline(always)]
+impl<T: Element> Transpose for Compressed<T> {
+    fn transpose(&self) -> Self {
+        let &Compressed { rows, columns, nonzeros, variant, .. } = self;
+        let mut matrix = Compressed::with_capacity((columns, rows), variant, nonzeros);
+        for (i, j, &value) in self.iter() {
+            matrix.set((j, i), value);
+        }
+        matrix
+    }
+}
+
 fn multiply_matrix<T>(a: &Compressed<T>, b: &[T], c: &mut [T], m: usize, p: usize, n: usize)
     where T: Element + Number
 {
@@ -93,5 +105,16 @@ mod tests {
             24.0, 24.0, 22.0, 18.0,
             54.0, 57.0, 55.0, 48.0,
         ]);
+    }
+
+    #[test]
+    fn transpose() {
+        let matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
+                          vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+
+        let matrix = matrix.transpose();
+
+        assert_eq!(matrix, new!(7, 5, 5, Variant::Column, vec![2.0, 1.0, 4.0, 3.0, 5.0],
+                                vec![3, 2, 6, 5, 6], vec![0, 1, 3, 3, 4, 5]));
     }
 }

@@ -18,8 +18,6 @@ pub struct Conventional<T: Element> {
 }
 
 mod convert;
-
-#[cfg(feature = "acceleration")]
 mod operation;
 
 size!(Conventional);
@@ -51,17 +49,6 @@ impl<T: Element> Matrix for Conventional<T> {
 
     fn nonzeros(&self) -> usize {
         self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
-    }
-
-    fn transpose(&self) -> Self {
-        let (rows, columns) = (self.rows, self.columns);
-        let mut matrix = Conventional::from_slice((columns, rows), &self.values);
-        for i in 0..rows {
-            for j in i..columns {
-                matrix.values.swap(j * rows + i, i * rows + j);
-            }
-        }
-        matrix
     }
 
     #[inline]
@@ -112,12 +99,5 @@ mod tests {
     fn nonzeros() {
         let matrix = Conventional::from_vec(2, vec![1.0, 2.0, 3.0, 0.0]);
         assert_eq!(matrix.nonzeros(), 3);
-    }
-
-    #[test]
-    fn transpose() {
-        let matrix = Conventional::from_vec((3, 2), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
-        let matrix = matrix.transpose();
-        assert_eq!(matrix, Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]));
     }
 }

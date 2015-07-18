@@ -19,3 +19,9 @@ pub trait SymmetricEigen {
     /// Perform the decomposition.
     fn decompose(&mut Self) -> Result<()>;
 }
+
+/// The transpose.
+pub trait Transpose {
+    /// Perform the transpose.
+    fn transpose(&self) -> Self;
+}
