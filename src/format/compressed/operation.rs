@@ -11,6 +11,15 @@ impl<T> Multiply<Diagonal<T>, Compressed<T>> for Compressed<T> where T: Element 
     }
 }
 
+impl<'l, T> MultiplyInto<[T], [T]> for Compressed<T> where T: Element + Number {
+    #[inline]
+    fn multiply_into(&self, right: &[T], result: &mut [T]) {
+        let (m, p) = (self.rows, self.columns);
+        let n = right.len() / p;
+        multiply_matrix(self, right, result, m, p, n)
+    }
+}
+
 impl<T> MultiplySelf<Diagonal<T>> for Compressed<T> where T: Element + Number {
     #[inline]
     fn multiply_self(&mut self, right: &Diagonal<T>) {
@@ -20,15 +29,6 @@ impl<T> MultiplySelf<Diagonal<T>> for Compressed<T> where T: Element + Number {
         for (_, j, value) in self.iter_mut() {
             *value = *value * right[j];
         }
-    }
-}
-
-impl<'l, T> MultiplyInto<[T], [T]> for Compressed<T> where T: Element + Number {
-    #[inline]
-    fn multiply_into(&self, right: &[T], result: &mut [T]) {
-        let (m, p) = (self.rows, self.columns);
-        let n = right.len() / p;
-        multiply_matrix(self, right, result, m, p, n)
     }
 }
 
