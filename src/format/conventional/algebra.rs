@@ -3,13 +3,6 @@ use blas;
 use algebra::MultiplyInto;
 use format::Conventional;
 
-impl MultiplyInto<Conventional<f64>, Conventional<f64>> for Conventional<f64> {
-    fn multiply_into(&self, right: &Self, result: &mut Self) {
-        let (m, p, n) = (self.rows, self.columns, right.columns);
-        multiply(1.0, &self.values, &right.values, 1.0, &mut result.values, m, p, n)
-    }
-}
-
 impl MultiplyInto<[f64], [f64]> for Conventional<f64> {
     fn multiply_into(&self, right: &[f64], result: &mut [f64]) {
         let (m, p) = (self.rows, self.columns);

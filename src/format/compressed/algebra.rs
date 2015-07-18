@@ -1,5 +1,5 @@
 use algebra::{MultiplyInto, MultiplySelf};
-use format::{Compressed, Conventional, Diagonal};
+use format::{Compressed, Diagonal};
 use {Element, Number};
 
 impl<T> MultiplySelf<Diagonal<T>> for Compressed<T>
@@ -12,15 +12,6 @@ impl<T> MultiplySelf<Diagonal<T>> for Compressed<T>
         for (_, j, value) in self.iter_mut() {
             *value = *value * right[j];
         }
-    }
-}
-
-impl<T> MultiplyInto<Conventional<T>, Conventional<T>> for Compressed<T>
-    where T: Element + Number
-{
-    fn multiply_into(&self, right: &Conventional<T>, result: &mut Conventional<T>) {
-        let (m, p, n) = (self.rows, self.columns, right.columns);
-        multiply_matrix(self, &right.values, &mut result.values, m, p, n)
     }
 }
 
