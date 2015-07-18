@@ -3,6 +3,7 @@
 //! The format is suitable for dense matrices.
 
 use std::ops::{Deref, DerefMut, Index, IndexMut};
+use std::ptr;
 
 use {Element, Matrix, Position, Size};
 
@@ -41,6 +42,14 @@ impl<T: Element> Conventional<T> {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), rows * columns);
         Conventional { rows: rows, columns: columns, values: values }
+    }
+
+    /// Zero out the content.
+    ///
+    /// The function should only be used when it is safe to overwrite `T` with
+    /// zero bytes.
+    pub unsafe fn zero(&mut self) {
+        ptr::write_bytes(self.values.as_mut_ptr(), 0, self.values.len())
     }
 }
 
@@ -94,6 +103,13 @@ impl<T: Element> DerefMut for Conventional<T> {
 #[cfg(tests)]
 mod tests {
     use prelude::*;
+
+    #[test]
+    fn zero() {
+        let mut matrix = Conventional::from_vec(10, vec![42.0; 10 * 10]);
+        matrix.zero();
+        assert!(matrix.iter().all(|&value| value == 0.0));
+    }
 
     #[test]
     fn nonzeros() {
