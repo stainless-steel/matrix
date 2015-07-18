@@ -9,6 +9,8 @@ pub use algebra::MultiplyInto;
 pub use algebra::MultiplySelf;
 pub use algebra::MultiplyThat;
 
+pub use decomposition::SymmetricEigen;
+
 pub use format::banded;
 pub use format::compressed;
 pub use format::conventional;

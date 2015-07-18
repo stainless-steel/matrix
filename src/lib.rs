@@ -1,12 +1,19 @@
 //! Matrix laboratory.
 
+#[cfg(test)]
+extern crate assert;
+
 #[cfg(feature = "acceleration")]
 extern crate blas;
 
 #[cfg(feature = "complex")]
 extern crate complex;
 
+#[cfg(feature = "acceleration")]
+extern crate lapack;
+
 use std::convert::Into;
+use std::{error, fmt};
 
 use format::Conventional;
 
@@ -25,6 +32,33 @@ pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
     fn zero<S: Size>(S) -> Self;
 }
 
+/// An error.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Error(String);
+
+/// A result.
+pub type Result<T> = std::result::Result<T, Error>;
+
+macro_rules! raise(
+    ($message:expr) => (
+        return Err(::Error($message.to_string()));
+    );
+);
+
+impl fmt::Display for Error {
+    #[inline]
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        self.0.fmt(formatter)
+    }
+}
+
+impl error::Error for Error {
+    #[inline]
+    fn description(&self) -> &str {
+        &self.0
+    }
+}
+
 mod element;
 mod number;
 mod position;
@@ -36,5 +70,6 @@ pub use position::Position;
 pub use size::Size;
 
 pub mod algebra;
+pub mod decomposition;
 pub mod format;
 pub mod prelude;

@@ -22,6 +22,9 @@ mod algebra;
 
 mod convert;
 
+#[cfg(feature = "acceleration")]
+mod decomposition;
+
 size!(Conventional);
 
 impl<T: Element> Conventional<T> {

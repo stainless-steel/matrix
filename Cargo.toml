@@ -9,7 +9,7 @@ documentation = "https://stainless-steel.github.io/matrix"
 description = "The package provides a matrix laboratory."
 
 [features]
-acceleration = ["blas"]
+acceleration = ["blas", "lapack"]
 default = ["acceleration", "complex"]
 
 [dependencies.blas]
@@ -19,3 +19,10 @@ optional = true
 [dependencies.complex]
 version = "0.7"
 optional = true
+
+[dependencies.lapack]
+version = "0.3"
+optional = true
+
+[dev-dependencies]
+assert = "*"
