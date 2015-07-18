@@ -10,9 +10,9 @@ pub trait Element: Copy + PartialEq {
     fn zero() -> Self;
 }
 
-macro_rules! element(
-    ($kind:ty, $zero:expr) => (
-        impl Element for $kind {
+macro_rules! implement(
+    ($name:ty, $zero:expr) => (
+        impl Element for $name {
             #[inline(always)]
             fn is_zero(&self) -> bool {
                 *self == $zero
@@ -24,29 +24,29 @@ macro_rules! element(
             }
         }
     );
-    ($kind:ty) => (
-        element!($kind, 0);
+    ($name:ty) => (
+        implement!($name, 0);
     );
 );
 
-element!(u8);
-element!(u16);
-element!(u32);
-element!(u64);
+implement!(u8);
+implement!(u16);
+implement!(u32);
+implement!(u64);
 
-element!(i8);
-element!(i16);
-element!(i32);
-element!(i64);
+implement!(i8);
+implement!(i16);
+implement!(i32);
+implement!(i64);
 
-element!(f32, 0.0);
-element!(f64, 0.0);
+implement!(f32, 0.0);
+implement!(f64, 0.0);
 
-element!(isize);
-element!(usize);
-
-#[cfg(feature = "complex")]
-element!(c32, c32(0.0, 0.0));
+implement!(isize);
+implement!(usize);
 
 #[cfg(feature = "complex")]
-element!(c64, c64(0.0, 0.0));
+implement!(c32, c32(0.0, 0.0));
+
+#[cfg(feature = "complex")]
+implement!(c64, c64(0.0, 0.0));

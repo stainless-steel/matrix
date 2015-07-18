@@ -45,6 +45,7 @@ macro_rules! new(
     );
 );
 
+mod algebra;
 mod convert;
 
 #[cfg(debug_assertions)]

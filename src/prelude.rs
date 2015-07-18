@@ -1,9 +1,13 @@
-//! Reexports of the most common traits, types, and functions.
+//! Reexports of modules, traits, and types.
 
 pub use Element;
 pub use Matrix;
 pub use Position;
 pub use Size;
+
+pub use algebra::MultiplyInto;
+pub use algebra::MultiplySelf;
+pub use algebra::MultiplyThat;
 
 pub use format::banded;
 pub use format::compressed;

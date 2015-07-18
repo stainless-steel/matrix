@@ -5,7 +5,7 @@ extern crate complex;
 
 use std::convert::Into;
 
-use format::conventional::Conventional;
+use format::Conventional;
 
 /// A matrix.
 pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
@@ -23,12 +23,15 @@ pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
 }
 
 mod element;
+mod number;
 mod position;
 mod size;
 
 pub use element::Element;
+pub use number::Number;
 pub use position::Position;
 pub use size::Size;
 
+pub mod algebra;
 pub mod format;
 pub mod prelude;
