@@ -36,14 +36,14 @@ size!(Diagonal);
 
 impl<T: Element> Diagonal<T> {
     /// Create a matrix from a slice.
-    pub fn from_slice<S: Size>(values: &[T], size: S) -> Self {
+    pub fn from_slice<S: Size>(size: S, values: &[T]) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), min!(rows, columns));
         new!(rows, columns, values.to_vec())
     }
 
     /// Create a matrix from a vector.
-    pub fn from_vec<S: Size>(values: Vec<T>, size: S) -> Self {
+    pub fn from_vec<S: Size>(size: S, values: Vec<T>) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), min!(rows, columns));
         new!(rows, columns, values)
@@ -90,7 +90,7 @@ mod tests {
 
     #[test]
     fn nonzeros() {
-        let matrix = Diagonal::from_vec(vec![1.0, 2.0, 0.0, 3.0], 4);
+        let matrix = Diagonal::from_vec(4, vec![1.0, 2.0, 0.0, 3.0]);
         assert_eq!(matrix.nonzeros(), 3);
     }
 }

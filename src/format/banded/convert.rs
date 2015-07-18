@@ -50,13 +50,13 @@ mod tests {
 
     #[test]
     fn from_diagonal_tall() {
-        let matrix = Banded::from(Diagonal::from_vec(vec![1.0, 2.0, 3.0], (5, 3)));
+        let matrix = Banded::from(Diagonal::from_vec((5, 3), vec![1.0, 2.0, 3.0]));
         assert_eq!(&matrix.values, &[1.0, 2.0, 3.0]);
     }
 
     #[test]
     fn from_diagonal_wide() {
-        let matrix = Banded::from(Diagonal::from_vec(vec![1.0, 2.0, 3.0], (3, 5)));
+        let matrix = Banded::from(Diagonal::from_vec((3, 5), vec![1.0, 2.0, 3.0]));
         assert_eq!(&matrix.values, &[1.0, 2.0, 3.0, 0.0, 0.0]);
     }
 

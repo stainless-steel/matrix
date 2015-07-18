@@ -62,7 +62,7 @@ mod tests {
         let mut matrix = new!(3, 2, 3, Variant::Column, vec![1.0, 2.0, 3.0],
                               vec![1, 0, 2], vec![0, 1, 3]);
 
-        let right = Diagonal::from_vec(vec![4.0, 5.0], (2, 4));
+        let right = Diagonal::from_vec((2, 4), vec![4.0, 5.0]);
 
         matrix.multiply_self(&right);
 
@@ -72,21 +72,21 @@ mod tests {
 
     #[test]
     fn multiply_into_conventional() {
-        let matrix = Compressed::from(Conventional::from_vec(vec![
+        let matrix = Compressed::from(Conventional::from_vec((4, 3), vec![
             1.0, 2.0, 3.0, 4.0,
             5.0, 6.0, 6.0, 5.0,
             4.0, 3.0, 2.0, 1.0,
-        ], (4, 3)));
+        ]));
 
-        let right = Conventional::from_vec(vec![
+        let right = Conventional::from_vec((3, 2), vec![
             1.0, 2.0, 3.0,
             4.0, 5.0, 6.0,
-        ], (3, 2));
+        ]);
 
-        let mut result = Conventional::from_vec(vec![
+        let mut result = Conventional::from_vec((4, 2), vec![
             1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0,
-        ], (4, 2));
+        ]);
 
         matrix.multiply_into(&right, &mut result);
 

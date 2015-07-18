@@ -29,14 +29,14 @@ impl<T: Element> Conventional<T> {
     }
 
     /// Create a matrix from a slice.
-    pub fn from_slice<S: Size>(values: &[T], size: S) -> Self {
+    pub fn from_slice<S: Size>(size: S, values: &[T]) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), rows * columns);
         Conventional { rows: rows, columns: columns, values: values.to_vec() }
     }
 
     /// Create a matrix from a vector.
-    pub fn from_vec<S: Size>(values: Vec<T>, size: S) -> Self {
+    pub fn from_vec<S: Size>(size: S, values: Vec<T>) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), rows * columns);
         Conventional { rows: rows, columns: columns, values: values }
@@ -52,7 +52,7 @@ impl<T: Element> Matrix for Conventional<T> {
 
     fn transpose(&self) -> Self {
         let (rows, columns) = (self.rows, self.columns);
-        let mut matrix = Conventional::from_slice(&self.values, (columns, rows));
+        let mut matrix = Conventional::from_slice((columns, rows), &self.values);
         for i in 0..rows {
             for j in i..columns {
                 matrix.values.swap(j * rows + i, i * rows + j);
@@ -107,14 +107,14 @@ mod tests {
 
     #[test]
     fn nonzeros() {
-        let matrix = Conventional::from_vec(vec![1.0, 2.0, 3.0, 0.0], 2);
+        let matrix = Conventional::from_vec(2, vec![1.0, 2.0, 3.0, 0.0]);
         assert_eq!(matrix.nonzeros(), 3);
     }
 
     #[test]
     fn transpose() {
-        let matrix = Conventional::from_vec(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0], (3, 2));
+        let matrix = Conventional::from_vec((3, 2), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
         let matrix = matrix.transpose();
-        assert_eq!(matrix, Conventional::from_vec(vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0], (2, 3)));
+        assert_eq!(matrix, Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]));
     }
 }
