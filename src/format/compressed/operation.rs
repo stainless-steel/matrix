@@ -1,5 +1,5 @@
-use algebra::{MultiplyInto, MultiplySelf};
 use format::{Compressed, Diagonal};
+use operation::{MultiplyInto, MultiplySelf};
 use {Element, Number};
 
 impl<T> MultiplySelf<Diagonal<T>> for Compressed<T>

@@ -1,38 +1,38 @@
+use blas;
 use lapack;
 
 use Result;
-use decomposition::SymmetricEigen;
 use format::Conventional;
+use operation::{MultiplyInto, SymmetricEigen};
 
-impl<'l> SymmetricEigen for (&'l mut Conventional<f64>, &'l mut Conventional<f64>) {
-    fn decompose(pair: &mut Self) -> Result<()> {
-        let m = pair.0.rows;
-        try!(decompose(pair.0, pair.1, m));
-        Ok(())
-    }
-}
-
-impl<'l> SymmetricEigen for (&'l mut Conventional<f64>, &'l mut [f64]) {
-    fn decompose(pair: &mut Self) -> Result<()> {
-        let m = pair.0.rows;
-        try!(decompose(pair.0, pair.1, m));
-        Ok(())
-    }
-}
-
-impl<'l> SymmetricEigen for (&'l mut [f64], &'l mut Conventional<f64>) {
-    fn decompose(pair: &mut Self) -> Result<()> {
-        let m = pair.1.len();
-        try!(decompose(pair.0, pair.1, m));
-        Ok(())
+impl MultiplyInto<[f64], [f64]> for Conventional<f64> {
+    #[inline]
+    fn multiply_into(&self, right: &[f64], result: &mut [f64]) {
+        let (m, p) = (self.rows, self.columns);
+        let n = right.len() / p;
+        multiply(1.0, &self.values, right, 1.0, result, m, p, n)
     }
 }
 
 impl<'l> SymmetricEigen for (&'l mut [f64], &'l mut [f64]) {
+    #[inline]
     fn decompose(pair: &mut Self) -> Result<()> {
         let m = pair.1.len();
         try!(decompose(pair.0, pair.1, m));
         Ok(())
+    }
+}
+
+fn multiply(alpha: f64, a: &[f64], b: &[f64], beta: f64, c: &mut [f64], m: usize, p: usize,
+            n: usize) {
+
+    debug_assert_eq!(a.len(), m * p);
+    debug_assert_eq!(b.len(), p * n);
+    debug_assert_eq!(c.len(), m * n);
+    if n == 1 {
+        blas::dgemv(blas::Trans::N, m, p, alpha, a, m, b, 1, beta, c, 1);
+    } else {
+        blas::dgemm(blas::Trans::N, blas::Trans::N, m, n, p, alpha, a, m, b, p, beta, c, m);
     }
 }
 
@@ -73,6 +73,25 @@ mod tests {
     use prelude::*;
 
     #[test]
+    fn multiply_into_conventional() {
+        let matrix = Conventional::from_vec((2, 3), vec![
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0,
+        ]);
+        let right = Conventional::from_vec((3, 4), vec![
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0,
+        ]);
+        let mut result = Conventional::from_vec((2, 4), vec![
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
+        ]);
+
+        matrix.multiply_into(&right, &mut result);
+
+        assert_eq!(result, Conventional::from_vec((2, 4), vec![
+            23.0, 30.0, 52.0, 68.0, 81.0, 106.0, 110.0, 144.0,
+        ]));
+    }
+
+    #[test]
     fn symmetric_eigen() {
         let mut matrix = Conventional::from_vec(5, vec![
             0.814723686393179, 0.097540404999410, 0.157613081677548, 0.141886338627215,
@@ -85,7 +104,7 @@ mod tests {
         ]);
         let mut vector = Conventional::from_vec((1, 5), vec![0.0; 5]);
 
-        assert::success(SymmetricEigen::decompose(&mut (&mut matrix, &mut vector)));
+        assert::success(SymmetricEigen::decompose(&mut (&mut *matrix, &mut *vector)));
 
         assert::close(&matrix.values, &vec![
              0.200767588469279, -0.613521879994358,  0.529492579537623,  0.161735212201923,

@@ -45,8 +45,8 @@ macro_rules! new(
     );
 );
 
-mod algebra;
 mod convert;
+mod operation;
 
 #[cfg(debug_assertions)]
 impl<T: Element> ::format::Validate for Compressed<T> {

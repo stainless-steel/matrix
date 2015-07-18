@@ -1,5 +1,7 @@
 //! Basic operations.
 
+use Result;
+
 /// A multiplication adding the result to a third object.
 pub trait MultiplyInto<Right: ?Sized, Output: ?Sized> {
     /// Perform the multiplication.
@@ -16,4 +18,10 @@ pub trait MultiplySelf<Right: ?Sized> {
 pub trait MultiplyThat<Right: ?Sized> {
     /// Perform the multiplication.
     fn multiply_that(&self, &mut Right);
+}
+
+/// The eigendecomposition of a symmetric matrix.
+pub trait SymmetricEigen {
+    /// Perform the decomposition.
+    fn decompose(&mut Self) -> Result<()>;
 }

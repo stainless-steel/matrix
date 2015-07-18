@@ -17,13 +17,10 @@ pub struct Conventional<T: Element> {
     pub values: Vec<T>,
 }
 
-#[cfg(feature = "acceleration")]
-mod algebra;
-
 mod convert;
 
 #[cfg(feature = "acceleration")]
-mod decomposition;
+mod operation;
 
 size!(Conventional);
 
