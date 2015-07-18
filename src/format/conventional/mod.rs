@@ -48,7 +48,7 @@ impl<T: Element> Conventional<T> {
     ///
     /// The function should only be used when it is safe to overwrite `T` with
     /// zero bytes.
-    pub unsafe fn zero(&mut self) {
+    pub unsafe fn erase(&mut self) {
         ptr::write_bytes(self.values.as_mut_ptr(), 0, self.values.len())
     }
 }
@@ -105,9 +105,9 @@ mod tests {
     use prelude::*;
 
     #[test]
-    fn zero() {
+    fn erase() {
         let mut matrix = Conventional::from_vec(10, vec![42.0; 10 * 10]);
-        matrix.zero();
+        matrix.erase();
         assert!(matrix.iter().all(|&value| value == 0.0));
     }
 
