@@ -1,4 +1,4 @@
-use format::{Compressed, Diagonal};
+use format::{Compressed, Conventional, Diagonal};
 use operation::{Multiply, MultiplyInto, MultiplySelf, Transpose};
 use {Element, Number};
 
@@ -16,7 +16,17 @@ impl<'l, T> MultiplyInto<[T], [T]> for Compressed<T> where T: Element + Number {
     fn multiply_into(&self, right: &[T], result: &mut [T]) {
         let (m, p) = (self.rows, self.columns);
         let n = right.len() / p;
-        multiply_matrix(self, right, result, m, p, n)
+        multiply_matrix_left(self, right, result, m, p, n)
+    }
+}
+
+impl<'l, T> MultiplyInto<Compressed<T>, Conventional<T>> for Conventional<T>
+    where T: Element + Number
+{
+    #[inline]
+    fn multiply_into(&self, right: &Compressed<T>, result: &mut Conventional<T>) {
+        let (m, p, n) = (self.rows, self.columns, right.columns);
+        multiply_matrix_right(&self.values, right, &mut result.values, m, p, n)
     }
 }
 
@@ -43,22 +53,22 @@ impl<T: Element> Transpose for Compressed<T> {
     }
 }
 
-fn multiply_matrix<T>(a: &Compressed<T>, b: &[T], c: &mut [T], m: usize, p: usize, n: usize)
+fn multiply_matrix_left<T>(a: &Compressed<T>, b: &[T], c: &mut [T], m: usize, p: usize, n: usize)
     where T: Element + Number
 {
     debug_assert_eq!(a.rows * a.columns, m * p);
     debug_assert_eq!(b.len(), p * n);
     debug_assert_eq!(c.len(), m * n);
-    let (mut i, mut j) = (0, 0);
+    let (mut k, mut l) = (0, 0);
     for _ in 0..n {
-        multiply_vector(a, &b[i..(i + p)], &mut c[j..(j + m)], p);
-        i += p;
-        j += m;
+        multiply_vector_left(a, &b[k..(k + p)], &mut c[l..(l + m)], p);
+        k += p;
+        l += m;
     }
 }
 
 #[inline(always)]
-fn multiply_vector<T>(a: &Compressed<T>, b: &[T], c: &mut [T], p: usize)
+fn multiply_vector_left<T>(a: &Compressed<T>, b: &[T], c: &mut [T], p: usize)
     where T: Element + Number
 {
     let &Compressed { ref values, ref indices, ref offsets, .. } = a;
@@ -66,6 +76,31 @@ fn multiply_vector<T>(a: &Compressed<T>, b: &[T], c: &mut [T], p: usize)
         for k in offsets[j]..offsets[j + 1] {
             let current = c[indices[k]];
             c[indices[k]] = current + values[k] * b[j];
+        }
+    }
+}
+
+fn multiply_matrix_right<T>(a: &[T], b: &Compressed<T>, c: &mut [T], m: usize, p: usize, n: usize)
+    where T: Element + Number
+{
+    debug_assert_eq!(a.len(), m * p);
+    debug_assert_eq!(b.rows * b.columns, p * n);
+    debug_assert_eq!(c.len(), m * n);
+    let mut k = 0;
+    for j in 0..n {
+        multiply_vector_right(a, b, &mut c[k..(k + m)], m, j);
+        k += m;
+    }
+}
+
+#[inline(always)]
+fn multiply_vector_right<T>(a: &[T], b: &Compressed<T>, c: &mut [T], m: usize, j: usize)
+    where T: Element + Number
+{
+    let &Compressed { ref values, ref indices, ref offsets, .. } = b;
+    for k in offsets[j]..offsets[j + 1] {
+        for i in 0..m {
+            c[i] = c[i] + values[k] * a[indices[k] * m + i];
         }
     }
 }
@@ -89,7 +124,7 @@ mod tests {
     }
 
     #[test]
-    fn multiply_into() {
+    fn multiply_into_left() {
         let matrix = Compressed::from(Conventional::from_vec((4, 3), vec![
             1.0, 2.0, 3.0, 4.0,
             5.0, 6.0, 6.0, 5.0,
@@ -100,6 +135,32 @@ mod tests {
             1.0, 2.0, 3.0,
             4.0, 5.0, 6.0,
         ]);
+
+        let mut result = Conventional::from_vec((4, 2), vec![
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+        ]);
+
+        matrix.multiply_into(&right, &mut result);
+
+        assert_eq!(&result.values, &vec![
+            24.0, 24.0, 22.0, 18.0,
+            54.0, 57.0, 55.0, 48.0,
+        ]);
+    }
+
+    #[test]
+    fn multiply_into_right() {
+        let matrix = Conventional::from_vec((4, 3), vec![
+            1.0, 2.0, 3.0, 4.0,
+            5.0, 6.0, 6.0, 5.0,
+            4.0, 3.0, 2.0, 1.0,
+        ]);
+
+        let right = Compressed::from(Conventional::from_vec((3, 2), vec![
+            1.0, 2.0, 3.0,
+            4.0, 5.0, 6.0,
+        ]));
 
         let mut result = Conventional::from_vec((4, 2), vec![
             1.0, 1.0, 1.0, 1.0,

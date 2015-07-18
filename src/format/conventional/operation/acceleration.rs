@@ -116,7 +116,7 @@ mod tests {
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
         ]);
 
-        matrix.multiply_into(&right, &mut result);
+        matrix.multiply_into(&*right, &mut result);
 
         assert_eq!(result, Conventional::from_vec((2, 4), vec![
             23.0, 30.0, 52.0, 68.0, 81.0, 106.0, 110.0, 144.0,
