@@ -6,7 +6,8 @@
 //! [1]: http://www.netlib.org/lapack/lug/node123.html
 //! [2]: http://www.netlib.org/lapack
 
-use {Conventional, Element, Matrix, Size};
+use storage::Conventional;
+use {Element, Matrix, Size};
 
 /// A packed matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -40,7 +41,7 @@ macro_rules! storage(
 );
 
 #[cfg(debug_assertions)]
-impl<T: Element> ::Validate for Packed<T> {
+impl<T: Element> ::storage::Validate for Packed<T> {
     fn validate(&self) {
         assert_eq!(self.values.len(), storage!(self.size));
     }
@@ -138,8 +139,9 @@ impl Format {
 
 #[cfg(test)]
 mod tests {
-    use packed::Format;
-    use {Conventional, Matrix, Packed};
+    use Matrix;
+    use storage::{Conventional, Packed};
+    use super::Format;
 
     macro_rules! new(
         ($size:expr, $format:expr, $values:expr) => (

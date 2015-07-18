@@ -109,7 +109,8 @@ impl<T: Element> DerefMut for Conventional<T> {
 
 #[cfg(tests)]
 mod tests {
-    use {Conventional, Matrix};
+    use Matrix;
+    use storage::Conventional;
 
     #[test]
     fn nonzeros() {

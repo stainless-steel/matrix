@@ -11,7 +11,8 @@
 
 use std::{iter, mem};
 
-use {Conventional, Diagonal, Element, Matrix, Position, Size};
+use storage::{Conventional, Diagonal};
+use {Element, Matrix, Position, Size};
 
 /// A compressed matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -38,7 +39,7 @@ pub struct Compressed<T: Element> {
 }
 
 #[cfg(debug_assertions)]
-impl<T: Element> ::Validate for Compressed<T> {
+impl<T: Element> ::storage::Validate for Compressed<T> {
     fn validate(&self) {
         assert_eq!(self.nonzeros, self.values.len());
         assert_eq!(self.nonzeros, self.indices.len());
@@ -338,8 +339,9 @@ iterator!(struct IteratorMut -> (usize, usize, &'l mut T));
 
 #[cfg(test)]
 mod tests {
-    use compressed::Format;
-    use {Compressed, Conventional, Diagonal, Matrix};
+    use Matrix;
+    use storage::{Compressed, Conventional, Diagonal};
+    use super::Format;
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,

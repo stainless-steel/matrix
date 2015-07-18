@@ -4,7 +4,8 @@
 
 use std::ops::{Deref, DerefMut};
 
-use {Conventional, Element, Matrix, Size};
+use storage::Conventional;
+use {Element, Matrix, Size};
 
 /// A diagonal matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -18,7 +19,7 @@ pub struct Diagonal<T: Element> {
 }
 
 #[cfg(debug_assertions)]
-impl<T: Element> ::Validate for Diagonal<T> {
+impl<T: Element> ::storage::Validate for Diagonal<T> {
     fn validate(&self) {
         assert_eq!(self.values.len(), min!(self.rows, self.columns))
     }
@@ -105,7 +106,8 @@ impl<T: Element> DerefMut for Diagonal<T> {
 
 #[cfg(test)]
 mod tests {
-    use {Conventional, Diagonal, Matrix};
+    use Matrix;
+    use storage::{Conventional, Diagonal};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $values:expr) => (

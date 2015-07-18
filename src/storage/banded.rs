@@ -9,7 +9,8 @@
 
 use std::iter;
 
-use {Conventional, Diagonal, Element, Matrix, Size};
+use storage::{Conventional, Diagonal};
+use {Element, Matrix, Size};
 
 /// A banded matrix.
 #[derive(Clone, Debug, PartialEq)]
@@ -38,7 +39,7 @@ pub struct Iterator<'l, T: 'l + Element> {
 }
 
 #[cfg(debug_assertions)]
-impl<T: Element> ::Validate for Banded<T> {
+impl<T: Element> ::storage::Validate for Banded<T> {
     fn validate(&self) {
         assert_eq!(self.values.len(), self.diagonals() * self.columns);
     }
@@ -215,7 +216,8 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
 
 #[cfg(test)]
 mod tests {
-    use {Banded, Conventional, Diagonal, Matrix};
+    use Matrix;
+    use storage::{Banded, Conventional, Diagonal};
 
     macro_rules! new(
         ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr, $values:expr) => (
