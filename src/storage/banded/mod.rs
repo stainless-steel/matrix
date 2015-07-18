@@ -170,8 +170,7 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
 
 #[cfg(test)]
 mod tests {
-    use Matrix;
-    use storage::Banded;
+    use prelude::*;
 
     #[test]
     fn nonzeros() {

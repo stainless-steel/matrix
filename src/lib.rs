@@ -5,6 +5,8 @@ extern crate complex;
 
 use std::convert::Into;
 
+use storage::conventional::Conventional;
+
 /// A matrix.
 pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
     /// The element type.
@@ -28,10 +30,5 @@ pub use element::Element;
 pub use position::Position;
 pub use size::Size;
 
+pub mod prelude;
 pub mod storage;
-
-pub use storage::Banded;
-pub use storage::Compressed;
-pub use storage::Conventional;
-pub use storage::Diagonal;
-pub use storage::Packed;

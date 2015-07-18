@@ -268,9 +268,8 @@ iterator!(struct IteratorMut -> (usize, usize, &'l mut T));
 
 #[cfg(test)]
 mod tests {
-    use Matrix;
-    use storage::Conventional;
-    use storage::compressed::{Compressed, Format};
+    use prelude::*;
+    use storage::compressed::Format;
 
     #[test]
     fn get() {

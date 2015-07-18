@@ -109,8 +109,8 @@ impl Format {
 
 #[cfg(test)]
 mod tests {
-    use Matrix;
-    use storage::packed::{Format, Packed};
+    use prelude::*;
+    use storage::packed::Format;
 
     #[test]
     fn nonzeros() {

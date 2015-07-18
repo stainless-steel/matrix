@@ -1,5 +1,4 @@
 use Element;
-
 use storage::{Conventional, Diagonal};
 
 impl<'l, T: Element> From<&'l Diagonal<T>> for Conventional<T> {
@@ -31,7 +30,7 @@ impl<T: Element> Into<Vec<T>> for Diagonal<T> {
 
 #[cfg(test)]
 mod tests {
-    use storage::{Conventional, Diagonal};
+    use prelude::*;
 
     #[test]
     fn into_conventional() {

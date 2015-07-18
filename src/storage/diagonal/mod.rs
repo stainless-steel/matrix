@@ -86,8 +86,7 @@ impl<T: Element> DerefMut for Diagonal<T> {
 
 #[cfg(test)]
 mod tests {
-    use Matrix;
-    use storage::Diagonal;
+    use prelude::*;
 
     #[test]
     fn nonzeros() {

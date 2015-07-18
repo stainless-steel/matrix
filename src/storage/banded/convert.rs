@@ -46,7 +46,7 @@ impl<T: Element> From<Diagonal<T>> for Banded<T> {
 
 #[cfg(test)]
 mod tests {
-    use storage::{Banded, Conventional, Diagonal};
+    use prelude::*;
 
     #[test]
     fn from_diagonal_tall() {
