@@ -1,10 +1,17 @@
 use format::{Compressed, Diagonal};
-use operation::{MultiplyInto, MultiplySelf, Transpose};
+use operation::{Multiply, MultiplyInto, MultiplySelf, Transpose};
 use {Element, Number};
 
-impl<T> MultiplySelf<Diagonal<T>> for Compressed<T>
-    where T: Element + Number
-{
+impl<T> Multiply<Diagonal<T>, Compressed<T>> for Compressed<T> where T: Element + Number {
+    #[inline]
+    fn multiply(&self, right: &Diagonal<T>) -> Self {
+        let mut result = self.clone();
+        result.multiply_self(right);
+        result
+    }
+}
+
+impl<T> MultiplySelf<Diagonal<T>> for Compressed<T> where T: Element + Number {
     #[inline]
     fn multiply_self(&mut self, right: &Diagonal<T>) {
         let (m, n) = (self.rows, right.columns);
