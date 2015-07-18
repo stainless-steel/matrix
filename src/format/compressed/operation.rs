@@ -20,13 +20,13 @@ impl<'l, T> MultiplyInto<[T], [T]> for Compressed<T> where T: Element + Number {
     }
 }
 
-impl<'l, T> MultiplyInto<Compressed<T>, Conventional<T>> for Conventional<T>
+impl<'l, T> MultiplyInto<Compressed<T>, [T]> for Conventional<T>
     where T: Element + Number
 {
     #[inline]
-    fn multiply_into(&self, right: &Compressed<T>, result: &mut Conventional<T>) {
+    fn multiply_into(&self, right: &Compressed<T>, result: &mut [T]) {
         let (m, p, n) = (self.rows, self.columns, right.columns);
-        multiply_matrix_right(&self.values, right, &mut result.values, m, p, n)
+        multiply_matrix_right(&self.values, right, result, m, p, n)
     }
 }
 

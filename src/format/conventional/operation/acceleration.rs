@@ -16,6 +16,13 @@ impl Multiply<[f64], Conventional<f64>> for Conventional<f64> {
     }
 }
 
+impl MultiplyInto<Conventional<f64>, [f64]> for Conventional<f64> {
+    #[inline(always)]
+    fn multiply_into(&self, right: &Self, result: &mut [f64]) {
+        MultiplyInto::multiply_into(self, &*right as &[f64], result)
+    }
+}
+
 impl MultiplyInto<[f64], [f64]> for Conventional<f64> {
     #[inline]
     fn multiply_into(&self, right: &[f64], result: &mut [f64]) {
@@ -116,7 +123,7 @@ mod tests {
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
         ]);
 
-        matrix.multiply_into(&*right, &mut result);
+        matrix.multiply_into(&right, &mut result);
 
         assert_eq!(result, Conventional::from_vec((2, 4), vec![
             23.0, 30.0, 52.0, 68.0, 81.0, 106.0, 110.0, 144.0,
