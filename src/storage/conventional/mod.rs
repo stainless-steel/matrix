@@ -2,7 +2,6 @@
 //!
 //! The storage is suitable for dense matrices.
 
-use std::convert::Into;
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 
 use {Element, Matrix, Position, Size};
@@ -17,6 +16,8 @@ pub struct Conventional<T: Element> {
     /// The values stored in the column-major order.
     pub values: Vec<T>,
 }
+
+mod convert;
 
 size!(Conventional);
 
@@ -81,13 +82,6 @@ impl<T: Element, P: Position> IndexMut<P> for Conventional<T> {
     fn index_mut(&mut self, index: P) -> &mut Self::Output {
         let (i, j) = index.coordinates();
         &mut self.values[j * self.rows + i]
-    }
-}
-
-impl<T: Element> Into<Vec<T>> for Conventional<T> {
-    #[inline]
-    fn into(self) -> Vec<T> {
-        self.values
     }
 }
 

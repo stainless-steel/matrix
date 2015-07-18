@@ -6,7 +6,6 @@
 //! [1]: http://www.netlib.org/lapack/lug/node123.html
 //! [2]: http://www.netlib.org/lapack
 
-use storage::Conventional;
 use {Element, Matrix, Size};
 
 /// A packed matrix.
@@ -21,14 +20,11 @@ pub struct Packed<T: Element> {
     pub values: Vec<T>,
 }
 
-/// A format of a packed matrix.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Format {
-    /// The lower-triangular format.
-    Lower,
-    /// The upper-triangular format.
-    Upper,
-}
+macro_rules! new(
+    ($size:expr, $format:expr, $values:expr) => (
+        Packed { size: $size, format: $format, values: $values }
+    );
+);
 
 macro_rules! arithmetic(
     ($count:expr, $first:expr, $last:expr) => (
@@ -39,6 +35,17 @@ macro_rules! arithmetic(
 macro_rules! storage(
     ($size:expr) => (arithmetic!($size, 1, $size))
 );
+
+mod convert;
+
+/// A format of a packed matrix.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Format {
+    /// The lower-triangular format.
+    Lower,
+    /// The upper-triangular format.
+    Upper,
+}
 
 #[cfg(debug_assertions)]
 impl<T: Element> ::storage::Validate for Packed<T> {
@@ -54,7 +61,7 @@ impl<T: Element> Packed<T> {
     pub fn new<S: Size>(size: S, format: Format) -> Self {
         let (rows, _columns) = size.dimensions();
         debug_assert!(rows == _columns);
-        Packed { size: rows, format: format, values: vec![T::zero(); storage!(rows)] }
+        new!(rows, format, vec![T::zero(); storage!(rows)])
     }
 }
 
@@ -89,43 +96,6 @@ impl<T: Element> Matrix for Packed<T> {
     }
 }
 
-impl<'l, T: Element> From<&'l Packed<T>> for Conventional<T> {
-    fn from(matrix: &'l Packed<T>) -> Self {
-        let &Packed { size, format, ref values } = validate!(matrix);
-
-        let mut matrix = Conventional::new(size);
-        match format {
-            Format::Lower => {
-                let mut k = 0;
-                for j in 0..size {
-                    for i in j..size {
-                        matrix.values[j * size + i] = values[k];
-                        k += 1;
-                    }
-                }
-            },
-            Format::Upper => {
-                let mut k = 0;
-                for j in 0..size {
-                    for i in 0..(j + 1) {
-                        matrix.values[j * size + i] = values[k];
-                        k += 1;
-                    }
-                }
-            },
-        }
-
-        matrix
-    }
-}
-
-impl<T: Element> From<Packed<T>> for Conventional<T> {
-    #[inline]
-    fn from(matrix: Packed<T>) -> Self {
-        (&matrix).into()
-    }
-}
-
 impl Format {
     /// Return the other format.
     #[inline]
@@ -140,14 +110,7 @@ impl Format {
 #[cfg(test)]
 mod tests {
     use Matrix;
-    use storage::{Conventional, Packed};
-    use super::Format;
-
-    macro_rules! new(
-        ($size:expr, $format:expr, $values:expr) => (
-            Packed { size: $size, format: $format, values: $values }
-        );
-    );
+    use storage::packed::{Format, Packed};
 
     #[test]
     fn nonzeros() {
@@ -181,37 +144,5 @@ mod tests {
         assert_eq!(matrix, new!(4, Format::Lower, vec![
             1.0, 2.0, 4.0, 7.0, 3.0, 5.0, 8.0, 6.0, 9.0, 10.0,
         ]));
-    }
-
-    #[test]
-    fn into_conventional_lower() {
-        let matrix = new!(4, Format::Lower, vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
-        ]);
-
-        let matrix = Conventional::from(matrix);
-
-        assert_eq!(&*matrix, &[
-            1.0, 2.0, 3.0,  4.0,
-            0.0, 5.0, 6.0,  7.0,
-            0.0, 0.0, 8.0,  9.0,
-            0.0, 0.0, 0.0, 10.0,
-        ]);
-    }
-
-    #[test]
-    fn into_conventional_upper() {
-        let matrix = new!(4, Format::Upper, vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
-        ]);
-
-        let matrix = Conventional::from(matrix);
-
-        assert_eq!(&*matrix, &[
-            1.0, 0.0, 0.0,  0.0,
-            2.0, 3.0, 0.0,  0.0,
-            4.0, 5.0, 6.0,  0.0,
-            7.0, 8.0, 9.0, 10.0,
-        ]);
     }
 }

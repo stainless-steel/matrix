@@ -4,7 +4,6 @@
 
 use std::ops::{Deref, DerefMut};
 
-use storage::Conventional;
 use {Element, Matrix, Size};
 
 /// A diagonal matrix.
@@ -17,6 +16,14 @@ pub struct Diagonal<T: Element> {
     /// The values of the diagonal elements.
     pub values: Vec<T>,
 }
+
+macro_rules! new(
+    ($rows:expr, $columns:expr, $values:expr) => (
+        Diagonal { rows: $rows, columns: $columns, values: $values }
+    );
+);
+
+mod convert;
 
 #[cfg(debug_assertions)]
 impl<T: Element> ::storage::Validate for Diagonal<T> {
@@ -32,14 +39,14 @@ impl<T: Element> Diagonal<T> {
     pub fn from_slice<S: Size>(values: &[T], size: S) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), min!(rows, columns));
-        Diagonal { rows: rows, columns: columns, values: values.to_vec() }
+        new!(rows, columns, values.to_vec())
     }
 
     /// Create a matrix from a vector.
     pub fn from_vec<S: Size>(values: Vec<T>, size: S) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), min!(rows, columns));
-        Diagonal { rows: rows, columns: columns, values: values }
+        new!(rows, columns, values)
     }
 }
 
@@ -57,34 +64,7 @@ impl<T: Element> Matrix for Diagonal<T> {
 
     fn zero<S: Size>(size: S) -> Self {
         let (rows, columns) = size.dimensions();
-        Diagonal { rows: rows, columns: columns, values: vec![T::zero(); min!(rows, columns)] }
-    }
-}
-
-impl<'l, T: Element> From<&'l Diagonal<T>> for Conventional<T> {
-    fn from(matrix: &Diagonal<T>) -> Self {
-        let &Diagonal { rows, columns, ref values } = validate!(matrix);
-
-        let mut conventional = Conventional::new((rows, columns));
-        for i in 0..min!(rows, columns) {
-            conventional.values[i * rows + i] = values[i];
-        }
-
-        conventional
-    }
-}
-
-impl<T: Element> From<Diagonal<T>> for Conventional<T> {
-    #[inline]
-    fn from(matrix: Diagonal<T>) -> Self {
-        (&matrix).into()
-    }
-}
-
-impl<T: Element> Into<Vec<T>> for Diagonal<T> {
-    #[inline]
-    fn into(self) -> Vec<T> {
-        self.values
+        new!(rows, columns, vec![T::zero(); min!(rows, columns)])
     }
 }
 
@@ -107,30 +87,11 @@ impl<T: Element> DerefMut for Diagonal<T> {
 #[cfg(test)]
 mod tests {
     use Matrix;
-    use storage::{Conventional, Diagonal};
-
-    macro_rules! new(
-        ($rows:expr, $columns:expr, $values:expr) => (
-            Diagonal { rows: $rows, columns: $columns, values: $values }
-        );
-    );
+    use storage::Diagonal;
 
     #[test]
     fn nonzeros() {
         let matrix = Diagonal::from_vec(vec![1.0, 2.0, 0.0, 3.0], 4);
         assert_eq!(matrix.nonzeros(), 3);
-    }
-
-    #[test]
-    fn into_conventional() {
-        let matrix = Conventional::from(new!(3, 5, vec![1.0, 2.0, 3.0]));
-
-        assert_eq!(matrix, Conventional::from_vec(vec![
-            1.0, 0.0, 0.0,
-            0.0, 2.0, 0.0,
-            0.0, 0.0, 3.0,
-            0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0,
-        ], (3, 5)));
     }
 }

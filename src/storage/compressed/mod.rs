@@ -11,7 +11,6 @@
 
 use std::{iter, mem};
 
-use storage::{Conventional, Diagonal};
 use {Element, Matrix, Position, Size};
 
 /// A compressed matrix.
@@ -37,6 +36,16 @@ pub struct Compressed<T: Element> {
     /// vector has one additional element, which is always equal to `nonzeros`.
     pub offsets: Vec<usize>,
 }
+
+macro_rules! new(
+    ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,
+     $values:expr, $indices:expr, $offsets:expr) => (
+        Compressed { rows: $rows, columns: $columns, nonzeros: $nonzeros, format: $format,
+                     values: $values, indices: $indices, offsets: $offsets }
+    );
+);
+
+mod convert;
 
 #[cfg(debug_assertions)]
 impl<T: Element> ::storage::Validate for Compressed<T> {
@@ -85,18 +94,12 @@ impl<T: Element> Compressed<T> {
     /// Create a zero matrix with a specific capacity.
     pub fn with_capacity<S: Size>(size: S, format: Format, capacity: usize) -> Self {
         let (rows, columns) = size.dimensions();
-        Compressed {
-            rows: rows,
-            columns: columns,
-            nonzeros: 0,
-            format: format,
-            values: Vec::with_capacity(capacity),
-            indices: Vec::with_capacity(capacity),
-            offsets: match format {
-                Format::Column => vec![0; columns + 1],
-                Format::Row => vec![0; rows + 1],
-            },
-        }
+        let offset = match format {
+            Format::Column => vec![0; columns + 1],
+            Format::Row => vec![0; rows + 1],
+        };
+        new!(rows, columns, 0, format, Vec::with_capacity(capacity),
+             Vec::with_capacity(capacity), offset)
     }
 
     /// Read an element.
@@ -223,80 +226,6 @@ impl<T: Element> Matrix for Compressed<T> {
     }
 }
 
-impl<'l, T: Element> From<&'l Conventional<T>> for Compressed<T> {
-    fn from(conventional: &'l Conventional<T>) -> Self {
-        let (rows, columns) = conventional.dimensions();
-        let mut matrix = Compressed::new((rows, columns), Format::Column);
-        for (k, &value) in conventional.values.iter().enumerate() {
-            if !value.is_zero() {
-                matrix.set((k % rows, k / rows), value);
-            }
-        }
-        matrix
-    }
-}
-
-impl<T: Element> From<Conventional<T>> for Compressed<T> {
-    #[inline]
-    fn from(matrix: Conventional<T>) -> Self {
-        (&matrix).into()
-    }
-}
-
-impl<'l, T: Element> From<&'l Compressed<T>> for Conventional<T> {
-    fn from(matrix: &'l Compressed<T>) -> Self {
-        let &Compressed {
-            rows, columns, format, ref values, ref indices, ref offsets, ..
-        } = validate!(matrix);
-
-        let mut matrix = Conventional::new((rows, columns));
-        match format {
-            Format::Row => for i in 0..rows {
-                for k in offsets[i]..offsets[i + 1] {
-                    matrix.values[indices[k] * rows + i] = values[k];
-                }
-            },
-            Format::Column => for j in 0..columns {
-                for k in offsets[j]..offsets[j + 1] {
-                    matrix.values[j * rows + indices[k]] = values[k];
-                }
-            },
-        }
-
-        matrix
-    }
-}
-
-impl<T: Element> From<Compressed<T>> for Conventional<T> {
-    #[inline]
-    fn from(matrix: Compressed<T>) -> Self {
-        (&matrix).into()
-    }
-}
-
-impl<'l, T: Element> From<&'l Diagonal<T>> for Compressed<T> {
-    #[inline]
-    fn from(matrix: &'l Diagonal<T>) -> Self {
-        matrix.clone().into()
-    }
-}
-
-impl<T: Element> From<Diagonal<T>> for Compressed<T> {
-    fn from(matrix: Diagonal<T>) -> Self {
-        let Diagonal { rows, columns, values } = validate!(matrix);
-        let nonzeros = values.len();
-        Compressed {
-            rows: rows,
-            columns: columns,
-            nonzeros: nonzeros,
-            values: values,
-            format: Format::Column,
-            indices: (0..nonzeros).collect(),
-            offsets: (0..(columns + 1)).map(|i| if i < nonzeros { i } else { nonzeros }).collect(),
-        }
-    }
-}
-
 impl Format {
     /// Return the other format.
     #[inline]
@@ -340,16 +269,8 @@ iterator!(struct IteratorMut -> (usize, usize, &'l mut T));
 #[cfg(test)]
 mod tests {
     use Matrix;
-    use storage::{Compressed, Conventional, Diagonal};
-    use super::Format;
-
-    macro_rules! new(
-        ($rows:expr, $columns:expr, $nonzeros:expr, $format:expr,
-         $values:expr, $indices:expr, $offsets:expr) => (
-            Compressed { rows: $rows, columns: $columns, nonzeros: $nonzeros, format: $format,
-                         values: $values, indices: $indices, offsets: $offsets }
-        );
-    );
+    use storage::Conventional;
+    use storage::compressed::{Compressed, Format};
 
     #[test]
     fn get() {
@@ -506,49 +427,5 @@ mod tests {
         matrix.resize((9, 7));
         assert_eq!(matrix, new!(9, 7, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
                                 vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
-    }
-
-    #[test]
-    fn from_conventional() {
-        let matrix = Conventional::from_vec(vec![
-            0.0, 1.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 2.0, 3.0,
-            0.0, 0.0, 0.0, 0.0, 4.0,
-        ], (5, 3));
-
-        let matrix = Compressed::from(matrix);
-
-        assert_eq!(matrix, new!(5, 3, 4, Format::Column, vec![1.0, 2.0, 3.0, 4.0],
-                                vec![1, 3, 4, 4], vec![0, 1, 3, 4]));
-    }
-
-    #[test]
-    fn from_diagonal_tall() {
-        let matrix = Compressed::from(Diagonal::from_vec(vec![1.0, 2.0, 0.0], (5, 3)));
-
-        assert_eq!(matrix, new!(5, 3, 3, Format::Column, vec![1.0, 2.0, 0.0],
-                                vec![0, 1, 2], vec![0, 1, 2, 3]));
-    }
-
-    #[test]
-    fn from_diagonal_wide() {
-        let matrix = Compressed::from(Diagonal::from_vec(vec![1.0, 0.0, 3.0], (3, 5)));
-
-        assert_eq!(matrix, new!(3, 5, 3, Format::Column, vec![1.0, 0.0, 3.0],
-                                vec![0, 1, 2], vec![0, 1, 2, 3, 3, 3]));
-    }
-
-    #[test]
-    fn into_conventional() {
-        let matrix = new!(5, 3, 3, Format::Column, vec![1.0, 2.0, 3.0],
-                          vec![0, 1, 2], vec![0, 1, 2, 3]);
-
-        let matrix = Conventional::from(matrix);
-
-        assert_eq!(&*matrix, &[
-            1.0, 0.0, 0.0, 0.0, 0.0,
-            0.0, 2.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 3.0, 0.0, 0.0,
-        ]);
     }
 }

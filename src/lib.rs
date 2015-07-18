@@ -13,7 +13,7 @@ pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
     /// Count the number of nonzero elements.
     fn nonzeros(&self) -> usize;
 
-    /// Transpose the matrix.
+    /// Compute the matrix transpose.
     fn transpose(&self) -> Self;
 
     /// Create a zero matrix.

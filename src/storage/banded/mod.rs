@@ -9,7 +9,6 @@
 
 use std::iter;
 
-use storage::{Conventional, Diagonal};
 use {Element, Matrix, Size};
 
 /// A banded matrix.
@@ -30,20 +29,12 @@ pub struct Banded<T: Element> {
     pub values: Vec<T>,
 }
 
-/// A sparse iterator.
-pub struct Iterator<'l, T: 'l + Element> {
-    matrix: &'l Banded<T>,
-    column: usize,
-    start: usize,
-    finish: usize,
-}
-
-#[cfg(debug_assertions)]
-impl<T: Element> ::storage::Validate for Banded<T> {
-    fn validate(&self) {
-        assert_eq!(self.values.len(), self.diagonals() * self.columns);
-    }
-}
+macro_rules! new(
+    ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr, $values:expr) => (
+        Banded { rows: $rows, columns: $columns, superdiagonals: $superdiagonals,
+                 subdiagonals: $subdiagonals, values: $values }
+    );
+);
 
 macro_rules! max_difference(
     ($limit:expr, $left:expr, $right:expr) => ({
@@ -76,19 +67,31 @@ macro_rules! row_range(
     );
 );
 
+mod convert;
+
+/// A sparse iterator.
+pub struct Iterator<'l, T: 'l + Element> {
+    matrix: &'l Banded<T>,
+    column: usize,
+    start: usize,
+    finish: usize,
+}
+
+#[cfg(debug_assertions)]
+impl<T: Element> ::storage::Validate for Banded<T> {
+    fn validate(&self) {
+        assert_eq!(self.values.len(), self.diagonals() * self.columns);
+    }
+}
+
 size!(Banded);
 
 impl<T: Element> Banded<T> {
     /// Create a zero matrix.
     pub fn new<S: Size>(size: S, superdiagonals: usize, subdiagonals: usize) -> Self {
         let (rows, columns) = size.dimensions();
-        Banded {
-            rows: rows,
-            columns: columns,
-            superdiagonals: superdiagonals,
-            subdiagonals: subdiagonals,
-            values: vec![T::zero(); (superdiagonals + 1 + subdiagonals) * columns],
-        }
+        let values = vec![T::zero(); (superdiagonals + 1 + subdiagonals) * columns];
+        new!(rows, columns, superdiagonals,  subdiagonals, values)
     }
 
     /// Return the number of diagonals.
@@ -133,55 +136,6 @@ impl<T: Element> Matrix for Banded<T> {
     }
 }
 
-impl<'l, T: Element> From<&'l Banded<T>> for Conventional<T> {
-    fn from(matrix: &'l Banded<T>) -> Self {
-        let &Banded {
-            rows, columns, superdiagonals, subdiagonals, ref values
-        } = validate!(matrix);
-
-        let diagonals = matrix.diagonals();
-        let mut matrix = Conventional::new((rows, columns));
-        for j in 0..columns {
-            for i in row_range!(rows, superdiagonals, subdiagonals, j) {
-                let k = superdiagonals + i - j;
-                matrix.values[j * rows + i] = values[j * diagonals + k];
-            }
-        }
-
-        matrix
-    }
-}
-
-impl<T: Element> From<Banded<T>> for Conventional<T> {
-    #[inline]
-    fn from(matrix: Banded<T>) -> Self {
-        (&matrix).into()
-    }
-}
-
-impl<'l, T: Element> From<&'l Diagonal<T>> for Banded<T> {
-    #[inline]
-    fn from(matrix: &'l Diagonal<T>) -> Self {
-        matrix.clone().into()
-    }
-}
-
-impl<T: Element> From<Diagonal<T>> for Banded<T> {
-    fn from(matrix: Diagonal<T>) -> Self {
-        let Diagonal { rows, columns, mut values } = validate!(matrix);
-        for _ in rows..columns {
-            values.push(T::zero());
-        }
-        Banded {
-            rows: rows,
-            columns: columns,
-            superdiagonals: 0,
-            subdiagonals: 0,
-            values: values,
-        }
-    }
-}
-
 impl<'l, T: Element> Iterator<'l, T> {
     fn new(matrix: &'l Banded<T>) -> Iterator<'l, T> {
         Iterator {
@@ -217,14 +171,7 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
 #[cfg(test)]
 mod tests {
     use Matrix;
-    use storage::{Banded, Conventional, Diagonal};
-
-    macro_rules! new(
-        ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr, $values:expr) => (
-            Banded { rows: $rows, columns: $columns, superdiagonals: $superdiagonals,
-                     subdiagonals: $subdiagonals, values: $values }
-        );
-    );
+    use storage::Banded;
 
     #[test]
     fn nonzeros() {
@@ -310,62 +257,6 @@ mod tests {
             7.0, 11.0, 15.0,
             12.0, 16.0,
             17.0,
-        ]);
-    }
-
-    #[test]
-    fn from_diagonal_tall() {
-        let matrix = Banded::from(Diagonal::from_vec(vec![1.0, 2.0, 3.0], (5, 3)));
-        assert_eq!(&matrix.values, &[1.0, 2.0, 3.0]);
-    }
-
-    #[test]
-    fn from_diagonal_wide() {
-        let matrix = Banded::from(Diagonal::from_vec(vec![1.0, 2.0, 3.0], (3, 5)));
-        assert_eq!(&matrix.values, &[1.0, 2.0, 3.0, 0.0, 0.0]);
-    }
-
-    #[test]
-    fn into_conventional_tall() {
-        let matrix = new!(7, 4, 2, 2, vec![
-            0.0,  0.0,  1.0,  4.0,  8.0,
-            0.0,  2.0,  5.0,  9.0, 12.0,
-            3.0,  6.0, 10.0, 13.0, 15.0,
-            7.0, 11.0, 14.0, 16.0, 17.0,
-        ]);
-
-        let matrix = Conventional::from(matrix);
-
-        assert_eq!(&*matrix, &[
-            1.0, 4.0,  8.0,  0.0,  0.0,  0.0, 0.0,
-            2.0, 5.0,  9.0, 12.0,  0.0,  0.0, 0.0,
-            3.0, 6.0, 10.0, 13.0, 15.0,  0.0, 0.0,
-            0.0, 7.0, 11.0, 14.0, 16.0, 17.0, 0.0,
-        ]);
-    }
-
-    #[test]
-    fn into_conventional_wide() {
-        let matrix = new!(4, 7, 2, 2, vec![
-             0.0,  0.0,  1.0,  4.0,  8.0,
-             0.0,  2.0,  5.0,  9.0, 13.0,
-             3.0,  6.0, 10.0, 14.0,  0.0,
-             7.0, 11.0, 15.0,  0.0,  0.0,
-            12.0, 16.0,  0.0,  0.0,  0.0,
-            17.0,  0.0,  0.0,  0.0,  0.0,
-             0.0,  0.0,  0.0,  0.0,  0.0,
-        ]);
-
-        let matrix = Conventional::from(matrix);
-
-        assert_eq!(&*matrix, &[
-            1.0, 4.0,  8.0,  0.0,
-            2.0, 5.0,  9.0, 13.0,
-            3.0, 6.0, 10.0, 14.0,
-            0.0, 7.0, 11.0, 15.0,
-            0.0, 0.0, 12.0, 16.0,
-            0.0, 0.0,  0.0, 17.0,
-            0.0, 0.0,  0.0,  0.0,
         ]);
     }
 }
