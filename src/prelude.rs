@@ -17,6 +17,7 @@ pub use format::conventional::Conventional;
 pub use format::diagonal::Diagonal;
 pub use format::packed::Packed;
 
+pub use operation::Multiply;
 pub use operation::MultiplyInto;
 pub use operation::MultiplySelf;
 pub use operation::ScaleSelf;

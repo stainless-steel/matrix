@@ -69,7 +69,7 @@ mod tests {
     use format::compressed::Variant;
 
     #[test]
-    fn multiply_self_diagonal() {
+    fn multiply_self() {
         let mut matrix = new!(3, 2, 3, Variant::Column, vec![1.0, 2.0, 3.0],
                               vec![1, 0, 2], vec![0, 1, 3]);
 
@@ -82,7 +82,7 @@ mod tests {
     }
 
     #[test]
-    fn multiply_into_conventional() {
+    fn multiply_into() {
         let matrix = Compressed::from(Conventional::from_vec((4, 3), vec![
             1.0, 2.0, 3.0, 4.0,
             5.0, 6.0, 6.0, 5.0,

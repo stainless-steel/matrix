@@ -2,6 +2,12 @@
 
 use Result;
 
+/// A multiplication.
+pub trait Multiply<Right: ?Sized, Output> {
+    /// Perform the multiplication.
+    fn multiply(&self, &Right) -> Output;
+}
+
 /// A multiplication that adds the result to a third object.
 pub trait MultiplyInto<Right: ?Sized, Output: ?Sized> {
     /// Perform the multiplication.
