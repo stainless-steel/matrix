@@ -22,7 +22,7 @@ pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
     /// The element type.
     type Element: Element;
 
-    /// Count the number of nonzero elements.
+    /// Count nonzero elements.
     fn nonzeros(&self) -> usize;
 
     /// Compute the matrix transpose.
