@@ -3,7 +3,7 @@ use lapack;
 
 use Result;
 use format::Conventional;
-use operation::{MultiplyInto, SymmetricEigen};
+use operation::{MultiplyInto, ScaleSelf, SymmetricEigen};
 
 impl MultiplyInto<[f64], [f64]> for Conventional<f64> {
     #[inline]
@@ -11,6 +11,13 @@ impl MultiplyInto<[f64], [f64]> for Conventional<f64> {
         let (m, p) = (self.rows, self.columns);
         let n = right.len() / p;
         multiply(1.0, &self.values, right, 1.0, result, m, p, n)
+    }
+}
+
+impl ScaleSelf<f64> for [f64] {
+    #[inline]
+    fn scale_self(&mut self, alpha: f64) {
+        blas::dscal(self.len(), alpha, self, 1);
     }
 }
 
@@ -89,6 +96,13 @@ mod tests {
         assert_eq!(result, Conventional::from_vec((2, 4), vec![
             23.0, 30.0, 52.0, 68.0, 81.0, 106.0, 110.0, 144.0,
         ]));
+    }
+
+    #[test]
+    fn scale_self() {
+        let mut matrix = Conventional::from_vec(2, vec![21.0, 21.0, 21.0, 21.0]);
+        matrix.scale_self(2.0);
+        assert_eq!(matrix, Conventional::from_vec(2, vec![42.0, 42.0, 42.0, 42.0]));
     }
 
     #[test]
