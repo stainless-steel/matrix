@@ -1,7 +1,7 @@
 use std::convert::Into;
 
 use Element;
-use storage::Conventional;
+use format::Conventional;
 
 impl<T: Element> Into<Vec<T>> for Conventional<T> {
     #[inline]

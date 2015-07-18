@@ -1,4 +1,4 @@
-//! Storage schemes.
+//! Storage formats.
 
 #[cfg(debug_assertions)]
 trait Validate {
@@ -8,7 +8,7 @@ trait Validate {
 #[cfg(debug_assertions)]
 macro_rules! validate(
     ($matrix:expr) => ({
-        use ::storage::Validate;
+        use ::format::Validate;
         let matrix = $matrix;
         matrix.validate();
         matrix

@@ -1,10 +1,10 @@
-//! The compressed storage.
+//! The compressed format.
 //!
-//! The storage is suitable for generic sparse matrices. Data are stored in one
-//! of the following formats:
+//! The format is suitable for generic sparse matrices. The format has two
+//! variants:
 //!
-//! * the [compressed-column][1] format or
-//! * the [compressed-row][2] format.
+//! * the [compressed-column][1] variant or
+//! * the [compressed-row][2] variant.
 //!
 //! [1]: http://netlib.org/linalg/html_templates/node92.html
 //! [2]: http://netlib.org/linalg/html_templates/node91.html
@@ -48,7 +48,7 @@ macro_rules! new(
 mod convert;
 
 #[cfg(debug_assertions)]
-impl<T: Element> ::storage::Validate for Compressed<T> {
+impl<T: Element> ::format::Validate for Compressed<T> {
     fn validate(&self) {
         assert_eq!(self.nonzeros, self.values.len());
         assert_eq!(self.nonzeros, self.indices.len());
@@ -269,7 +269,7 @@ iterator!(struct IteratorMut -> (usize, usize, &'l mut T));
 #[cfg(test)]
 mod tests {
     use prelude::*;
-    use storage::compressed::Variant;
+    use format::compressed::Variant;
 
     #[test]
     fn get() {
@@ -279,7 +279,7 @@ mod tests {
             0.0, 0.0, 0.0, 0.0, 4.0,
         ], (5, 3));
 
-        let matrix: Compressed<_> = (&conventional).into();
+        let matrix = Compressed::from(&conventional);
         assert_eq!(matrix.nonzeros, 4);
 
         for i in 0..5 {
@@ -297,7 +297,7 @@ mod tests {
             0.0, 0.0, 0.0, 0.0, 4.0,
         ], (5, 3));
 
-        let mut matrix: Compressed<_> = (&conventional).into();
+        let mut matrix = Compressed::from(&conventional);
         assert_eq!(matrix.nonzeros, 4);
 
         conventional[(0, 0)] = 42.0;

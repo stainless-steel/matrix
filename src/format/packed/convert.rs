@@ -1,6 +1,6 @@
 use Element;
-use storage::packed::Variant;
-use storage::{Conventional, Packed};
+use format::packed::Variant;
+use format::{Conventional, Packed};
 
 impl<'l, T: Element> From<&'l Packed<T>> for Conventional<T> {
     fn from(matrix: &'l Packed<T>) -> Self {
@@ -41,8 +41,8 @@ impl<T: Element> From<Packed<T>> for Conventional<T> {
 
 #[cfg(test)]
 mod tests {
+    use format::packed::Variant;
     use prelude::*;
-    use storage::packed::Variant;
 
     #[test]
     fn into_conventional_lower() {

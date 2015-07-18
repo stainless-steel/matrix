@@ -1,5 +1,5 @@
-use storage::compressed::Variant;
-use storage::{Conventional, Compressed, Diagonal};
+use format::compressed::Variant;
+use format::{Conventional, Compressed, Diagonal};
 use {Element, Size};
 
 impl<'l, T: Element> From<&'l Conventional<T>> for Compressed<T> {
@@ -74,8 +74,8 @@ impl<T: Element> From<Diagonal<T>> for Compressed<T> {
 
 #[cfg(test)]
 mod tests {
+    use format::compressed::Variant;
     use prelude::*;
-    use storage::compressed::Variant;
 
     #[test]
     fn from_conventional() {

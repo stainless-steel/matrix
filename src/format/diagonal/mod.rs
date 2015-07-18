@@ -1,6 +1,6 @@
-//! The diagonal storage.
+//! The diagonal format.
 //!
-//! The storage is suitable for diagonal matrices.
+//! The format is suitable for diagonal matrices.
 
 use std::ops::{Deref, DerefMut};
 
@@ -26,7 +26,7 @@ macro_rules! new(
 mod convert;
 
 #[cfg(debug_assertions)]
-impl<T: Element> ::storage::Validate for Diagonal<T> {
+impl<T: Element> ::format::Validate for Diagonal<T> {
     fn validate(&self) {
         assert_eq!(self.values.len(), min!(self.rows, self.columns))
     }

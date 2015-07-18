@@ -1,6 +1,6 @@
-//! The conventional storage.
+//! The conventional format.
 //!
-//! The storage is suitable for dense matrices.
+//! The format is suitable for dense matrices.
 
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 

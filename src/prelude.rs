@@ -5,14 +5,14 @@ pub use Matrix;
 pub use Position;
 pub use Size;
 
-pub use storage::banded;
-pub use storage::compressed;
-pub use storage::conventional;
-pub use storage::diagonal;
-pub use storage::packed;
+pub use format::banded;
+pub use format::compressed;
+pub use format::conventional;
+pub use format::diagonal;
+pub use format::packed;
 
-pub use storage::banded::Banded;
-pub use storage::compressed::Compressed;
-pub use storage::conventional::Conventional;
-pub use storage::diagonal::Diagonal;
-pub use storage::packed::Packed;
+pub use format::banded::Banded;
+pub use format::compressed::Compressed;
+pub use format::conventional::Conventional;
+pub use format::diagonal::Diagonal;
+pub use format::packed::Packed;

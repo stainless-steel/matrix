@@ -1,8 +1,8 @@
-//! The banded storage.
+//! The banded format.
 //!
-//! The storage is suitable for matrices with a small number of superdiagonals
-//! and/or subdiagonals relative to the smallest dimension. Data are stored in
-//! the [format][1] adopted by [LAPACK][2].
+//! The format is suitable for matrices with a small number of superdiagonals
+//! and/or subdiagonals relative to the smallest dimension. The format is
+//! compatible with the [one][1] adopted by [LAPACK][2].
 //!
 //! [1]: http://www.netlib.org/lapack/lug/node124.html
 //! [2]: http://www.netlib.org/lapack
@@ -78,7 +78,7 @@ pub struct Iterator<'l, T: 'l + Element> {
 }
 
 #[cfg(debug_assertions)]
-impl<T: Element> ::storage::Validate for Banded<T> {
+impl<T: Element> ::format::Validate for Banded<T> {
     fn validate(&self) {
         assert_eq!(self.values.len(), self.diagonals() * self.columns);
     }

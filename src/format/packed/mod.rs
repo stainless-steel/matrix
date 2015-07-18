@@ -1,7 +1,7 @@
-//! The packed storage.
+//! The packed format.
 //!
-//! The storage is suitable for symmetric, Hermitian, and triangular matrices.
-//! Data are stored in the [format][1] adopted by [LAPACK][2].
+//! The format is suitable for symmetric, Hermitian, and triangular matrices.
+//! The format is compatible with the [one][1] adopted by [LAPACK][2].
 //!
 //! [1]: http://www.netlib.org/lapack/lug/node123.html
 //! [2]: http://www.netlib.org/lapack
@@ -13,7 +13,7 @@ use {Element, Matrix, Size};
 pub struct Packed<T: Element> {
     /// The number of rows or columns.
     pub size: usize,
-    /// The storage variant.
+    /// The format variant.
     pub variant: Variant,
     /// The values of the lower triangle when `variant = Lower` or upper
     /// triangle when `variant = Upper` stored by columns.
@@ -48,7 +48,7 @@ pub enum Variant {
 }
 
 #[cfg(debug_assertions)]
-impl<T: Element> ::storage::Validate for Packed<T> {
+impl<T: Element> ::format::Validate for Packed<T> {
     fn validate(&self) {
         assert_eq!(self.values.len(), storage!(self.size));
     }
@@ -109,8 +109,8 @@ impl Variant {
 
 #[cfg(test)]
 mod tests {
+    use format::packed::Variant;
     use prelude::*;
-    use storage::packed::Variant;
 
     #[test]
     fn nonzeros() {
