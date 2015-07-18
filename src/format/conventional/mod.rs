@@ -18,6 +18,12 @@ pub struct Conventional<T: Element> {
     pub values: Vec<T>,
 }
 
+macro_rules! new(
+    ($rows:expr, $columns:expr, $values:expr) => (
+        Conventional { rows: $rows, columns: $columns, values: $values }
+    );
+);
+
 mod convert;
 mod operation;
 
@@ -27,21 +33,29 @@ impl<T: Element> Conventional<T> {
     /// Create a zero matrix.
     pub fn new<S: Size>(size: S) -> Self {
         let (rows, columns) = size.dimensions();
-        Conventional { rows: rows, columns: columns, values: vec![T::zero(); rows * columns] }
+        new!(rows, columns, vec![T::zero(); rows * columns])
     }
 
     /// Create a matrix from a slice.
     pub fn from_slice<S: Size>(size: S, values: &[T]) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), rows * columns);
-        Conventional { rows: rows, columns: columns, values: values.to_vec() }
+        new!(rows, columns, values.to_vec())
     }
 
     /// Create a matrix from a vector.
     pub fn from_vec<S: Size>(size: S, values: Vec<T>) -> Self {
         let (rows, columns) = size.dimensions();
         debug_assert_eq!(values.len(), rows * columns);
-        Conventional { rows: rows, columns: columns, values: values }
+        new!(rows, columns, values)
+    }
+
+    /// Create a matrix with uninitialized elements.
+    pub unsafe fn with_uninitialized<S: Size>(size: S) -> Self {
+        let (rows, columns) = size.dimensions();
+        let mut values = Vec::with_capacity(rows * columns);
+        values.set_len(rows * columns);
+        new!(rows, columns, values)
     }
 
     /// Zero out the content.
