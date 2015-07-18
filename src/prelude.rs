@@ -19,5 +19,4 @@ pub use format::packed::Packed;
 
 pub use operation::MultiplyInto;
 pub use operation::MultiplySelf;
-pub use operation::MultiplyThat;
 pub use operation::SymmetricEigen;
