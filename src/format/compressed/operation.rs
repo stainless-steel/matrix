@@ -59,23 +59,18 @@ fn multiply_matrix_left<T>(a: &Compressed<T>, b: &[T], c: &mut [T], m: usize, p:
     debug_assert_eq!(a.rows * a.columns, m * p);
     debug_assert_eq!(b.len(), p * n);
     debug_assert_eq!(c.len(), m * n);
-    let (mut k, mut l) = (0, 0);
-    for _ in 0..n {
-        multiply_vector_left(a, &b[k..(k + p)], &mut c[l..(l + m)], p);
-        k += p;
-        l += m;
-    }
-}
 
-#[inline(always)]
-fn multiply_vector_left<T>(a: &Compressed<T>, b: &[T], c: &mut [T], p: usize)
-    where T: Element + Number
-{
     let &Compressed { ref values, ref indices, ref offsets, .. } = a;
-    for j in 0..p {
-        for k in offsets[j]..offsets[j + 1] {
-            let current = c[indices[k]];
-            c[indices[k]] = current + values[k] * b[j];
+
+    for j in 0..n {
+        let bo = j * p;
+        let co = j * m;
+        for l in 0..p {
+            let bi = bo + l;
+            for k in offsets[l]..offsets[l + 1] {
+                let i = co + indices[k];
+                c[i] = c[i] + values[k] * b[bi];
+            }
         }
     }
 }
@@ -86,21 +81,16 @@ fn multiply_matrix_right<T>(a: &[T], b: &Compressed<T>, c: &mut [T], m: usize, p
     debug_assert_eq!(a.len(), m * p);
     debug_assert_eq!(b.rows * b.columns, p * n);
     debug_assert_eq!(c.len(), m * n);
-    let mut k = 0;
-    for j in 0..n {
-        multiply_vector_right(a, b, &mut c[k..(k + m)], m, j);
-        k += m;
-    }
-}
 
-#[inline(always)]
-fn multiply_vector_right<T>(a: &[T], b: &Compressed<T>, c: &mut [T], m: usize, j: usize)
-    where T: Element + Number
-{
     let &Compressed { ref values, ref indices, ref offsets, .. } = b;
-    for k in offsets[j]..offsets[j + 1] {
-        for i in 0..m {
-            c[i] = c[i] + values[k] * a[indices[k] * m + i];
+
+    for j in 0..n {
+        let co = j * m;
+        for k in offsets[j]..offsets[j + 1] {
+            let ao = indices[k] * m;
+            for i in 0..m {
+                c[co + i] = c[co + i] + values[k] * a[ao + i];
+            }
         }
     }
 }
