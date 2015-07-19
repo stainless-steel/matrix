@@ -26,3 +26,4 @@ optional = true
 
 [dev-dependencies]
 assert = "*"
+random = "*"
