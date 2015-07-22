@@ -55,15 +55,13 @@ fn multiply(alpha: f64, a: &[f64], b: &[f64], beta: f64, c: &mut [f64], m: usize
     debug_assert_eq!(b.len(), p * n);
     debug_assert_eq!(c.len(), m * n);
     if n == 1 {
-        blas::dgemv(blas::Trans::N, m, p, alpha, a, m, b, 1, beta, c, 1);
+        blas::dgemv(b'N', m, p, alpha, a, m, b, 1, beta, c, 1);
     } else {
-        blas::dgemm(blas::Trans::N, blas::Trans::N, m, n, p, alpha, a, m, b, p, beta, c, m);
+        blas::dgemm(b'N', b'N', m, n, p, alpha, a, m, b, p, beta, c, m);
     }
 }
 
 fn decompose(matrix: &mut [f64], vector: &mut [f64], m: usize) -> Result<()> {
-    use lapack::{Jobz, Uplo};
-
     debug_assert_eq!(matrix.len(), m * m);
     debug_assert_eq!(vector.len(), m);
 
@@ -80,13 +78,13 @@ fn decompose(matrix: &mut [f64], vector: &mut [f64], m: usize) -> Result<()> {
     let mut flag = 0;
 
     let mut work = [0.0];
-    lapack::dsyev(Jobz::V, Uplo::U, m, matrix, m, vector, &mut work, -1isize as usize, &mut flag);
+    lapack::dsyev(b'V', b'U', m, matrix, m, vector, &mut work, -1isize as usize, &mut flag);
     success!(flag);
 
     let size = work[0] as usize;
     let mut work = Vec::with_capacity(size);
     unsafe { work.set_len(size) };
-    lapack::dsyev(Jobz::V, Uplo::U, m, matrix, m, vector, &mut work, size, &mut flag);
+    lapack::dsyev(b'V', b'U', m, matrix, m, vector, &mut work, size, &mut flag);
     success!(flag);
 
     Ok(())
