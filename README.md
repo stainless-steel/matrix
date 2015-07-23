@@ -10,7 +10,7 @@ The package provides a matrix laboratory.
 2. Implement your idea.
 3. Open a pull request.
 
-[version-img]: https://img.shields.io/crates/v/matrix.svg
+[version-img]: http://stainless-steel.github.io/images/crates.svg
 [version-url]: https://crates.io/crates/matrix
 [status-img]: https://travis-ci.org/stainless-steel/matrix.svg?branch=master
 [status-url]: https://travis-ci.org/stainless-steel/matrix
