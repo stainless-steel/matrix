@@ -265,10 +265,12 @@ mod tests {
 
     #[test]
     fn get() {
-        let conventional = Conventional::from_vec((5, 3), vec![
-            0.0, 1.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 2.0, 3.0,
-            0.0, 0.0, 0.0, 0.0, 4.0,
+        let conventional = Conventional::from_vec((5, 3), matrix![
+            0.0, 0.0, 0.0;
+            1.0, 0.0, 0.0;
+            0.0, 0.0, 0.0;
+            0.0, 2.0, 0.0;
+            0.0, 3.0, 4.0;
         ]);
 
         let matrix = Compressed::from(&conventional);

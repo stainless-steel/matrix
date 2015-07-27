@@ -29,6 +29,55 @@ pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
     fn zero<S: Size>(S) -> Self;
 }
 
+/// A macro for composing matrices in the natural order.
+///
+/// The data of a generic matrix is conventionally stored in the column-major
+/// order; see `format::Conventional`. Consequently, the vector
+///
+/// ```norun
+/// vec![
+///     1.0, 2.0, 3.0, 4.0,
+///     5.0, 6.0, 7.0, 8.0,
+/// ]
+/// ```
+///
+/// corresponds to the following matrix with four rows and two columns:
+///
+/// ```math
+/// ┌            ┐
+/// │  1.0  5.0  │
+/// │  2.0  6.0  │
+/// │  3.0  7.0  │
+/// │  4.0  8.0  │
+/// └            ┘
+/// ```
+///
+/// The macro allows one to write such a matrix in the natural order:
+///
+/// ```norun
+/// matrix![
+///     1.0, 5.0,
+///     2.0, 6.0,
+///     3.0, 7.0,
+///     4.0, 8.0,
+/// ]
+/// ```
+#[macro_export]
+macro_rules! matrix {
+    ($([$tail:expr,];)* -> [$($head:expr,)*]) => (
+        vec![$($head,)* $($tail,)*]
+    );
+    ($([$middle:expr, $($tail:expr,)*];)* -> [$($head:expr,)*]) => (
+        matrix!($([$($tail,)*];)* -> [$($head,)* $($middle,)*])
+    );
+    ($($($item:expr),*;)*) => (
+        matrix!($([$($item,)*];)* -> [])
+    );
+    ($($($item:expr,)*;)*) => (
+        matrix!($([$($item,)*];)* -> [])
+    );
+}
+
 /// An error.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Error(String);
