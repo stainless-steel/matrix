@@ -56,10 +56,10 @@ pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
 ///
 /// ```norun
 /// matrix![
-///     1.0, 5.0,
-///     2.0, 6.0,
-///     3.0, 7.0,
-///     4.0, 8.0,
+///     1.0, 5.0;
+///     2.0, 6.0;
+///     3.0, 7.0;
+///     4.0, 8.0;
 /// ]
 /// ```
 #[macro_export]
