@@ -32,7 +32,7 @@ pub trait Matrix: Into<Conventional<<Self as Matrix>::Element>> + Size {
 /// A macro for composing matrices in the natural order.
 ///
 /// The data of a generic matrix is conventionally stored in the column-major
-/// order; see `format::Conventional`. Consequently, the vector
+/// order; see `format::conventional`. Consequently, the vector
 ///
 /// ```norun
 /// vec![
