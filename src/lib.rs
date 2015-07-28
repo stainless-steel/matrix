@@ -9,7 +9,7 @@
 //! use matrix::prelude::*;
 //!
 //! # fn main() {
-//! let mut sparse = Compressed::new((2, 4), compressed::Variant::Column);
+//! let mut sparse = Compressed::zero((2, 4));
 //! sparse.set((0, 0), 42.0);
 //! sparse.set((1, 3), 69.0);
 //!
