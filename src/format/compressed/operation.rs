@@ -115,53 +115,65 @@ mod tests {
 
     #[test]
     fn multiply_into_left() {
-        let matrix = Compressed::from(Conventional::from_vec((4, 3), vec![
-            1.0, 2.0, 3.0, 4.0,
-            5.0, 6.0, 6.0, 5.0,
-            4.0, 3.0, 2.0, 1.0,
+        let matrix = Compressed::from(Conventional::from_vec((4, 3), matrix![
+            1.0, 5.0, 4.0;
+            2.0, 6.0, 3.0;
+            3.0, 6.0, 2.0;
+            4.0, 5.0, 1.0;
         ]));
 
-        let right = Conventional::from_vec((3, 2), vec![
-            1.0, 2.0, 3.0,
-            4.0, 5.0, 6.0,
+        let right = Conventional::from_vec((3, 2), matrix![
+            1.0, 4.0;
+            2.0, 5.0;
+            3.0, 6.0;
         ]);
 
-        let mut result = Conventional::from_vec((4, 2), vec![
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
+        let mut result = Conventional::from_vec((4, 2), matrix![
+            1.0, 1.0;
+            1.0, 1.0;
+            1.0, 1.0;
+            1.0, 1.0;
         ]);
 
         matrix.multiply_into(&right, &mut result);
 
-        assert_eq!(&result.values, &vec![
-            24.0, 24.0, 22.0, 18.0,
-            54.0, 57.0, 55.0, 48.0,
+        assert_eq!(&result.values, &matrix![
+            24.0, 54.0;
+            24.0, 57.0;
+            22.0, 55.0;
+            18.0, 48.0;
         ]);
     }
 
     #[test]
     fn multiply_into_right() {
-        let matrix = Conventional::from_vec((4, 3), vec![
-            1.0, 2.0, 3.0, 4.0,
-            5.0, 6.0, 6.0, 5.0,
-            4.0, 3.0, 2.0, 1.0,
+        let matrix = Conventional::from_vec((4, 3), matrix![
+            1.0, 5.0, 4.0;
+            2.0, 6.0, 3.0;
+            3.0, 6.0, 2.0;
+            4.0, 5.0, 1.0;
         ]);
 
-        let right = Compressed::from(Conventional::from_vec((3, 2), vec![
-            1.0, 2.0, 3.0,
-            4.0, 5.0, 6.0,
+        let right = Compressed::from(Conventional::from_vec((3, 2), matrix![
+            1.0, 4.0;
+            2.0, 5.0;
+            3.0, 6.0;
         ]));
 
-        let mut result = Conventional::from_vec((4, 2), vec![
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
+        let mut result = Conventional::from_vec((4, 2), matrix![
+            1.0, 1.0;
+            1.0, 1.0;
+            1.0, 1.0;
+            1.0, 1.0;
         ]);
 
         matrix.multiply_into(&right, &mut result);
 
-        assert_eq!(&result.values, &vec![
-            24.0, 24.0, 22.0, 18.0,
-            54.0, 57.0, 55.0, 48.0,
+        assert_eq!(&result.values, &matrix![
+            24.0, 54.0;
+            24.0, 57.0;
+            22.0, 55.0;
+            18.0, 48.0;
         ]);
     }
 
