@@ -148,7 +148,7 @@ mod tests {
         ]);
         let mut vector = Conventional::from_vec((1, 5), vec![0.0; 5]);
 
-        assert::success(SymmetricEigen::decompose(&mut (&mut *matrix, &mut *vector)));
+        assert!(SymmetricEigen::decompose(&mut (&mut *matrix, &mut *vector)).is_ok());
 
         assert::close(&*matrix, &*vec![
              0.200767588469279, -0.613521879994358,  0.529492579537623,  0.161735212201923,
