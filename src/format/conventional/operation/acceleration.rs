@@ -78,13 +78,13 @@ fn decompose(matrix: &mut [f64], vector: &mut [f64], m: usize) -> Result<()> {
     let mut flag = 0;
 
     let mut work = [0.0];
-    lapack::dsyev(b'V', b'U', m, matrix, m, vector, &mut work, -1isize as usize, &mut flag);
+    lapack::dsyev(b'V', b'U', m, matrix, m, vector, &mut work, -1, &mut flag);
     success!(flag);
 
     let size = work[0] as usize;
     let mut work = Vec::with_capacity(size);
     unsafe { work.set_len(size) };
-    lapack::dsyev(b'V', b'U', m, matrix, m, vector, &mut work, size, &mut flag);
+    lapack::dsyev(b'V', b'U', m, matrix, m, vector, &mut work, size as isize, &mut flag);
     success!(flag);
 
     Ok(())

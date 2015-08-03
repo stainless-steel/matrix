@@ -1,6 +1,6 @@
 [package]
 name = "matrix"
-version = "0.17.11"
+version = "0.17.12"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 license = "MIT"
 repository = "https://github.com/stainless-steel/matrix"
@@ -21,7 +21,7 @@ version = "0.7"
 optional = true
 
 [dependencies.lapack]
-version = "0.4"
+version = "0.5"
 optional = true
 
 [dev-dependencies]
