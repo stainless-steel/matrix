@@ -21,5 +21,6 @@ pub use operation::Multiply;
 pub use operation::MultiplyInto;
 pub use operation::MultiplySelf;
 pub use operation::ScaleSelf;
-pub use operation::SymmetricEigen;
 pub use operation::Transpose;
+
+pub use decomposition::SymmetricEigen;

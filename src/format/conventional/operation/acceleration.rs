@@ -2,8 +2,9 @@ use blas;
 use lapack;
 
 use Result;
+use decomposition::SymmetricEigen;
 use format::Conventional;
-use operation::{Multiply, MultiplyInto, ScaleSelf, SymmetricEigen};
+use operation::{Multiply, MultiplyInto, ScaleSelf};
 
 impl Multiply<[f64], Conventional<f64>> for Conventional<f64> {
     #[inline]

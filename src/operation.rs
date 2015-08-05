@@ -1,6 +1,4 @@
-//! Basic operations.
-
-use Result;
+//! Operations.
 
 /// A multiplication.
 pub trait Multiply<Right: ?Sized, Output> {
@@ -24,12 +22,6 @@ pub trait MultiplySelf<Right: ?Sized> {
 pub trait ScaleSelf<T> {
     /// Perform the scaling.
     fn scale_self(&mut self, T);
-}
-
-/// The eigendecomposition of a symmetric matrix.
-pub trait SymmetricEigen {
-    /// Perform the decomposition.
-    fn decompose(&mut Self) -> Result<()>;
 }
 
 /// The transpose.

@@ -135,6 +135,7 @@ pub use number::Number;
 pub use position::Position;
 pub use size::Size;
 
+pub mod decomposition;
 pub mod format;
 pub mod operation;
 pub mod prelude;
