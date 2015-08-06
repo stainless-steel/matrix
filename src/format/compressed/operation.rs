@@ -31,7 +31,6 @@ impl<'l, T> MultiplyInto<Compressed<T>, [T]> for Conventional<T>
 }
 
 impl<T> MultiplySelf<Diagonal<T>> for Compressed<T> where T: Element + Number {
-    #[inline]
     fn multiply_self(&mut self, right: &Diagonal<T>) {
         let (m, n) = (self.rows, right.columns);
         debug_assert_eq!(self.columns, right.rows);
