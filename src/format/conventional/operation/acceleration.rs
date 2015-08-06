@@ -24,6 +24,13 @@ impl MultiplyInto<Conventional<f64>, [f64]> for Conventional<f64> {
     }
 }
 
+impl MultiplyInto<Vec<f64>, [f64]> for Conventional<f64> {
+    #[inline(always)]
+    fn multiply_into(&self, right: &Vec<f64>, result: &mut [f64]) {
+        MultiplyInto::multiply_into(self, &*right as &[f64], result)
+    }
+}
+
 impl MultiplyInto<[f64], [f64]> for Conventional<f64> {
     #[inline]
     fn multiply_into(&self, right: &[f64], result: &mut [f64]) {
