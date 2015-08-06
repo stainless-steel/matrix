@@ -62,8 +62,32 @@ impl<T: Element> Conventional<T> {
     ///
     /// The function should only be used when it is safe to overwrite `T` with
     /// zero bytes.
+    #[inline]
     pub unsafe fn erase(&mut self) {
         ptr::write_bytes(self.values.as_mut_ptr(), 0, self.values.len())
+    }
+
+    /// Resize.
+    pub fn resize<S: Size>(&mut self, size: S) {
+        let (rows, columns) = size.dimensions();
+        if self.rows == rows {
+            if self.columns > columns {
+                self.values.truncate(rows * columns);
+            } else {
+                self.values.extend(vec![T::zero(); rows * (columns - self.columns)]);
+            }
+            self.columns = columns;
+        } else {
+            let mut matrix = Conventional::zero(size);
+            let rows = min!(self.rows, rows);
+            let columns = min!(self.columns, columns);
+            for j in 0..columns {
+                for i in 0..rows {
+                    matrix[(i, j)] = self[(i, j)];
+                }
+            }
+            *self = matrix;
+        }
     }
 }
 
@@ -83,7 +107,7 @@ impl<T: Element> Matrix for Conventional<T> {
 impl<T: Element, P: Position> Index<P> for Conventional<T> {
     type Output = T;
 
-    #[inline]
+    #[inline(always)]
     fn index(&self, index: P) -> &Self::Output {
         let (i, j) = index.coordinates();
         &self.values[j * self.rows + i]
@@ -91,7 +115,7 @@ impl<T: Element, P: Position> Index<P> for Conventional<T> {
 }
 
 impl<T: Element, P: Position> IndexMut<P> for Conventional<T> {
-    #[inline]
+    #[inline(always)]
     fn index_mut(&mut self, index: P) -> &mut Self::Output {
         let (i, j) = index.coordinates();
         &mut self.values[j * self.rows + i]
@@ -114,15 +138,66 @@ impl<T: Element> DerefMut for Conventional<T> {
     }
 }
 
-#[cfg(tests)]
+#[cfg(test)]
 mod tests {
     use prelude::*;
 
     #[test]
     fn erase() {
         let mut matrix = Conventional::from_vec(10, vec![42.0; 10 * 10]);
-        matrix.erase();
+        unsafe { matrix.erase() };
         assert!(matrix.iter().all(|&value| value == 0.0));
+    }
+
+    #[test]
+    fn resize_fewer_columns() {
+        let mut matrix = Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]);
+        matrix.resize((2, 2));
+        assert_eq!(matrix, Conventional::from_vec((2, 2), matrix![
+            1.0, 2.0;
+            4.0, 5.0;
+        ]));
+    }
+
+    #[test]
+    fn resize_fewer_rows() {
+        let mut matrix = Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]);
+        matrix.resize((1, 3));
+        assert_eq!(matrix, Conventional::from_vec((1, 3), matrix![
+            1.0, 2.0, 3.0;
+        ]));
+    }
+
+    #[test]
+    fn resize_more_columns() {
+        let mut matrix = Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]);
+        matrix.resize((2, 4));
+        assert_eq!(matrix, Conventional::from_vec((2, 4), matrix![
+            1.0, 2.0, 3.0, 0.0;
+            4.0, 5.0, 6.0, 0.0;
+        ]));
+    }
+
+    #[test]
+    fn resize_more_rows() {
+        let mut matrix = Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]);
+        matrix.resize((3, 3));
+        assert_eq!(matrix, Conventional::from_vec((3, 3), matrix![
+            1.0, 2.0, 3.0;
+            4.0, 5.0, 6.0;
+            0.0, 0.0, 0.0;
+        ]));
+    }
+
+    #[test]
+    fn resize_more_columns_rows() {
+        let mut matrix = Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]);
+        matrix.resize((3, 4));
+        assert_eq!(matrix, Conventional::from_vec((3, 4), matrix![
+            1.0, 2.0, 3.0, 0.0;
+            4.0, 5.0, 6.0, 0.0;
+            0.0, 0.0, 0.0, 0.0;
+        ]));
     }
 
     #[test]
