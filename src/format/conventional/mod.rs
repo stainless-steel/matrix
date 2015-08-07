@@ -54,9 +54,7 @@ impl<T: Element> Conventional<T> {
     /// Create a matrix with uninitialized elements.
     pub unsafe fn with_uninitialized<S: Size>(size: S) -> Self {
         let (rows, columns) = size.dimensions();
-        let mut values = Vec::with_capacity(rows * columns);
-        values.set_len(rows * columns);
-        new!(rows, columns, values)
+        new!(rows, columns, buffer!(rows * columns))
     }
 
     /// Zero out the content.

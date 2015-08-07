@@ -5,19 +5,20 @@ trait Validate {
     fn validate(&self);
 }
 
-#[cfg(debug_assertions)]
-macro_rules! validate(
-    ($matrix:expr) => ({
-        use ::format::Validate;
-        let matrix = $matrix;
-        matrix.validate();
-        matrix
+macro_rules! buffer(
+    ($capacity:expr) => ({
+        let capacity = $capacity;
+        let mut buffer = Vec::with_capacity(capacity);
+        buffer.set_len(capacity);
+        buffer
     });
 );
 
-#[cfg(not(debug_assertions))]
-macro_rules! validate(
-    ($matrix:expr) => ($matrix);
+macro_rules! min(
+    ($left:expr, $right:expr) => ({
+        let (left, right) = ($left, $right);
+        if left > right { right } else { left }
+    });
 );
 
 macro_rules! size(
@@ -39,11 +40,19 @@ macro_rules! size(
     );
 );
 
-macro_rules! min(
-    ($left:expr, $right:expr) => ({
-        let (left, right) = ($left, $right);
-        if left > right { right } else { left }
+#[cfg(debug_assertions)]
+macro_rules! validate(
+    ($matrix:expr) => ({
+        use ::format::Validate;
+        let matrix = $matrix;
+        matrix.validate();
+        matrix
     });
+);
+
+#[cfg(not(debug_assertions))]
+macro_rules! validate(
+    ($matrix:expr) => ($matrix);
 );
 
 pub mod banded;

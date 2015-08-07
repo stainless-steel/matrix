@@ -23,4 +23,5 @@ pub use operation::MultiplySelf;
 pub use operation::ScaleSelf;
 pub use operation::Transpose;
 
+pub use decomposition::SingularValue;
 pub use decomposition::SymmetricEigen;

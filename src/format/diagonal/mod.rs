@@ -55,6 +55,12 @@ impl<T: Element> Diagonal<T> {
         debug_assert_eq!(values.len(), min!(rows, columns));
         new!(rows, columns, values)
     }
+
+    /// Create a matrix with uninitialized elements.
+    pub unsafe fn with_uninitialized<S: Size>(size: S) -> Self {
+        let (rows, columns) = size.dimensions();
+        new!(rows, columns, buffer!(min!(rows, columns)))
+    }
 }
 
 impl<T: Element> Matrix for Diagonal<T> {
