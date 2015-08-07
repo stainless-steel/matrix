@@ -2,17 +2,19 @@ use lapack;
 
 use Result;
 use decomposition::SymmetricEigen;
+use format::{Conventional, Diagonal};
 
-impl<'l> SymmetricEigen for (&'l mut [f64], &'l mut [f64]) {
-    #[inline]
-    fn decompose(pair: &mut Self) -> Result<()> {
-        let m = pair.1.len();
-        try!(decompose(pair.0, pair.1, m));
-        Ok(())
+impl SymmetricEigen<f64> for Conventional<f64> {
+    fn decompose(&self) -> Result<(Conventional<f64>, Diagonal<f64>)> {
+        debug_assert_eq!(self.rows, self.columns);
+        let mut vectors = self.clone();
+        let mut values = Diagonal::new(self.rows);
+        try!(symmetric_eigen(&mut vectors, &mut values, self.rows));
+        Ok((vectors, values))
     }
 }
 
-fn decompose(matrix: &mut [f64], vector: &mut [f64], m: usize) -> Result<()> {
+fn symmetric_eigen(matrix: &mut [f64], vector: &mut [f64], m: usize) -> Result<()> {
     debug_assert_eq!(matrix.len(), m * m);
     debug_assert_eq!(vector.len(), m);
 
@@ -45,9 +47,10 @@ fn decompose(matrix: &mut [f64], vector: &mut [f64], m: usize) -> Result<()> {
 mod tests {
     use assert;
     use prelude::*;
+
     #[test]
     fn symmetric_eigen() {
-        let mut matrix = Conventional::from_vec(5, vec![
+        let matrix = Conventional::from_vec(5, vec![
             0.814723686393179, 0.097540404999410, 0.157613081677548, 0.141886338627215,
             0.655740699156587, 0.097540404999410, 0.278498218867048, 0.970592781760616,
             0.421761282626275, 0.035711678574190, 0.157613081677548, 0.970592781760616,
@@ -56,11 +59,10 @@ mod tests {
             0.655740699156587, 0.035711678574190, 0.849129305868777, 0.933993247757551,
             0.678735154857773,
         ]);
-        let mut vector = Conventional::from_vec((1, 5), vec![0.0; 5]);
 
-        assert!(SymmetricEigen::decompose(&mut (&mut *matrix, &mut *vector)).is_ok());
+        let (vectors, values) = SymmetricEigen::decompose(&matrix).unwrap();
 
-        assert::close(&*matrix, &*vec![
+        assert::close(&*vectors, &*vec![
              0.200767588469279, -0.613521879994358,  0.529492579537623,  0.161735212201923,
             -0.526082320114459, -0.241005628008408, -0.272281143378657,  0.443280672960843,
             -0.675165120368165,  0.464148221418878,  0.509762909240926,  0.555609456752178,
@@ -69,7 +71,7 @@ mod tests {
              0.233456648876442,  0.302202482503382,  0.589211894835079,  0.517708631263932,
              0.488854547655902,
         ], 1e-14);
-        assert::close(&*vector, &*vec![
+        assert::close(&*values, &*vec![
             -0.671640666831794, -0.230366398529950, 0.397221322493687, 0.999582068576074,
              3.026535012212483,
         ], 1e-14);

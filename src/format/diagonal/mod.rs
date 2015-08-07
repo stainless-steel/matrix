@@ -36,6 +36,12 @@ impl<T: Element> ::format::Validate for Diagonal<T> {
 size!(Diagonal);
 
 impl<T: Element> Diagonal<T> {
+    /// Create a zero matrix.
+    pub fn new<S: Size>(size: S) -> Self {
+        let (rows, columns) = size.dimensions();
+        new!(rows, columns, vec![T::zero(); min!(rows, columns)])
+    }
+
     /// Create a matrix from a slice.
     pub fn from_slice<S: Size>(size: S, values: &[T]) -> Self {
         let (rows, columns) = size.dimensions();
@@ -58,9 +64,9 @@ impl<T: Element> Matrix for Diagonal<T> {
         self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
     }
 
+    #[inline]
     fn zero<S: Size>(size: S) -> Self {
-        let (rows, columns) = size.dimensions();
-        new!(rows, columns, vec![T::zero(); min!(rows, columns)])
+        Diagonal::new(size)
     }
 }
 
