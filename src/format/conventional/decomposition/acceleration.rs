@@ -69,12 +69,16 @@ fn symmetric_eigen(matrix: &mut [f64], values: &mut [f64], m: usize) -> Result<(
     let mut info = 0;
 
     let mut work = [0.0];
-    lapack::dsyev(b'V', b'U', m, matrix, m, values, &mut work, -1, &mut info);
+    let mut iwork = [0];
+    lapack::dsyevd(b'V', b'U', m, matrix, m, values, &mut work, -1, &mut iwork, -1, &mut info);
     success!(info);
 
     let lwork = work[0] as usize;
+    let liwork = iwork[0] as usize;
     let mut work = unsafe { buffer!(lwork) };
-    lapack::dsyev(b'V', b'U', m, matrix, m, values, &mut work, lwork as isize, &mut info);
+    let mut iwork = unsafe { buffer!(liwork) };
+    lapack::dsyevd(b'V', b'U', m, matrix, m, values, &mut work, lwork as isize, &mut iwork,
+                   liwork as isize, &mut info);
     success!(info);
 
     Ok(())
