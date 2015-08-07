@@ -29,7 +29,7 @@ assert_eq!(&*dense, &*matrix![
 2. Implement your idea.
 3. Open a pull request.
 
-[version-img]: http://stainless-steel.github.io/images/crates.svg
+[version-img]: https://stainless-steel.github.io/images/crates.svg
 [version-url]: https://crates.io/crates/matrix
 [status-img]: https://travis-ci.org/stainless-steel/matrix.svg?branch=master
 [status-url]: https://travis-ci.org/stainless-steel/matrix

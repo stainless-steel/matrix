@@ -1,5 +1,21 @@
 //! Matrix laboratory.
 //!
+//! ## Formats
+//!
+//! The following storage formats are supported:
+//!
+//! * [Banded][banded], suitable for matrices with a small number of
+//!   superdiagonals and/or subdiagonals;
+//!
+//! * [Compressed][compressed], suitable for generic sparse matrices;
+//!
+//! * [Conventional][conventional], suitable for dense matrices;
+//!
+//! * [Diagonal][diagonal], suitable for diagonal matrices; and
+//!
+//! * [Packed][packed], suitable for symmetric, Hermitian, and triangular
+//!   matrices.
+//!
 //! ## Example
 //!
 //! ```
@@ -19,6 +35,13 @@
 //!      0.0, 0.0, 0.0, 69.0;
 //! ]);
 //! # }
+//! ```
+//!
+//! [banded]: https://stainless-steel.github.io/matrix/matrix/format/banded
+//! [compressed]: https://stainless-steel.github.io/matrix/matrix/format/compressed
+//! [conventional]: https://stainless-steel.github.io/matrix/matrix/format/conventional
+//! [diagonal]: https://stainless-steel.github.io/matrix/matrix/format/diagonal
+//! [packed]: https://stainless-steel.github.io/matrix/matrix/format/packed
 
 #[cfg(test)]
 extern crate assert;
