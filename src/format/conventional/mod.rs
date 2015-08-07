@@ -25,6 +25,7 @@ macro_rules! new(
 );
 
 mod convert;
+mod decomposition;
 mod operation;
 
 size!(Conventional);
