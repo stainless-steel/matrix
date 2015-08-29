@@ -49,11 +49,20 @@ extern crate assert;
 #[cfg(feature = "acceleration")]
 extern crate blas;
 
-#[cfg(feature = "complex")]
-extern crate complex;
-
 #[cfg(feature = "acceleration")]
 extern crate lapack;
+
+extern crate num;
+
+pub use num::Num as Number;
+
+/// A complex number with 32-bit parts.
+#[allow(non_camel_case_types)]
+pub type c32 = num::Complex<f32>;
+
+/// A complex number with 64-bit parts.
+#[allow(non_camel_case_types)]
+pub type c64 = num::Complex<f64>;
 
 use std::convert::Into;
 use std::{error, fmt};
@@ -149,12 +158,10 @@ impl error::Error for Error {
 }
 
 mod element;
-mod number;
 mod position;
 mod size;
 
 pub use element::Element;
-pub use number::Number;
 pub use position::Position;
 pub use size::Size;
 

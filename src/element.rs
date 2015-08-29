@@ -1,5 +1,4 @@
-#[cfg(feature = "complex")]
-use complex::{c32, c64};
+use {c32, c64};
 
 /// An element.
 pub trait Element: Copy + PartialEq {
@@ -45,8 +44,5 @@ implement!(f64, 0.0);
 implement!(isize);
 implement!(usize);
 
-#[cfg(feature = "complex")]
-implement!(c32, c32(0.0, 0.0));
-
-#[cfg(feature = "complex")]
-implement!(c64, c64(0.0, 0.0));
+implement!(c32, c32::new(0.0, 0.0));
+implement!(c64, c64::new(0.0, 0.0));
