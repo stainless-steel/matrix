@@ -7,7 +7,7 @@ trait Validate {
 
 macro_rules! buffer(
     ($capacity:expr) => ({
-        let capacity = $capacity;
+        let capacity = $capacity as usize;
         let mut buffer = Vec::with_capacity(capacity);
         buffer.set_len(capacity);
         buffer

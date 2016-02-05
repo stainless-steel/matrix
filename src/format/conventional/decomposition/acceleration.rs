@@ -43,20 +43,22 @@ fn singular_value(matrix: &[f64], left: &mut [f64], values: &mut [f64], right: &
     debug_assert_eq!(values.len(), min!(m, n));
     debug_assert_eq!(right.len(), n * n);
 
+    let (m, n) = (m as i32, n as i32);
+
     let mut matrix = matrix.to_vec();
 
     let mut info = 0;
     let mut iwork = unsafe { buffer!(8 * min!(m, n)) };
 
     let mut work = [0.0];
-    backend::dgesdd(b'A', m as i32, n as i32, &mut matrix, m as i32, values, left, m as i32, right,
-                    n as i32, &mut work, -1, &mut iwork, &mut info);
+    backend::dgesdd(b'A', m, n, &mut matrix, m, values, left, m, right, n, &mut work, -1,
+                    &mut iwork, &mut info);
     success!(info);
 
-    let lwork = work[0] as usize;
+    let lwork = work[0] as i32;
     let mut work = unsafe { buffer!(lwork) };
-    backend::dgesdd(b'A', m as i32, n as i32, &mut matrix, m as i32, values, left, m as i32, right,
-                    n as i32, &mut work, lwork as i32, &mut iwork, &mut info);
+    backend::dgesdd(b'A', m, n, &mut matrix, m, values, left, m, right, n, &mut work, lwork,
+                    &mut iwork, &mut info);
     success!(info);
 
     Ok(())
@@ -66,20 +68,21 @@ fn symmetric_eigen(matrix: &mut [f64], values: &mut [f64], m: usize) -> Result<(
     debug_assert_eq!(matrix.len(), m * m);
     debug_assert_eq!(values.len(), m);
 
+    let m = m as i32;
+
     let mut info = 0;
 
     let mut work = [0.0];
     let mut iwork = [0];
-    backend::dsyevd(b'V', b'U', m as i32, matrix, m as i32, values, &mut work, -1, &mut iwork, -1,
-                    &mut info);
+    backend::dsyevd(b'V', b'U', m, matrix, m, values, &mut work, -1, &mut iwork, -1, &mut info);
     success!(info);
 
-    let lwork = work[0] as usize;
-    let liwork = iwork[0] as usize;
+    let lwork = work[0] as i32;
+    let liwork = iwork[0];
     let mut work = unsafe { buffer!(lwork) };
     let mut iwork = unsafe { buffer!(liwork) };
-    backend::dsyevd(b'V', b'U', m as i32, matrix, m as i32, values, &mut work, lwork as i32,
-                   &mut iwork, liwork as i32, &mut info);
+    backend::dsyevd(b'V', b'U', m, matrix, m, values, &mut work, lwork, &mut iwork, liwork,
+                    &mut info);
     success!(info);
 
     Ok(())

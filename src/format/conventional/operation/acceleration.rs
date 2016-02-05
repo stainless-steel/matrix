@@ -50,11 +50,13 @@ fn multiply(alpha: f64, a: &[f64], b: &[f64], beta: f64, c: &mut [f64], m: usize
     debug_assert_eq!(a.len(), m * p);
     debug_assert_eq!(b.len(), p * n);
     debug_assert_eq!(c.len(), m * n);
+
+    let (m, p, n) = (m as i32, p as i32, n as i32);
+
     if n == 1 {
-        backend::dgemv(b'N', m as i32, p as i32, alpha, a, m as i32, b, 1, beta, c, 1);
+        backend::dgemv(b'N', m, p, alpha, a, m, b, 1, beta, c, 1);
     } else {
-        backend::dgemm(b'N', b'N', m as i32, n as i32, p as i32, alpha, a, m as i32, b, p as i32,
-                       beta, c, m as i32);
+        backend::dgemm(b'N', b'N', m, n, p, alpha, a, m, b, p, beta, c, m);
     }
 }
 
