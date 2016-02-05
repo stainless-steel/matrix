@@ -1,12 +1,12 @@
 [package]
 name = "matrix"
 version = "0.20.0"
+license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
-license = "MIT"
-repository = "https://github.com/stainless-steel/matrix"
-homepage = "https://github.com/stainless-steel/matrix"
-documentation = "https://stainless-steel.github.io/matrix"
 description = "The package provides a matrix laboratory."
+documentation = "https://stainless-steel.github.io/matrix"
+homepage = "https://github.com/stainless-steel/matrix"
+repository = "https://github.com/stainless-steel/matrix"
 
 [features]
 default = ["acceleration"]
