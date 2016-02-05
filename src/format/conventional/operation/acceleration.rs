@@ -1,4 +1,4 @@
-use blas;
+use blas::fortran as backend;
 
 use format::Conventional;
 use operation::{Multiply, MultiplyInto, ScaleSelf};
@@ -40,7 +40,7 @@ impl MultiplyInto<[f64], [f64]> for Conventional<f64> {
 impl ScaleSelf<f64> for [f64] {
     #[inline]
     fn scale_self(&mut self, alpha: f64) {
-        blas::dscal(self.len(), alpha, self, 1);
+        backend::dscal(self.len() as i32, alpha, self, 1);
     }
 }
 
@@ -51,9 +51,10 @@ fn multiply(alpha: f64, a: &[f64], b: &[f64], beta: f64, c: &mut [f64], m: usize
     debug_assert_eq!(b.len(), p * n);
     debug_assert_eq!(c.len(), m * n);
     if n == 1 {
-        blas::dgemv(b'N', m, p, alpha, a, m, b, 1, beta, c, 1);
+        backend::dgemv(b'N', m as i32, p as i32, alpha, a, m as i32, b, 1, beta, c, 1);
     } else {
-        blas::dgemm(b'N', b'N', m, n, p, alpha, a, m, b, p, beta, c, m);
+        backend::dgemm(b'N', b'N', m as i32, n as i32, p as i32, alpha, a, m as i32, b, p as i32,
+                       beta, c, m as i32);
     }
 }
 

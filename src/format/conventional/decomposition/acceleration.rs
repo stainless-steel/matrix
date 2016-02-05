@@ -1,4 +1,4 @@
-use lapack;
+use lapack::fortran as backend;
 
 use Result;
 use decomposition::{SingularValue, SymmetricEigen};
@@ -49,14 +49,14 @@ fn singular_value(matrix: &[f64], left: &mut [f64], values: &mut [f64], right: &
     let mut iwork = unsafe { buffer!(8 * min!(m, n)) };
 
     let mut work = [0.0];
-    lapack::dgesdd(b'A', m, n, &mut matrix, m, values, left, m, right, n, &mut work, -1,
-                   &mut iwork, &mut info);
+    backend::dgesdd(b'A', m as i32, n as i32, &mut matrix, m as i32, values, left, m as i32, right,
+                    n as i32, &mut work, -1, &mut iwork, &mut info);
     success!(info);
 
     let lwork = work[0] as usize;
     let mut work = unsafe { buffer!(lwork) };
-    lapack::dgesdd(b'A', m, n, &mut matrix, m, values, left, m, right, n, &mut work,
-                   lwork as isize, &mut iwork, &mut info);
+    backend::dgesdd(b'A', m as i32, n as i32, &mut matrix, m as i32, values, left, m as i32, right,
+                    n as i32, &mut work, lwork as i32, &mut iwork, &mut info);
     success!(info);
 
     Ok(())
@@ -70,15 +70,16 @@ fn symmetric_eigen(matrix: &mut [f64], values: &mut [f64], m: usize) -> Result<(
 
     let mut work = [0.0];
     let mut iwork = [0];
-    lapack::dsyevd(b'V', b'U', m, matrix, m, values, &mut work, -1, &mut iwork, -1, &mut info);
+    backend::dsyevd(b'V', b'U', m as i32, matrix, m as i32, values, &mut work, -1, &mut iwork, -1,
+                    &mut info);
     success!(info);
 
     let lwork = work[0] as usize;
     let liwork = iwork[0] as usize;
     let mut work = unsafe { buffer!(lwork) };
     let mut iwork = unsafe { buffer!(liwork) };
-    lapack::dsyevd(b'V', b'U', m, matrix, m, values, &mut work, lwork as isize, &mut iwork,
-                   liwork as isize, &mut info);
+    backend::dsyevd(b'V', b'U', m as i32, matrix, m as i32, values, &mut work, lwork as i32,
+                   &mut iwork, liwork as i32, &mut info);
     success!(info);
 
     Ok(())

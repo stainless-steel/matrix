@@ -13,11 +13,11 @@ default = ["acceleration"]
 acceleration = ["blas", "lapack"]
 
 [dependencies.blas]
-version = "0.9"
+version = "0.14"
 optional = true
 
 [dependencies.lapack]
-version = "0.8"
+version = "0.9"
 optional = true
 
 [dependencies.num]
@@ -26,5 +26,5 @@ default-features = false
 features = ["complex"]
 
 [dev-dependencies]
-assert = "*"
-random = "*"
+assert = "0.6"
+random = "0.9"
