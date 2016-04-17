@@ -52,17 +52,18 @@ extern crate blas;
 #[cfg(feature = "acceleration")]
 extern crate lapack;
 
-extern crate num;
+extern crate num_complex;
+extern crate num_traits;
 
-pub use num::Num as Number;
+pub use num_traits::Num as Number;
 
 /// A complex number with 32-bit parts.
 #[allow(non_camel_case_types)]
-pub type c32 = num::Complex<f32>;
+pub type c32 = num_complex::Complex<f32>;
 
 /// A complex number with 64-bit parts.
 #[allow(non_camel_case_types)]
-pub type c64 = num::Complex<f64>;
+pub type c64 = num_complex::Complex<f64>;
 
 use std::convert::Into;
 use std::{error, fmt};
