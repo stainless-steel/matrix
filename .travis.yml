@@ -1,17 +1,17 @@
 language: rust
 sudo: false
 
+after_success:
+  - curl https://stainless-steel.github.io/travis/documentation.sh | bash
+
+env:
+  global:
+    - secure: EHYgVU/AQEnozaC/DiUoVZSrkjZoifBLDYS+bRIxPW7N/fSzNpwsgFSRj+Dt3Ushh8k5WqRRcmGPxnr8hX9N/JaAvBTwD1I4cQ/A/frX/vPkXMpxIUwCMpRC3cvqfgLWsEGReVWC6B5KDIHkHGFq7aNMFmGy2WtdETMgKcLHTzg=
+
+notifications:
+  email: false
+
 addons:
   apt:
     packages:
       - gfortran
-
-after_success:
-  - curl https://stainless-steel.github.io/travis/after_success.sh | bash
-
-env:
-  global:
-    secure: EHYgVU/AQEnozaC/DiUoVZSrkjZoifBLDYS+bRIxPW7N/fSzNpwsgFSRj+Dt3Ushh8k5WqRRcmGPxnr8hX9N/JaAvBTwD1I4cQ/A/frX/vPkXMpxIUwCMpRC3cvqfgLWsEGReVWC6B5KDIHkHGFq7aNMFmGy2WtdETMgKcLHTzg=
-
-notifications:
-  email: false
