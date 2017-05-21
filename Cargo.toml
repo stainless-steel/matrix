@@ -7,6 +7,8 @@ description = "The package provides a matrix laboratory."
 documentation = "https://docs.rs/matrix"
 homepage = "https://github.com/stainless-steel/matrix"
 repository = "https://github.com/stainless-steel/matrix"
+categories = ["science"]
+keywords = ["linear-algebra"]
 
 [features]
 default = ["acceleration"]
