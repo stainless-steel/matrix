@@ -2,7 +2,7 @@
 
 The package provides a matrix laboratory.
 
-## [Documentation][doc]
+## [Documentation][documentation]
 
 ## Example
 
@@ -29,8 +29,8 @@ Your contribution is highly appreciated. Do not hesitate to open an issue or a
 pull request. Note that any contribution submitted for inclusion in the project
 will be licensed according to the terms given in [LICENSE.md](LICENSE.md).
 
-[version-img]: https://img.shields.io/crates/v/matrix.svg
-[version-url]: https://crates.io/crates/matrix
+[documentation]: https://docs.rs/matrix
 [status-img]: https://travis-ci.org/stainless-steel/matrix.svg?branch=master
 [status-url]: https://travis-ci.org/stainless-steel/matrix
-[doc]: https://stainless-steel.github.io/matrix
+[version-img]: https://img.shields.io/crates/v/matrix.svg
+[version-url]: https://crates.io/crates/matrix

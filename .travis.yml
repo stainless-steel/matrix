@@ -7,9 +7,6 @@ rust:
   - beta
   - nightly
 
-after_success:
-  - curl https://stainless-steel.github.io/travis/documentation.sh | bash
-
 env:
   global:
     - secure: EHYgVU/AQEnozaC/DiUoVZSrkjZoifBLDYS+bRIxPW7N/fSzNpwsgFSRj+Dt3Ushh8k5WqRRcmGPxnr8hX9N/JaAvBTwD1I4cQ/A/frX/vPkXMpxIUwCMpRC3cvqfgLWsEGReVWC6B5KDIHkHGFq7aNMFmGy2WtdETMgKcLHTzg=
