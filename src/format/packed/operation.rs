@@ -1,6 +1,6 @@
 use Element;
 use format::Packed;
-use format::packed::Variant;
+use format::packed::{Variant,triangular_elems};
 use operation::Transpose;
 
 impl<T: Element> Transpose for Packed<T> {
@@ -12,9 +12,9 @@ impl<T: Element> Transpose for Packed<T> {
         for j in 0..size {
             for i in j..size {
                 if lower {
-                    matrix.values[arithmetic!(i, 1, i) + j] = self.values[k];
+                    matrix.values[triangular_elems(i) + j] = self.values[k];
                 } else {
-                    matrix.values[k] = self.values[arithmetic!(i, 1, i) + j];
+                    matrix.values[k] = self.values[triangular_elems(i) + j];
                 }
                 k += 1;
             }
