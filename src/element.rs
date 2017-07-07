@@ -46,3 +46,15 @@ implement!(usize);
 
 implement!(c32, c32::new(0.0, 0.0));
 implement!(c64, c64::new(0.0, 0.0));
+
+impl<T> Element for Option<T> where T: Copy + PartialEq {
+    #[inline(always)]
+    fn is_zero(&self) -> bool {
+        self.is_none()
+    }
+
+    #[inline(always)]
+    fn zero() -> Self {
+        None
+    }
+}
