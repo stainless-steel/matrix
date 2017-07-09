@@ -51,14 +51,18 @@ fn singular_value(matrix: &[f64], left: &mut [f64], values: &mut [f64], right: &
     let mut iwork = unsafe { buffer!(8 * min!(m, n)) };
 
     let mut work = [0.0];
-    backend::dgesdd(b'A', m, n, &mut matrix, m, values, left, m, right, n, &mut work, -1,
-                    &mut iwork, &mut info);
+    unsafe {
+        backend::dgesdd(b'A', m, n, &mut matrix, m, values, left, m, right, n, &mut work, -1,
+                        &mut iwork, &mut info);
+    }
     success!(info);
 
     let lwork = work[0] as i32;
     let mut work = unsafe { buffer!(lwork) };
-    backend::dgesdd(b'A', m, n, &mut matrix, m, values, left, m, right, n, &mut work, lwork,
-                    &mut iwork, &mut info);
+    unsafe {
+        backend::dgesdd(b'A', m, n, &mut matrix, m, values, left, m, right, n, &mut work, lwork,
+                        &mut iwork, &mut info);
+    }
     success!(info);
 
     Ok(())
@@ -74,15 +78,20 @@ fn symmetric_eigen(matrix: &mut [f64], values: &mut [f64], m: usize) -> Result<(
 
     let mut work = [0.0];
     let mut iwork = [0];
-    backend::dsyevd(b'V', b'U', m, matrix, m, values, &mut work, -1, &mut iwork, -1, &mut info);
+    unsafe {
+        backend::dsyevd(b'V', b'U', m, matrix, m, values, &mut work, -1, &mut iwork, -1,
+                        &mut info);
+    }
     success!(info);
 
     let lwork = work[0] as i32;
     let liwork = iwork[0];
     let mut work = unsafe { buffer!(lwork) };
     let mut iwork = unsafe { buffer!(liwork) };
-    backend::dsyevd(b'V', b'U', m, matrix, m, values, &mut work, lwork, &mut iwork, liwork,
-                    &mut info);
+    unsafe {
+        backend::dsyevd(b'V', b'U', m, matrix, m, values, &mut work, lwork, &mut iwork, liwork,
+                        &mut info);
+    }
     success!(info);
 
     Ok(())

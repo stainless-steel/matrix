@@ -1,6 +1,6 @@
 [package]
 name = "matrix"
-version = "0.21.6"
+version = "0.21.7"
 license = "Apache-2.0/MIT"
 authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
 description = "The package provides a matrix laboratory."
@@ -15,11 +15,11 @@ default = ["acceleration"]
 acceleration = ["blas", "lapack"]
 
 [dependencies.blas]
-version = "0.15"
+version = "0.16"
 optional = true
 
 [dependencies.lapack]
-version = "0.11"
+version = "0.13"
 optional = true
 
 [dependencies.num-complex]

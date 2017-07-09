@@ -40,7 +40,9 @@ impl MultiplyInto<[f64], [f64]> for Conventional<f64> {
 impl ScaleSelf<f64> for [f64] {
     #[inline]
     fn scale_self(&mut self, alpha: f64) {
-        backend::dscal(self.len() as i32, alpha, self, 1);
+        unsafe {
+            backend::dscal(self.len() as i32, alpha, self, 1);
+        }
     }
 }
 
@@ -54,9 +56,13 @@ fn multiply(alpha: f64, a: &[f64], b: &[f64], beta: f64, c: &mut [f64], m: usize
     let (m, p, n) = (m as i32, p as i32, n as i32);
 
     if n == 1 {
-        backend::dgemv(b'N', m, p, alpha, a, m, b, 1, beta, c, 1);
+        unsafe {
+            backend::dgemv(b'N', m, p, alpha, a, m, b, 1, beta, c, 1);
+        }
     } else {
-        backend::dgemm(b'N', b'N', m, n, p, alpha, a, m, b, p, beta, c, m);
+        unsafe {
+            backend::dgemm(b'N', b'N', m, n, p, alpha, a, m, b, p, beta, c, m);
+        }
     }
 }
 
