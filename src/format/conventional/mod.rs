@@ -20,7 +20,11 @@ pub struct Conventional<T: Element> {
 
 macro_rules! new(
     ($rows:expr, $columns:expr, $values:expr) => (
-        Conventional { rows: $rows, columns: $columns, values: $values }
+        Conventional {
+            rows: $rows,
+            columns: $columns,
+            values: $values,
+        }
     );
 );
 
@@ -73,7 +77,8 @@ impl<T: Element> Conventional<T> {
             if self.columns > columns {
                 self.values.truncate(rows * columns);
             } else {
-                self.values.extend(vec![T::zero(); rows * (columns - self.columns)]);
+                self.values
+                    .extend(vec![T::zero(); rows * (columns - self.columns)]);
             }
             self.columns = columns;
         } else {
@@ -94,7 +99,9 @@ impl<T: Element> Matrix for Conventional<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
-        self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
+        self.values
+            .iter()
+            .fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
     }
 
     #[inline]
@@ -152,51 +159,81 @@ mod tests {
     fn resize_fewer_columns() {
         let mut matrix = Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]);
         matrix.resize((2, 2));
-        assert_eq!(matrix, Conventional::from_vec((2, 2), matrix![
-            1.0, 2.0;
-            4.0, 5.0;
-        ]));
+        assert_eq!(
+            matrix,
+            Conventional::from_vec(
+                (2, 2),
+                matrix![
+                    1.0, 2.0;
+                    4.0, 5.0;
+                ],
+            )
+        );
     }
 
     #[test]
     fn resize_fewer_rows() {
         let mut matrix = Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]);
         matrix.resize((1, 3));
-        assert_eq!(matrix, Conventional::from_vec((1, 3), matrix![
-            1.0, 2.0, 3.0;
-        ]));
+        assert_eq!(
+            matrix,
+            Conventional::from_vec(
+                (1, 3),
+                matrix![
+                    1.0, 2.0, 3.0;
+                ],
+            )
+        );
     }
 
     #[test]
     fn resize_more_columns() {
         let mut matrix = Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]);
         matrix.resize((2, 4));
-        assert_eq!(matrix, Conventional::from_vec((2, 4), matrix![
-            1.0, 2.0, 3.0, 0.0;
-            4.0, 5.0, 6.0, 0.0;
-        ]));
+        assert_eq!(
+            matrix,
+            Conventional::from_vec(
+                (2, 4),
+                matrix![
+                    1.0, 2.0, 3.0, 0.0;
+                    4.0, 5.0, 6.0, 0.0;
+                ],
+            )
+        );
     }
 
     #[test]
     fn resize_more_rows() {
         let mut matrix = Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]);
         matrix.resize((3, 3));
-        assert_eq!(matrix, Conventional::from_vec((3, 3), matrix![
-            1.0, 2.0, 3.0;
-            4.0, 5.0, 6.0;
-            0.0, 0.0, 0.0;
-        ]));
+        assert_eq!(
+            matrix,
+            Conventional::from_vec(
+                (3, 3),
+                matrix![
+                    1.0, 2.0, 3.0;
+                    4.0, 5.0, 6.0;
+                    0.0, 0.0, 0.0;
+                ],
+            )
+        );
     }
 
     #[test]
     fn resize_more_columns_rows() {
         let mut matrix = Conventional::from_vec((2, 3), vec![1.0, 4.0, 2.0, 5.0, 3.0, 6.0]);
         matrix.resize((3, 4));
-        assert_eq!(matrix, Conventional::from_vec((3, 4), matrix![
-            1.0, 2.0, 3.0, 0.0;
-            4.0, 5.0, 6.0, 0.0;
-            0.0, 0.0, 0.0, 0.0;
-        ]));
+        assert_eq!(
+            matrix,
+            Conventional::from_vec(
+                (3, 4),
+                matrix![
+                    1.0, 2.0, 3.0, 0.0;
+                    4.0, 5.0, 6.0, 0.0;
+                    0.0, 0.0, 0.0, 0.0;
+                ],
+            )
+        );
     }
 
     #[test]

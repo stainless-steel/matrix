@@ -19,7 +19,11 @@ pub struct Diagonal<T: Element> {
 
 macro_rules! new(
     ($rows:expr, $columns:expr, $values:expr) => (
-        Diagonal { rows: $rows, columns: $columns, values: $values }
+        Diagonal {
+            rows: $rows,
+            columns: $columns,
+            values: $values
+        }
     );
 );
 
@@ -67,7 +71,9 @@ impl<T: Element> Matrix for Diagonal<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
-        self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
+        self.values
+            .iter()
+            .fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
     }
 
     #[inline]

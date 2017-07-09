@@ -40,8 +40,15 @@ pub struct Compressed<T: Element> {
 macro_rules! new(
     ($rows:expr, $columns:expr, $nonzeros:expr, $variant:expr,
      $values:expr, $indices:expr, $offsets:expr) => (
-        Compressed { rows: $rows, columns: $columns, nonzeros: $nonzeros, variant: $variant,
-                     values: $values, indices: $indices, offsets: $offsets }
+        Compressed {
+            rows: $rows,
+            columns: $columns,
+            nonzeros: $nonzeros,
+            variant: $variant,
+            values: $values,
+            indices: $indices,
+            offsets: $offsets,
+        }
     );
 );
 
@@ -99,8 +106,15 @@ impl<T: Element> Compressed<T> {
             Variant::Column => vec![0; columns + 1],
             Variant::Row => vec![0; rows + 1],
         };
-        new!(rows, columns, 0, variant, Vec::with_capacity(capacity),
-             Vec::with_capacity(capacity), offset)
+        new!(
+            rows,
+            columns,
+            0,
+            variant,
+            Vec::with_capacity(capacity),
+            Vec::with_capacity(capacity),
+            offset
+        )
     }
 
     /// Read an element.
@@ -152,13 +166,21 @@ impl<T: Element> Compressed<T> {
     /// Return a sparse iterator.
     #[inline]
     pub fn iter<'l>(&'l self) -> Iterator<'l, T> {
-        Iterator { matrix: self, taken: 0, major: 0 }
+        Iterator {
+            matrix: self,
+            taken: 0,
+            major: 0,
+        }
     }
 
     /// Return a sparse iterator allowing mutation.
     #[inline]
     pub fn iter_mut<'l>(&'l mut self) -> IteratorMut<'l, T> {
-        IteratorMut { matrix: self, taken: 0, major: 0 }
+        IteratorMut {
+            matrix: self,
+            taken: 0,
+            major: 0,
+        }
     }
 
     /// Resize the matrix.
@@ -181,7 +203,10 @@ impl<T: Element> Compressed<T> {
     }
 
     /// Retain the elements that satisfy a condition and discard the rest.
-    pub fn retain<F>(&mut self, mut condition: F) where F: FnMut(usize, usize, &T) -> bool {
+    pub fn retain<F>(&mut self, mut condition: F)
+    where
+        F: FnMut(usize, usize, &T) -> bool,
+    {
         let (mut k, mut major) = (0, 0);
         while k < self.indices.len() {
             while self.offsets[major + 1] <= k {
@@ -209,7 +234,9 @@ impl<T: Element> Matrix for Compressed<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
-        self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
+        self.values
+            .iter()
+            .fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
     }
 
     #[inline]
@@ -265,13 +292,16 @@ mod tests {
 
     #[test]
     fn get() {
-        let conventional = Conventional::from_vec((5, 3), matrix![
-            0.0, 0.0, 0.0;
-            1.0, 0.0, 0.0;
-            0.0, 0.0, 0.0;
-            0.0, 2.0, 0.0;
-            0.0, 3.0, 4.0;
-        ]);
+        let conventional = Conventional::from_vec(
+            (5, 3),
+            matrix![
+                0.0, 0.0, 0.0;
+                1.0, 0.0, 0.0;
+                0.0, 0.0, 0.0;
+                0.0, 2.0, 0.0;
+                0.0, 3.0, 4.0;
+            ],
+        );
 
         let matrix = Compressed::from(&conventional);
         assert_eq!(matrix.nonzeros, 4);
@@ -285,13 +315,16 @@ mod tests {
 
     #[test]
     fn set() {
-        let mut conventional = Conventional::from_vec((5, 3), matrix![
-            0.0, 0.0, 0.0;
-            1.0, 0.0, 0.0;
-            0.0, 0.0, 0.0;
-            0.0, 2.0, 0.0;
-            0.0, 3.0, 4.0;
-        ]);
+        let mut conventional = Conventional::from_vec(
+            (5, 3),
+            matrix![
+                0.0, 0.0, 0.0;
+                1.0, 0.0, 0.0;
+                0.0, 0.0, 0.0;
+                0.0, 2.0, 0.0;
+                0.0, 3.0, 4.0;
+            ],
+        );
 
         let mut matrix = Compressed::from(&conventional);
         assert_eq!(matrix.nonzeros, 4);
@@ -319,8 +352,15 @@ mod tests {
 
     #[test]
     fn nonzeros() {
-        let matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 0.0, 3.0, 0.0, 5.0],
-                          vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+        let matrix = new!(
+            5,
+            7,
+            5,
+            Variant::Column,
+            vec![1.0, 0.0, 3.0, 0.0, 5.0],
+            vec![1, 0, 3, 1, 4],
+            vec![0, 0, 0, 1, 2, 2, 3, 5]
+        );
 
         assert_eq!(matrix.nonzeros, 5);
         assert_eq!(matrix.nonzeros(), 3);
@@ -328,8 +368,15 @@ mod tests {
 
     #[test]
     fn iter() {
-        let matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
-                          vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+        let matrix = new!(
+            5,
+            7,
+            5,
+            Variant::Column,
+            vec![1.0, 2.0, 3.0, 4.0, 5.0],
+            vec![1, 0, 3, 1, 4],
+            vec![0, 0, 0, 1, 2, 2, 3, 5]
+        );
 
         let result = matrix.iter().map(|(i, _, _)| i).collect::<Vec<_>>();
         assert_eq!(&result, &vec![1, 0, 3, 1, 4]);
@@ -337,14 +384,24 @@ mod tests {
         let result = matrix.iter().map(|(_, j, _)| j).collect::<Vec<_>>();
         assert_eq!(&result, &vec![2, 3, 5, 6, 6]);
 
-        let result = matrix.iter().map(|(_, _, &value)| value).collect::<Vec<_>>();
+        let result = matrix
+            .iter()
+            .map(|(_, _, &value)| value)
+            .collect::<Vec<_>>();
         assert_eq!(&result, &vec![1.0, 2.0, 3.0, 4.0, 5.0]);
     }
 
     #[test]
     fn iter_mut() {
-        let mut matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
-                              vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+        let mut matrix = new!(
+            5,
+            7,
+            5,
+            Variant::Column,
+            vec![1.0, 2.0, 3.0, 4.0, 5.0],
+            vec![1, 0, 3, 1, 4],
+            vec![0, 0, 0, 1, 2, 2, 3, 5]
+        );
 
         for (i, _, value) in matrix.iter_mut() {
             *value = if i % 2 == 0 { 42.0 } else { 69.0 };
@@ -355,61 +412,171 @@ mod tests {
 
     #[test]
     fn resize_fewer_columns() {
-        let mut matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
-                              vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+        let mut matrix = new!(
+            5,
+            7,
+            5,
+            Variant::Column,
+            vec![1.0, 2.0, 3.0, 4.0, 5.0],
+            vec![1, 0, 3, 1, 4],
+            vec![0, 0, 0, 1, 2, 2, 3, 5]
+        );
 
         matrix.resize((5, 5));
-        assert_eq!(matrix, new!(5, 5, 2, Variant::Column, vec![1.0, 2.0],
-                                vec![1, 0], vec![0, 0, 0, 1, 2, 2]));
+        assert_eq!(
+            matrix,
+            new!(
+                5,
+                5,
+                2,
+                Variant::Column,
+                vec![1.0, 2.0],
+                vec![1, 0],
+                vec![0, 0, 0, 1, 2, 2]
+            )
+        );
 
         matrix.resize((5, 3));
-        assert_eq!(matrix, new!(5, 3, 1, Variant::Column, vec![1.0],
-                                vec![1], vec![0, 0, 0, 1]));
+        assert_eq!(
+            matrix,
+            new!(
+                5,
+                3,
+                1,
+                Variant::Column,
+                vec![1.0],
+                vec![1],
+                vec![0, 0, 0, 1]
+            )
+        );
 
         matrix.resize((5, 1));
-        assert_eq!(matrix, new!(5, 1, 0, Variant::Column, vec![],
-                                vec![], vec![0, 0]));
+        assert_eq!(
+            matrix,
+            new!(5, 1, 0, Variant::Column, vec![], vec![], vec![0, 0])
+        );
     }
 
     #[test]
     fn resize_fewer_rows() {
-        let mut matrix = new!(5, 7, 5, Variant::Column, vec![1.0, 2.0, 3.0, 4.0, 5.0],
-                              vec![1, 0, 3, 1, 4], vec![0, 0, 0, 1, 2, 2, 3, 5]);
+        let mut matrix = new!(
+            5,
+            7,
+            5,
+            Variant::Column,
+            vec![1.0, 2.0, 3.0, 4.0, 5.0],
+            vec![1, 0, 3, 1, 4],
+            vec![0, 0, 0, 1, 2, 2, 3, 5]
+        );
 
         matrix.resize((3, 7));
-        assert_eq!(matrix, new!(3, 7, 3, Variant::Column, vec![1.0, 2.0, 4.0],
-                                vec![1, 0, 1], vec![0, 0, 0, 1, 2, 2, 2, 3]));
+        assert_eq!(
+            matrix,
+            new!(
+                3,
+                7,
+                3,
+                Variant::Column,
+                vec![1.0, 2.0, 4.0],
+                vec![1, 0, 1],
+                vec![0, 0, 0, 1, 2, 2, 2, 3]
+            )
+        );
 
         matrix.resize((1, 7));
-        assert_eq!(matrix, new!(1, 7, 1, Variant::Column, vec![2.0],
-                                vec![0], vec![0, 0, 0, 0, 1, 1, 1, 1]));
+        assert_eq!(
+            matrix,
+            new!(
+                1,
+                7,
+                1,
+                Variant::Column,
+                vec![2.0],
+                vec![0],
+                vec![0, 0, 0, 0, 1, 1, 1, 1]
+            )
+        );
     }
 
     #[test]
     fn resize_more_columns() {
-        let mut matrix = new!(5, 7, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
-                              vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
+        let mut matrix = new!(
+            5,
+            7,
+            4,
+            Variant::Column,
+            vec![1.0, 2.0, 3.0, 4.0],
+            vec![1, 1, 3, 4],
+            vec![0, 0, 0, 1, 2, 2, 3, 4]
+        );
 
         matrix.resize((5, 9));
-        assert_eq!(matrix, new!(5, 9, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
-                                vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4]));
+        assert_eq!(
+            matrix,
+            new!(
+                5,
+                9,
+                4,
+                Variant::Column,
+                vec![1.0, 2.0, 3.0, 4.0],
+                vec![1, 1, 3, 4],
+                vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4]
+            )
+        );
 
         matrix.resize((5, 11));
-        assert_eq!(matrix, new!(5, 11, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
-                                vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4, 4, 4]));
+        assert_eq!(
+            matrix,
+            new!(
+                5,
+                11,
+                4,
+                Variant::Column,
+                vec![1.0, 2.0, 3.0, 4.0],
+                vec![1, 1, 3, 4],
+                vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4, 4, 4]
+            )
+        );
     }
 
     #[test]
     fn resize_more_rows() {
-        let mut matrix = new!(5, 7, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
-                              vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]);
+        let mut matrix = new!(
+            5,
+            7,
+            4,
+            Variant::Column,
+            vec![1.0, 2.0, 3.0, 4.0],
+            vec![1, 1, 3, 4],
+            vec![0, 0, 0, 1, 2, 2, 3, 4]
+        );
 
         matrix.resize((7, 7));
-        assert_eq!(matrix, new!(7, 7, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
-                                vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
+        assert_eq!(
+            matrix,
+            new!(
+                7,
+                7,
+                4,
+                Variant::Column,
+                vec![1.0, 2.0, 3.0, 4.0],
+                vec![1, 1, 3, 4],
+                vec![0, 0, 0, 1, 2, 2, 3, 4]
+            )
+        );
 
         matrix.resize((9, 7));
-        assert_eq!(matrix, new!(9, 7, 4, Variant::Column, vec![1.0, 2.0, 3.0, 4.0],
-                                vec![1, 1, 3, 4], vec![0, 0, 0, 1, 2, 2, 3, 4]));
+        assert_eq!(
+            matrix,
+            new!(
+                9,
+                7,
+                4,
+                Variant::Column,
+                vec![1.0, 2.0, 3.0, 4.0],
+                vec![1, 1, 3, 4],
+                vec![0, 0, 0, 1, 2, 2, 3, 4]
+            )
+        );
     }
 }

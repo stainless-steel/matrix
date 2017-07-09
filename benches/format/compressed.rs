@@ -3,23 +3,67 @@ use test::Bencher;
 
 use matrix::format::compressed::Variant;
 use matrix::format::{Compressed, Conventional};
-use matrix::operation::{MultiplyInto};
+use matrix::operation::MultiplyInto;
 
-#[bench] fn multiply_left_0010(b: &mut Bencher) { multiply_left(10, 10, b); }
-#[bench] fn multiply_left_0100(b: &mut Bencher) { multiply_left(100, 100, b); }
-#[bench] fn multiply_left_1000(b: &mut Bencher) { multiply_left(1000, 1000, b); }
+#[bench]
+fn multiply_left_0010(b: &mut Bencher) {
+    multiply_left(10, 10, b);
+}
 
-#[bench] fn multiply_left_0010_dense(b: &mut Bencher) { multiply_left_dense(10, 10, b); }
-#[bench] fn multiply_left_0100_dense(b: &mut Bencher) { multiply_left_dense(100, 100, b); }
-#[bench] fn multiply_left_1000_dense(b: &mut Bencher) { multiply_left_dense(1000, 1000, b); }
+#[bench]
+fn multiply_left_0100(b: &mut Bencher) {
+    multiply_left(100, 100, b);
+}
 
-#[bench] fn multiply_right_0010(b: &mut Bencher) { multiply_right(10, 10, b); }
-#[bench] fn multiply_right_0100(b: &mut Bencher) { multiply_right(100, 100, b); }
-#[bench] fn multiply_right_1000(b: &mut Bencher) { multiply_right(1000, 1000, b); }
+#[bench]
+fn multiply_left_1000(b: &mut Bencher) {
+    multiply_left(1000, 1000, b);
+}
 
-#[bench] fn multiply_right_0010_dense(b: &mut Bencher) { multiply_right_dense(10, 10, b); }
-#[bench] fn multiply_right_0100_dense(b: &mut Bencher) { multiply_right_dense(100, 100, b); }
-#[bench] fn multiply_right_1000_dense(b: &mut Bencher) { multiply_right_dense(1000, 1000, b); }
+#[bench]
+fn multiply_left_0010_dense(b: &mut Bencher) {
+    multiply_left_dense(10, 10, b);
+}
+
+#[bench]
+fn multiply_left_0100_dense(b: &mut Bencher) {
+    multiply_left_dense(100, 100, b);
+}
+
+#[bench]
+fn multiply_left_1000_dense(b: &mut Bencher) {
+    multiply_left_dense(1000, 1000, b);
+}
+
+#[bench]
+fn multiply_right_0010(b: &mut Bencher) {
+    multiply_right(10, 10, b);
+}
+
+#[bench]
+fn multiply_right_0100(b: &mut Bencher) {
+    multiply_right(100, 100, b);
+}
+
+#[bench]
+fn multiply_right_1000(b: &mut Bencher) {
+    multiply_right(1000, 1000, b);
+}
+
+#[bench]
+fn multiply_right_0010_dense(b: &mut Bencher) {
+    multiply_right_dense(10, 10, b);
+}
+
+#[bench]
+fn multiply_right_0100_dense(b: &mut Bencher) {
+    multiply_right_dense(100, 100, b);
+}
+
+#[bench]
+fn multiply_right_1000_dense(b: &mut Bencher) {
+    multiply_right_dense(1000, 1000, b);
+}
 
 fn multiply_left(size: usize, nonzeros: usize, bencher: &mut Bencher) {
     let left = make_compressed(size, size, nonzeros);

@@ -4,8 +4,11 @@ use format::{Conventional, Packed};
 
 impl<'l, T: Element> From<&'l Packed<T>> for Conventional<T> {
     fn from(matrix: &'l Packed<T>) -> Self {
-        let &Packed { size, variant, ref values } = validate!(matrix);
-
+        let &Packed {
+            size,
+            variant,
+            ref values,
+        } = validate!(matrix);
         let mut matrix = Conventional::new(size);
         match variant {
             Variant::Lower => {
@@ -16,7 +19,7 @@ impl<'l, T: Element> From<&'l Packed<T>> for Conventional<T> {
                         k += 1;
                     }
                 }
-            },
+            }
             Variant::Upper => {
                 let mut k = 0;
                 for j in 0..size {
@@ -25,9 +28,8 @@ impl<'l, T: Element> From<&'l Packed<T>> for Conventional<T> {
                         k += 1;
                     }
                 }
-            },
+            }
         }
-
         matrix
     }
 }
@@ -46,33 +48,43 @@ mod tests {
 
     #[test]
     fn into_conventional_lower() {
-        let matrix = new!(4, Variant::Lower, vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
-        ]);
+        let matrix = new!(
+            4,
+            Variant::Lower,
+            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+        );
 
         let matrix = Conventional::from(matrix);
 
-        assert_eq!(&*matrix, &*matrix![
-            1.0, 0.0, 0.0,  0.0;
-            2.0, 5.0, 0.0,  0.0;
-            3.0, 6.0, 8.0,  0.0;
-            4.0, 7.0, 9.0, 10.0;
-        ]);
+        assert_eq!(
+            &*matrix,
+            &*matrix![
+                1.0, 0.0, 0.0,  0.0;
+                2.0, 5.0, 0.0,  0.0;
+                3.0, 6.0, 8.0,  0.0;
+                4.0, 7.0, 9.0, 10.0;
+            ]
+        );
     }
 
     #[test]
     fn into_conventional_upper() {
-        let matrix = new!(4, Variant::Upper, vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0,
-        ]);
+        let matrix = new!(
+            4,
+            Variant::Upper,
+            vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+        );
 
         let matrix = Conventional::from(matrix);
 
-        assert_eq!(&*matrix, &*matrix![
-            1.0, 2.0, 4.0,  7.0;
-            0.0, 3.0, 5.0,  8.0;
-            0.0, 0.0, 6.0,  9.0;
-            0.0, 0.0, 0.0, 10.0;
-        ]);
+        assert_eq!(
+            &*matrix,
+            &*matrix![
+                1.0, 2.0, 4.0,  7.0;
+                0.0, 3.0, 5.0,  8.0;
+                0.0, 0.0, 6.0,  9.0;
+                0.0, 0.0, 0.0, 10.0;
+            ]
+        );
     }
 }

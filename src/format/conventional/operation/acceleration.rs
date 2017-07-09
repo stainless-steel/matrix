@@ -46,15 +46,20 @@ impl ScaleSelf<f64> for [f64] {
     }
 }
 
-fn multiply(alpha: f64, a: &[f64], b: &[f64], beta: f64, c: &mut [f64], m: usize, p: usize,
-            n: usize) {
-
+fn multiply(
+    alpha: f64,
+    a: &[f64],
+    b: &[f64],
+    beta: f64,
+    c: &mut [f64],
+    m: usize,
+    p: usize,
+    n: usize,
+) {
     debug_assert_eq!(a.len(), m * p);
     debug_assert_eq!(b.len(), p * n);
     debug_assert_eq!(c.len(), m * n);
-
     let (m, p, n) = (m as i32, p as i32, n as i32);
-
     if n == 1 {
         unsafe {
             backend::dgemv(b'N', m, p, alpha, a, m, b, 1, beta, c, 1);
@@ -72,41 +77,75 @@ mod tests {
 
     #[test]
     fn multiply() {
-        let matrix = Conventional::from_vec((2, 3), vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0,
-        ]);
-        let right = Conventional::from_vec((3, 4), vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0,
-        ]);
+        let matrix = Conventional::from_vec((2, 3), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+        let right = Conventional::from_vec(
+            (3, 4),
+            vec![
+                1.0,
+                2.0,
+                3.0,
+                4.0,
+                5.0,
+                6.0,
+                7.0,
+                8.0,
+                9.0,
+                10.0,
+                11.0,
+                12.0,
+            ],
+        );
 
-        assert_eq!(matrix.multiply(&right), Conventional::from_vec((2, 4), vec![
-            22.0, 28.0, 49.0, 64.0, 76.0, 100.0, 103.0, 136.0,
-        ]));
+        assert_eq!(
+            matrix.multiply(&right),
+            Conventional::from_vec(
+                (2, 4),
+                vec![22.0, 28.0, 49.0, 64.0, 76.0, 100.0, 103.0, 136.0]
+            )
+        );
     }
 
     #[test]
     fn multiply_into() {
-        let matrix = Conventional::from_vec((2, 3), vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0,
-        ]);
-        let right = Conventional::from_vec((3, 4), vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0,
-        ]);
-        let mut result = Conventional::from_vec((2, 4), vec![
-            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
-        ]);
+        let matrix = Conventional::from_vec((2, 3), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+        let right = Conventional::from_vec(
+            (3, 4),
+            vec![
+                1.0,
+                2.0,
+                3.0,
+                4.0,
+                5.0,
+                6.0,
+                7.0,
+                8.0,
+                9.0,
+                10.0,
+                11.0,
+                12.0,
+            ],
+        );
+        let mut result =
+            Conventional::from_vec((2, 4), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
 
         matrix.multiply_into(&right, &mut result);
 
-        assert_eq!(result, Conventional::from_vec((2, 4), vec![
-            23.0, 30.0, 52.0, 68.0, 81.0, 106.0, 110.0, 144.0,
-        ]));
+        assert_eq!(
+            result,
+            Conventional::from_vec(
+                (2, 4),
+                vec![23.0, 30.0, 52.0, 68.0, 81.0, 106.0, 110.0, 144.0]
+            )
+        );
     }
 
     #[test]
     fn scale_self() {
         let mut matrix = Conventional::from_vec(2, vec![21.0, 21.0, 21.0, 21.0]);
         matrix.scale_self(2.0);
-        assert_eq!(matrix, Conventional::from_vec(2, vec![42.0, 42.0, 42.0, 42.0]));
+        assert_eq!(
+            matrix,
+            Conventional::from_vec(2, vec![42.0, 42.0, 42.0, 42.0])
+        );
     }
 }

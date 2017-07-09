@@ -70,7 +70,9 @@ impl<T: Element> Matrix for Packed<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
-        self.values.iter().fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
+        self.values
+            .iter()
+            .fold(0, |sum, &value| if value.is_zero() { sum } else { sum + 1 })
     }
 
     #[inline]
@@ -97,9 +99,11 @@ mod tests {
 
     #[test]
     fn nonzeros() {
-        let matrix = new!(4, Variant::Lower, vec![
-            1.0, 0.0, 3.0, 0.0, 5.0, 0.0, 7.0, 8.0, 9.0, 10.0,
-        ]);
+        let matrix = new!(
+            4,
+            Variant::Lower,
+            vec![1.0, 0.0, 3.0, 0.0, 5.0, 0.0, 7.0, 8.0, 9.0, 10.0]
+        );
         assert_eq!(matrix.nonzeros(), 7);
     }
 }

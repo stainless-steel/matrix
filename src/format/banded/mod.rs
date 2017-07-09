@@ -31,8 +31,13 @@ pub struct Banded<T: Element> {
 
 macro_rules! new(
     ($rows:expr, $columns:expr, $superdiagonals:expr, $subdiagonals:expr, $values:expr) => (
-        Banded { rows: $rows, columns: $columns, superdiagonals: $superdiagonals,
-                 subdiagonals: $subdiagonals, values: $values }
+        Banded {
+            rows: $rows,
+            columns: $columns,
+            superdiagonals: $superdiagonals,
+            subdiagonals: $subdiagonals,
+            values: $values,
+        }
     );
 );
 
@@ -92,7 +97,7 @@ impl<T: Element> Banded<T> {
     pub fn new<S: Size>(size: S, superdiagonals: usize, subdiagonals: usize) -> Self {
         let (rows, columns) = size.dimensions();
         let values = vec![T::zero(); (superdiagonals + 1 + subdiagonals) * columns];
-        new!(rows, columns, superdiagonals,  subdiagonals, values)
+        new!(rows, columns, superdiagonals, subdiagonals, values)
     }
 
     /// Return the number of diagonals.
@@ -112,7 +117,10 @@ impl<T: Element> Matrix for Banded<T> {
     type Element = T;
 
     fn nonzeros(&self) -> usize {
-        self.iter().fold(0, |sum, (_, _, &value)| if value.is_zero() { sum } else { sum + 1 })
+        self.iter().fold(
+            0,
+            |sum, (_, _, &value)| if value.is_zero() { sum } else { sum + 1 },
+        )
     }
 
     #[inline]
@@ -136,7 +144,12 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
     type Item = (usize, usize, &'l T);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let &mut Iterator { matrix, ref mut column, ref mut start, ref mut finish } = self;
+        let &mut Iterator {
+            matrix,
+            ref mut column,
+            ref mut start,
+            ref mut finish,
+        } = self;
         while *column < matrix.columns {
             if *start >= *finish {
                 *column += 1;
@@ -147,7 +160,11 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
             let i = *start;
             let k = matrix.superdiagonals + i - *column;
             *start += 1;
-            return Some((i, *column, &matrix.values[*column * matrix.diagonals() + k]));
+            return Some((
+                i,
+                *column,
+                &matrix.values[*column * matrix.diagonals() + k],
+            ));
         }
         None
     }
@@ -159,65 +176,131 @@ mod tests {
 
     #[test]
     fn nonzeros() {
-        let matrix = new!(7, 4, 2, 2, matrix![
-            7.0,  7.0,  3.0,  7.0;
-            7.0,  2.0,  6.0, 11.0;
-            1.0,  5.0, 10.0,  0.0;
-            4.0,  9.0,  0.0, 16.0;
-            8.0, 12.0, 15.0, 17.0;
-        ]);
+        let matrix = new!(
+            7,
+            4,
+            2,
+            2,
+            matrix![
+                7.0,  7.0,  3.0,  7.0;
+                7.0,  2.0,  6.0, 11.0;
+                1.0,  5.0, 10.0,  0.0;
+                4.0,  9.0,  0.0, 16.0;
+                8.0, 12.0, 15.0, 17.0;
+            ]
+        );
         assert_eq!(matrix.nonzeros(), 17 - 2);
     }
 
     #[test]
     fn iter_tall() {
-        let matrix = new!(7, 4, 2, 2, matrix![
-            0.0,  0.0,  3.0,  7.0;
-            0.0,  2.0,  6.0, 11.0;
-            1.0,  5.0, 10.0, 14.0;
-            4.0,  9.0, 13.0, 16.0;
-            8.0, 12.0, 15.0, 17.0;
-        ]);
+        let matrix = new!(
+            7,
+            4,
+            2,
+            2,
+            matrix![
+                0.0,  0.0,  3.0,  7.0;
+                0.0,  2.0,  6.0, 11.0;
+                1.0,  5.0, 10.0, 14.0;
+                4.0,  9.0, 13.0, 16.0;
+                8.0, 12.0, 15.0, 17.0;
+            ]
+        );
 
         let result = matrix.iter().map(|(i, _, _)| i).collect::<Vec<_>>();
-        assert_eq!(&result, &vec![0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 4, 1, 2, 3, 4, 5]);
+        assert_eq!(
+            &result,
+            &vec![0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 4, 1, 2, 3, 4, 5]
+        );
 
         let result = matrix.iter().map(|(_, j, _)| j).collect::<Vec<_>>();
-        assert_eq!(&result, &vec![0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]);
+        assert_eq!(
+            &result,
+            &vec![0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]
+        );
 
-        let result = matrix.iter().map(|(_, _, &value)| value).collect::<Vec<_>>();
-        assert_eq!(&result, &vec![
-            1.0, 4.0, 8.0,
-            2.0, 5.0, 9.0, 12.0,
-            3.0, 6.0, 10.0, 13.0, 15.0,
-            7.0, 11.0, 14.0, 16.0, 17.0,
-        ]);
+        let result = matrix
+            .iter()
+            .map(|(_, _, &value)| value)
+            .collect::<Vec<_>>();
+        assert_eq!(
+            &result,
+            &vec![
+                1.0,
+                4.0,
+                8.0,
+                2.0,
+                5.0,
+                9.0,
+                12.0,
+                3.0,
+                6.0,
+                10.0,
+                13.0,
+                15.0,
+                7.0,
+                11.0,
+                14.0,
+                16.0,
+                17.0,
+            ]
+        );
     }
 
     #[test]
     fn iter_wide() {
-        let matrix = new!(4, 7, 2, 2, matrix![
-            0.0,  0.0,  3.0,  7.0, 12.0, 17.0, 0.0;
-            0.0,  2.0,  6.0, 11.0, 16.0,  0.0, 0.0;
-            1.0,  5.0, 10.0, 15.0,  0.0,  0.0, 0.0;
-            4.0,  9.0, 14.0,  0.0,  0.0,  0.0, 0.0;
-            8.0, 13.0,  0.0,  0.0,  0.0,  0.0, 0.0;
-        ]);
+        let matrix = new!(
+            4,
+            7,
+            2,
+            2,
+            matrix![
+                0.0,  0.0,  3.0,  7.0, 12.0, 17.0, 0.0;
+                0.0,  2.0,  6.0, 11.0, 16.0,  0.0, 0.0;
+                1.0,  5.0, 10.0, 15.0,  0.0,  0.0, 0.0;
+                4.0,  9.0, 14.0,  0.0,  0.0,  0.0, 0.0;
+                8.0, 13.0,  0.0,  0.0,  0.0,  0.0, 0.0;
+            ]
+        );
 
         let result = matrix.iter().map(|(i, _, _)| i).collect::<Vec<_>>();
-        assert_eq!(&result, &vec![0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 2, 3, 3]);
+        assert_eq!(
+            &result,
+            &vec![0, 1, 2, 0, 1, 2, 3, 0, 1, 2, 3, 1, 2, 3, 2, 3, 3]
+        );
 
         let result = matrix.iter().map(|(_, j, _)| j).collect::<Vec<_>>();
-        assert_eq!(&result, &vec![0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5]);
+        assert_eq!(
+            &result,
+            &vec![0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4, 4, 5]
+        );
 
-        let result = matrix.iter().map(|(_, _, &value)| value).collect::<Vec<_>>();
-        assert_eq!(&result, &vec![
-            1.0, 4.0, 8.0,
-            2.0, 5.0, 9.0, 13.0,
-            3.0, 6.0, 10.0, 14.0,
-            7.0, 11.0, 15.0,
-            12.0, 16.0,
-            17.0,
-        ]);
+        let result = matrix
+            .iter()
+            .map(|(_, _, &value)| value)
+            .collect::<Vec<_>>();
+        assert_eq!(
+            &result,
+            &vec![
+                1.0,
+                4.0,
+                8.0,
+                2.0,
+                5.0,
+                9.0,
+                13.0,
+                3.0,
+                6.0,
+                10.0,
+                14.0,
+                7.0,
+                11.0,
+                15.0,
+                12.0,
+                16.0,
+                17.0,
+            ]
+        );
     }
 }
