@@ -53,9 +53,7 @@ mod tests {
             Variant::Lower,
             vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
         );
-
         let matrix = Conventional::from(matrix);
-
         assert_eq!(
             &*matrix,
             &*matrix![
@@ -74,9 +72,7 @@ mod tests {
             Variant::Upper,
             vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
         );
-
         let matrix = Conventional::from(matrix);
-
         assert_eq!(
             &*matrix,
             &*matrix![

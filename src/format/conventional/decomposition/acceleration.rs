@@ -164,9 +164,7 @@ mod tests {
                 7.0, 8.0;
             ],
         );
-
         let (left, values, right) = SingularValue::decompose(&matrix).unwrap();
-
         assert::close(
             &*left,
             &*vec![
@@ -189,13 +187,11 @@ mod tests {
             ],
             1e-14,
         );
-
         assert::close(
             &*values,
             &*vec![1.426909549926149e+01, 6.268282324175424e-01],
             1e-14,
         );
-
         assert::close(
             &*right,
             &*vec![
@@ -219,9 +215,7 @@ mod tests {
                 1.0 / 4.0, 1.0 / 2.0, 3.0 / 4.0, 1.0;
             ],
         );
-
         let (vectors, values) = SymmetricEigen::decompose(&matrix).unwrap();
-
         assert::close(
             &*vectors,
             &*vec![

@@ -134,11 +134,8 @@ mod tests {
             vec![1, 0, 2],
             vec![0, 1, 3]
         );
-
         let right = Diagonal::from_vec((2, 4), vec![4.0, 5.0]);
-
         matrix.multiply_self(&right);
-
         assert_eq!(
             matrix,
             new!(
@@ -164,7 +161,6 @@ mod tests {
                 4.0, 5.0, 1.0;
             ],
         ));
-
         let right = Conventional::from_vec(
             (3, 2),
             matrix![
@@ -173,7 +169,6 @@ mod tests {
                 3.0, 6.0;
             ],
         );
-
         let mut result = Conventional::from_vec(
             (4, 2),
             matrix![
@@ -183,9 +178,7 @@ mod tests {
                 1.0, 1.0;
             ],
         );
-
         matrix.multiply_into(&right, &mut result);
-
         assert_eq!(
             &result.values,
             &matrix![
@@ -208,7 +201,6 @@ mod tests {
                 4.0, 5.0, 1.0;
             ],
         );
-
         let right = Compressed::from(Conventional::from_vec(
             (3, 2),
             matrix![
@@ -217,7 +209,6 @@ mod tests {
                 3.0, 6.0;
             ],
         ));
-
         let mut result = Conventional::from_vec(
             (4, 2),
             matrix![
@@ -227,9 +218,7 @@ mod tests {
                 1.0, 1.0;
             ],
         );
-
         matrix.multiply_into(&right, &mut result);
-
         assert_eq!(
             &result.values,
             &matrix![
@@ -252,9 +241,7 @@ mod tests {
             vec![1, 0, 3, 1, 4],
             vec![0, 0, 0, 1, 2, 2, 3, 5]
         );
-
         let matrix = matrix.transpose();
-
         assert_eq!(
             matrix,
             new!(

@@ -37,7 +37,6 @@ mod tests {
     #[test]
     fn into_conventional() {
         let matrix = Conventional::from(new!(3, 5, vec![1.0, 2.0, 3.0]));
-
         assert_eq!(
             matrix,
             Conventional::from_vec(

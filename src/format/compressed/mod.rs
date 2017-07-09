@@ -302,10 +302,8 @@ mod tests {
                 0.0, 3.0, 4.0;
             ],
         );
-
         let matrix = Compressed::from(&conventional);
         assert_eq!(matrix.nonzeros, 4);
-
         for i in 0..5 {
             for j in 0..3 {
                 assert_eq!(conventional[(i, j)], matrix.get((i, j)));
@@ -325,27 +323,21 @@ mod tests {
                 0.0, 3.0, 4.0;
             ],
         );
-
         let mut matrix = Compressed::from(&conventional);
         assert_eq!(matrix.nonzeros, 4);
-
         conventional[(0, 0)] = 42.0;
         conventional[(3, 1)] = 69.0;
-
         matrix.set((0, 0), 42.0);
         matrix.set((3, 1), 69.0);
         matrix.set((4, 0), 0.0);
-
         assert_eq!(matrix.nonzeros, 4 + 1 + (1 - 1) + 1);
         assert_eq!(conventional, (&matrix).into());
-
         for i in 0..5 {
             for j in 0..3 {
                 conventional[(i, j)] = (j * 5 + i) as f64;
                 matrix.set((i, j), (j * 5 + i) as f64);
             }
         }
-
         assert_eq!(matrix.nonzeros, 5 * 3);
         assert_eq!(conventional, (&matrix).into());
     }
@@ -361,7 +353,6 @@ mod tests {
             vec![1, 0, 3, 1, 4],
             vec![0, 0, 0, 1, 2, 2, 3, 5]
         );
-
         assert_eq!(matrix.nonzeros, 5);
         assert_eq!(matrix.nonzeros(), 3);
     }
@@ -377,13 +368,10 @@ mod tests {
             vec![1, 0, 3, 1, 4],
             vec![0, 0, 0, 1, 2, 2, 3, 5]
         );
-
         let result = matrix.iter().map(|(i, _, _)| i).collect::<Vec<_>>();
         assert_eq!(&result, &vec![1, 0, 3, 1, 4]);
-
         let result = matrix.iter().map(|(_, j, _)| j).collect::<Vec<_>>();
         assert_eq!(&result, &vec![2, 3, 5, 6, 6]);
-
         let result = matrix
             .iter()
             .map(|(_, _, &value)| value)
@@ -402,11 +390,9 @@ mod tests {
             vec![1, 0, 3, 1, 4],
             vec![0, 0, 0, 1, 2, 2, 3, 5]
         );
-
         for (i, _, value) in matrix.iter_mut() {
             *value = if i % 2 == 0 { 42.0 } else { 69.0 };
         }
-
         assert_eq!(&matrix.values, &vec![69.0, 42.0, 69.0, 69.0, 42.0]);
     }
 
@@ -421,7 +407,6 @@ mod tests {
             vec![1, 0, 3, 1, 4],
             vec![0, 0, 0, 1, 2, 2, 3, 5]
         );
-
         matrix.resize((5, 5));
         assert_eq!(
             matrix,
@@ -435,7 +420,6 @@ mod tests {
                 vec![0, 0, 0, 1, 2, 2]
             )
         );
-
         matrix.resize((5, 3));
         assert_eq!(
             matrix,
@@ -449,7 +433,6 @@ mod tests {
                 vec![0, 0, 0, 1]
             )
         );
-
         matrix.resize((5, 1));
         assert_eq!(
             matrix,
@@ -468,7 +451,6 @@ mod tests {
             vec![1, 0, 3, 1, 4],
             vec![0, 0, 0, 1, 2, 2, 3, 5]
         );
-
         matrix.resize((3, 7));
         assert_eq!(
             matrix,
@@ -482,7 +464,6 @@ mod tests {
                 vec![0, 0, 0, 1, 2, 2, 2, 3]
             )
         );
-
         matrix.resize((1, 7));
         assert_eq!(
             matrix,
@@ -509,7 +490,6 @@ mod tests {
             vec![1, 1, 3, 4],
             vec![0, 0, 0, 1, 2, 2, 3, 4]
         );
-
         matrix.resize((5, 9));
         assert_eq!(
             matrix,
@@ -523,7 +503,6 @@ mod tests {
                 vec![0, 0, 0, 1, 2, 2, 3, 4, 4, 4]
             )
         );
-
         matrix.resize((5, 11));
         assert_eq!(
             matrix,
@@ -550,7 +529,6 @@ mod tests {
             vec![1, 1, 3, 4],
             vec![0, 0, 0, 1, 2, 2, 3, 4]
         );
-
         matrix.resize((7, 7));
         assert_eq!(
             matrix,
@@ -564,7 +542,6 @@ mod tests {
                 vec![0, 0, 0, 1, 2, 2, 3, 4]
             )
         );
-
         matrix.resize((9, 7));
         assert_eq!(
             matrix,

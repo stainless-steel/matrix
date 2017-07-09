@@ -51,9 +51,7 @@ mod tests {
             ],
         );
         let right = Diagonal::from_vec((2, 4), vec![2.0, 3.0]);
-
         matrix.multiply_self(&right);
-
         assert_eq!(
             &*matrix,
             &*matrix![
@@ -74,7 +72,6 @@ mod tests {
                 3.0, 6.0;
             ],
         );
-
         assert_eq!(
             matrix.transpose(),
             Conventional::from_vec(

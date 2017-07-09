@@ -43,9 +43,7 @@ mod tests {
                 5.0, 10.0, 15.0,  0.0,  0.0,  0.0,  0.0, 0.0;
             ]
         );
-
         let matrix = matrix.transpose();
-
         assert_eq!(
             matrix,
             new!(

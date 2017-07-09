@@ -81,9 +81,7 @@ mod tests {
                 8.0, 12.0, 15.0, 17.0;
             ]
         );
-
         let matrix = Conventional::from(matrix);
-
         assert_eq!(
             &*matrix,
             &*matrix![
@@ -113,9 +111,7 @@ mod tests {
                 8.0, 13.0,  0.0,  0.0,  0.0,  0.0, 0.0;
             ]
         );
-
         let matrix = Conventional::from(matrix);
-
         assert_eq!(
             &*matrix,
             &*matrix![
