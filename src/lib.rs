@@ -40,11 +40,11 @@
 //! # }
 //! ```
 //!
-//! [banded]: https://stainless-steel.github.io/matrix/matrix/format/banded
-//! [compressed]: https://stainless-steel.github.io/matrix/matrix/format/compressed
-//! [conventional]: https://stainless-steel.github.io/matrix/matrix/format/conventional
-//! [diagonal]: https://stainless-steel.github.io/matrix/matrix/format/diagonal
-//! [packed]: https://stainless-steel.github.io/matrix/matrix/format/packed
+//! [banded]: format/banded/index.html
+//! [compressed]: format/compressed/index.html
+//! [conventional]: format/conventional/index.html
+//! [diagonal]: format/diagonal/index.html
+//! [packed]: format/packed/index.html
 
 #[cfg(test)]
 extern crate assert;
