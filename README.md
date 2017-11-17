@@ -15,9 +15,8 @@ sparse.set((0, 0), 42.0);
 sparse.set((1, 3), 69.0);
 
 let dense = Conventional::from(&sparse);
-assert_eq!(
-    &*dense,
-    &*matrix![
+assert!(
+    &*dense == &*matrix![
         42.0, 0.0, 0.0,  0.0;
          0.0, 0.0, 0.0, 69.0;
     ]
