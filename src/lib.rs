@@ -55,6 +55,9 @@ extern crate blas;
 #[cfg(feature = "acceleration")]
 extern crate lapack;
 
+#[cfg(feature = "acceleration")]
+extern crate openblas_src;
+
 extern crate num_complex;
 extern crate num_traits;
 

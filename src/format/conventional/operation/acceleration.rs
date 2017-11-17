@@ -1,4 +1,4 @@
-use blas::fortran as backend;
+use blas as backend;
 
 use format::Conventional;
 use operation::{Multiply, MultiplyInto, ScaleSelf};
