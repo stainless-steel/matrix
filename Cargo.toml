@@ -12,8 +12,8 @@ categories = ["science"]
 keywords = ["linear-algebra"]
 
 [features]
-default = ["acceleration"]
-acceleration = ["blas", "lapack", "openblas-src"]
+acceleration = ["blas", "lapack"]
+acceleration-src = ["openblas-src"]
 
 [dependencies]
 blas = { version = "0.19", optional = true }

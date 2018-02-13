@@ -6,6 +6,14 @@ rust:
   - beta
   - nightly
 
+env:
+  matrix:
+    - FEATURES=
+    - FEATURES=acceleration,acceleration-src
+
+script:
+  - cargo test -vv --features=${FEATURES}
+
 addons:
   apt:
     packages:
