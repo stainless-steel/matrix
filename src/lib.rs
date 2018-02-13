@@ -143,6 +143,7 @@ pub struct Error(String);
 /// A result.
 pub type Result<T> = std::result::Result<T, Error>;
 
+#[cfg(feature = "acceleration")]
 macro_rules! raise(
     ($message:expr) => (
         return Err(::Error($message.to_string()));
