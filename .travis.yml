@@ -14,7 +14,7 @@ env:
 script:
   - cargo test -vv --features=${FEATURES}
   - if [ "$TRAVIS_RUST_VERSION" == "nightly" ]; then
-      carbo bench --features=${FEATURES}
+      carbo bench --features=${FEATURES};
     fi
 
 addons:
