@@ -160,11 +160,7 @@ impl<'l, T: Element> iter::Iterator for Iterator<'l, T> {
             let i = *start;
             let k = matrix.superdiagonals + i - *column;
             *start += 1;
-            return Some((
-                i,
-                *column,
-                &matrix.values[*column * matrix.diagonals() + k],
-            ));
+            return Some((i, *column, &matrix.values[*column * matrix.diagonals() + k]));
         }
         None
     }
@@ -227,23 +223,8 @@ mod tests {
         assert_eq!(
             &result,
             &vec![
-                1.0,
-                4.0,
-                8.0,
-                2.0,
-                5.0,
-                9.0,
-                12.0,
-                3.0,
-                6.0,
-                10.0,
-                13.0,
-                15.0,
-                7.0,
-                11.0,
-                14.0,
-                16.0,
-                17.0,
+                1.0, 4.0, 8.0, 2.0, 5.0, 9.0, 12.0, 3.0, 6.0, 10.0, 13.0, 15.0, 7.0, 11.0, 14.0,
+                16.0, 17.0,
             ]
         );
     }
@@ -283,23 +264,8 @@ mod tests {
         assert_eq!(
             &result,
             &vec![
-                1.0,
-                4.0,
-                8.0,
-                2.0,
-                5.0,
-                9.0,
-                13.0,
-                3.0,
-                6.0,
-                10.0,
-                14.0,
-                7.0,
-                11.0,
-                15.0,
-                12.0,
-                16.0,
-                17.0,
+                1.0, 4.0, 8.0, 2.0, 5.0, 9.0, 13.0, 3.0, 6.0, 10.0, 14.0, 7.0, 11.0, 15.0, 12.0,
+                16.0, 17.0,
             ]
         );
     }
