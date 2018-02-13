@@ -1,4 +1,4 @@
-use lapack::fortran as backend;
+use lapack as backend;
 
 use Result;
 use decomposition::{SingularValue, SymmetricEigen};
