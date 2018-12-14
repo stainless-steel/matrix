@@ -38,6 +38,7 @@ implement!(i16);
 implement!(i32);
 implement!(i64);
 
+implement!(bool, false);
 implement!(f32, 0.0);
 implement!(f64, 0.0);
 
