@@ -3,7 +3,9 @@ use {c32, c64};
 /// An element.
 pub trait Element: Copy + PartialEq {
     /// Check if the element is zero.
-    fn is_zero(&self) -> bool;
+    fn is_zero(&self) -> bool {
+        self == &Self::zero()
+    }
 
     /// Return the zero element.
     fn zero() -> Self;
