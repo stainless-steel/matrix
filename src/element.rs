@@ -3,7 +3,10 @@ use {c32, c64};
 /// An element.
 pub trait Element: Copy + PartialEq {
     /// Check if the element is zero.
-    fn is_zero(&self) -> bool;
+    #[inline(always)]
+    fn is_zero(&self) -> bool {
+        self == &Self::zero()
+    }
 
     /// Return the zero element.
     fn zero() -> Self;
@@ -12,11 +15,6 @@ pub trait Element: Copy + PartialEq {
 macro_rules! implement(
     ($name:ty, $zero:expr) => (
         impl Element for $name {
-            #[inline(always)]
-            fn is_zero(&self) -> bool {
-                *self == $zero
-            }
-
             #[inline(always)]
             fn zero() -> Self {
                 $zero
