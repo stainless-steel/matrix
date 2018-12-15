@@ -2,14 +2,14 @@ use {c32, c64};
 
 /// An element.
 pub trait Element: Copy + PartialEq {
+    /// Return the zero element.
+    fn zero() -> Self;
+
     /// Check if the element is zero.
     #[inline(always)]
     fn is_zero(&self) -> bool {
         self == &Self::zero()
     }
-
-    /// Return the zero element.
-    fn zero() -> Self;
 }
 
 macro_rules! implement(
@@ -26,6 +26,8 @@ macro_rules! implement(
     );
 );
 
+implement!(bool, false);
+
 implement!(u8);
 implement!(u16);
 implement!(u32);
@@ -36,7 +38,6 @@ implement!(i16);
 implement!(i32);
 implement!(i64);
 
-implement!(bool, false);
 implement!(f32, 0.0);
 implement!(f64, 0.0);
 
