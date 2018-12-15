@@ -2,7 +2,10 @@
 name = "matrix"
 version = "0.22.0"
 license = "Apache-2.0/MIT"
-authors = ["Ivan Ukhov <ivan.ukhov@gmail.com>"]
+authors = [
+    "Ivan Ukhov <ivan.ukhov@gmail.com>",
+    "Marcel Hellwig",
+]
 description = "The package provides a matrix laboratory."
 documentation = "https://docs.rs/matrix"
 homepage = "https://github.com/stainless-steel/matrix"
