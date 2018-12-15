@@ -1,5 +1,5 @@
-use Element;
 use format::{Conventional, Diagonal};
+use Element;
 
 impl<'l, T: Element> From<&'l Diagonal<T>> for Conventional<T> {
     fn from(matrix: &Diagonal<T>) -> Self {

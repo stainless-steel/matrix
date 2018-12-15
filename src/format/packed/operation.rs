@@ -1,7 +1,7 @@
-use Element;
-use format::Packed;
 use format::packed::Variant;
+use format::Packed;
 use operation::Transpose;
+use Element;
 
 impl<T: Element> Transpose for Packed<T> {
     fn transpose(&self) -> Self {

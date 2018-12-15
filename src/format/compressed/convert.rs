@@ -35,16 +35,20 @@ impl<'l, T: Element> From<&'l Compressed<T>> for Conventional<T> {
         } = validate!(matrix);
         let mut matrix = Conventional::new((rows, columns));
         match variant {
-            Variant::Row => for i in 0..rows {
-                for k in offsets[i]..offsets[i + 1] {
-                    matrix.values[indices[k] * rows + i] = values[k];
+            Variant::Row => {
+                for i in 0..rows {
+                    for k in offsets[i]..offsets[i + 1] {
+                        matrix.values[indices[k] * rows + i] = values[k];
+                    }
                 }
-            },
-            Variant::Column => for j in 0..columns {
-                for k in offsets[j]..offsets[j + 1] {
-                    matrix.values[j * rows + indices[k]] = values[k];
+            }
+            Variant::Column => {
+                for j in 0..columns {
+                    for k in offsets[j]..offsets[j + 1] {
+                        matrix.values[j * rows + indices[k]] = values[k];
+                    }
                 }
-            },
+            }
         }
         matrix
     }

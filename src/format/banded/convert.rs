@@ -1,5 +1,5 @@
-use Element;
 use format::{Banded, Conventional, Diagonal};
+use Element;
 
 impl<'l, T: Element> From<&'l Banded<T>> for Conventional<T> {
     fn from(matrix: &'l Banded<T>) -> Self {

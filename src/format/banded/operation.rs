@@ -1,6 +1,6 @@
-use Element;
 use format::Banded;
 use operation::Transpose;
+use Element;
 
 impl<T: Element> Transpose for Banded<T> {
     fn transpose(&self) -> Self {

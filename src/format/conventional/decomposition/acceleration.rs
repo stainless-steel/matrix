@@ -1,8 +1,8 @@
 use lapack as backend;
 
-use Result;
 use decomposition::{SingularValue, SymmetricEigen};
 use format::{Conventional, Diagonal};
+use Result;
 
 macro_rules! success(
     ($info:expr) => (
@@ -111,17 +111,7 @@ fn symmetric_eigen(matrix: &mut [f64], values: &mut [f64], m: usize) -> Result<(
     let mut iwork = [0];
     unsafe {
         backend::dsyevd(
-            b'V',
-            b'U',
-            m,
-            matrix,
-            m,
-            values,
-            &mut work,
-            -1,
-            &mut iwork,
-            -1,
-            &mut info,
+            b'V', b'U', m, matrix, m, values, &mut work, -1, &mut iwork, -1, &mut info,
         );
     }
     success!(info);
@@ -131,17 +121,7 @@ fn symmetric_eigen(matrix: &mut [f64], values: &mut [f64], m: usize) -> Result<(
     let mut iwork = unsafe { buffer!(liwork) };
     unsafe {
         backend::dsyevd(
-            b'V',
-            b'U',
-            m,
-            matrix,
-            m,
-            values,
-            &mut work,
-            lwork,
-            &mut iwork,
-            liwork,
-            &mut info,
+            b'V', b'U', m, matrix, m, values, &mut work, lwork, &mut iwork, liwork, &mut info,
         );
     }
     success!(info);

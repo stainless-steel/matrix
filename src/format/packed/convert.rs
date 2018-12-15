@@ -1,6 +1,6 @@
-use Element;
 use format::packed::Variant;
 use format::{Conventional, Packed};
+use Element;
 
 impl<'l, T: Element> From<&'l Packed<T>> for Conventional<T> {
     fn from(matrix: &'l Packed<T>) -> Self {

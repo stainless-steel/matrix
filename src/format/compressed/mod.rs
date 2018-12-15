@@ -287,8 +287,8 @@ iterator!(struct IteratorMut -> (usize, usize, &'l mut T));
 
 #[cfg(test)]
 mod tests {
-    use prelude::*;
     use format::compressed::Variant;
+    use prelude::*;
 
     #[test]
     fn get() {
