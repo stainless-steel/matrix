@@ -4,6 +4,7 @@
 
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 use std::ptr;
+use std::fmt;
 
 use {Element, Matrix, Position, Size};
 
@@ -141,6 +142,26 @@ impl<T: Element> DerefMut for Conventional<T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.values.deref_mut()
+    }
+}
+
+impl<T: Element> fmt::Display for Conventional<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "[\n")?;
+        for i in 0..self.rows {
+            write!(f, "\t")?;
+            for j in 0..self.columns {
+                write!(f, "{}", self.values[i + j * self.rows])?;
+                if j == self.columns-1 {
+                    write!(f, ";")?;
+                } else {
+                    write!(f, ",\t")?;
+                }
+            }
+            write!(f, "\n")?;
+        }
+        write!(f, "]")?;
+        Ok(())
     }
 }
 
