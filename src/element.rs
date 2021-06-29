@@ -1,7 +1,8 @@
 use {c32, c64};
+use std::fmt::Display;
 
 /// An element.
-pub trait Element: Copy + PartialEq {
+pub trait Element: Copy + PartialEq +Display {
     /// Return the zero element.
     fn zero() -> Self;
 
