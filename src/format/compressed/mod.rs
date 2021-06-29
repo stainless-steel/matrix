@@ -9,7 +9,7 @@
 //! [1]: http://netlib.org/linalg/html_templates/node92.html
 //! [2]: http://netlib.org/linalg/html_templates/node91.html
 
-use std::{iter, mem};
+use std::{iter, mem, fmt};
 
 use {Element, Matrix, Position, Size};
 
@@ -242,6 +242,26 @@ impl<T: Element> Matrix for Compressed<T> {
     #[inline]
     fn zero<S: Size>(size: S) -> Self {
         Compressed::new(size, Variant::Column)
+    }
+}
+
+impl<T: Element> fmt::Display for Compressed<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "[\n")?;
+        for i in 0..self.rows {
+            write!(f, "\t")?;
+            for j in 0..self.columns {
+                write!(f, "{}", self.get((i, j)))?;
+                if j == self.columns-1 {
+                    write!(f, ";")?;
+                } else {
+                    write!(f, ",\t")?;
+                }
+            }
+            write!(f, "\n")?;
+        }
+        write!(f, "]")?;
+        Ok(())
     }
 }
 
