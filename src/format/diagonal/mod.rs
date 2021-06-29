@@ -3,6 +3,7 @@
 //! The format is suitable for diagonal matrices.
 
 use std::ops::{Deref, DerefMut};
+use std::fmt;
 
 use {Element, Matrix, Size};
 
@@ -95,6 +96,31 @@ impl<T: Element> DerefMut for Diagonal<T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.values.deref_mut()
+    }
+}
+
+impl<T: Element> fmt::Display for Diagonal<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "[\n")?;
+        for i in 0..self.rows {
+            write!(f, "\t")?;
+            for j in 0..self.columns {
+                if i == j {
+                    write!(f, "{}", self.values[i])?;
+                } else {
+                    write!(f, "{}", 0.0)?;
+                }
+
+                if j == self.columns-1 {
+                    write!(f, ";")?;
+                } else {
+                    write!(f, ",\t")?;
+                }
+            }
+            write!(f, "\n")?;
+        }
+        write!(f, "]")?;
+        Ok(())
     }
 }
 
