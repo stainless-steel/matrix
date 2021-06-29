@@ -6,6 +6,7 @@
 //! [1]: http://www.netlib.org/lapack/lug/node123.html
 //! [2]: http://www.netlib.org/lapack
 
+use std::fmt;
 use {Element, Matrix, Size};
 
 /// A packed matrix.
@@ -78,6 +79,42 @@ impl<T: Element> Matrix for Packed<T> {
     #[inline]
     fn zero<S: Size>(size: S) -> Self {
         Packed::new(size, Variant::Lower)
+    }
+}
+
+impl<T: Element> fmt::Display for Packed<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "[\n")?;
+        for i in 0..self.size {
+            write!(f, "\t")?;
+            for j in 0..self.size {
+                match self.variant {
+                    Variant::Upper => {
+                        if i <= j {
+                            write!(f, "{}", self.values[(2+(j+1))*j/2-(j-i)])?;
+                        } else {
+                            write!(f, "{}", 0.0)?;
+                        }
+                    }
+                    Variant::Lower => {
+                        if i >= j {
+                            write!(f, "{}", self.values[(i-j)+(self.size+(self.size-j+1))*j/2])?;
+                        } else {
+                            write!(f, "{}", 0.0)?;
+                        }
+                    }
+                }
+
+                if j == self.size-1 {
+                    write!(f, ";")?;
+                } else {
+                    write!(f, ",\t")?;
+                }
+            }
+            write!(f, "\n")?;
+        }
+        write!(f, "]")?;
+        Ok(())
     }
 }
 
